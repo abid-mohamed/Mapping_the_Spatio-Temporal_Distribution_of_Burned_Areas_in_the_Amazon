@@ -1,0 +1,490 @@
+---
+title: "SpatVector"
+output: html_document
+date: "2023-03-13"
+---
+
+```{r}
+library(terra)
+### SpatVector from file
+f <- system.file("ex/lux.shp", package="terra")
+f
+v <- vect(f)
+v
+```
+
+```{r}
+## subsetting (large) files
+## with attribute query 
+v <- vect(f, query="SELECT NAME_1, NAME_2, ID_2 FROM lux WHERE ID_2 < 4")
+v
+```
+
+```{r}
+## with an extent
+e <- ext(5.9, 6.3, 49.9, 50) 
+v <- vect(f, extent=e)
+plot(v)
+```
+
+```{r}
+## with polygons
+p <- as.polygons(e)
+v <- vect(f, filter=p)
+plot(v)
+```
+
+
+
+
+```{r}
+
+### SpatVector from a geom matrix
+x1 <- rbind(c(-180,-20), c(-140,55), c(10, 0), c(-140,-60))
+x2 <- rbind(c(-10,0), c(140,60), c(160,0), c(140,-55))
+x3 <- rbind(c(-125,0), c(0,60), c(40,5), c(15,-45))
+hole <- rbind(c(80,0), c(105,13), c(120,2), c(105,-13))
+z <- rbind(cbind(object=1, part=1, x1, hole=0), cbind(object=2, part=1, x3, hole=0),
+      cbind(object=3, part=1, x2, hole=0), cbind(object=3, part=1, hole, hole=1))
+colnames(z)[3:4] <- c('x', 'y')
+
+p <- vect(z, "polygons")
+p
+
+z[z[, "hole"]==1, "object"] <- 4
+lns <- vect(z[,1:4], "lines")
+plot(p)
+lines(lns, col="red", lwd=2)
+```
+
+```{r}
+
+### from wkt
+v <- vect("POLYGON ((0 -5, 10 0, 10 -10, 0 -5))")
+plot(v)
+wkt <- c("MULTIPOLYGON ( ((40 40, 20 45, 45 30, 40 40)), 
+((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20)))", 
+"POLYGON ((0 -5, 10 0, 10 -10, 0 -5))")
+w <- vect(wkt)
+plot(w)
+```
+
+```{r}
+# combine two SpatVectors 
+vw <- rbind(w, v)
+plot(vw)
+```
+
+```{r}
+
+# add a data.frame
+d <- data.frame(id=1:2, name=c("a", "b"))
+values(w) <- d
+plot(w)
+```
+
+```{r}
+
+# add data.frame on creation, here from a geom matrix
+g <- geom(w)
+d <- data.frame(id=1:2, name=c("a", "b"))
+m <- vect(g, "polygons", atts=d, crs="+proj=longlat +datum=WGS84")
+plot(m)
+```
+
+
+
+```{r}
+
+
+### SpatVector from a data.frame
+d$wkt <- wkt
+x <- vect(d, geom="wkt")
+plot(x)
+
+d$wkt <- NULL
+d$lon <- c(0,10)
+d$lat <- c(0,10)
+x <- vect(d, geom=c("lon", "lat"))
+plot(x)
+# SpatVector to sf
+#sf::st_as_sf(x)
+
+```
+
+```{r}
+amaz.basin.shp <- st_read("~/Documents/Amazon_new_data/0. Amazon_shapefile/projected/amazon_shp_projected.shp")
+amaz.v <- vect(amaz.basin.shp) %>% geom()
+v <- ext(amaz.basin.shp)
+v$xmin
+```
+
+```{r}
+amaz.basin.shp <- st_read("~/Documents/Amazon_new_data/0. Amazon_shapefile/projected/amazon_shp_projected.shp")
+v <- ext(amaz.basin.shp)
+
+x1 <- -1e+06; x2 <- 0.2e+06; y1 <- 3.2e+06
+a1 <- c(v$xmin, v$ymin); a2 <- c(x1, v$ymin); a3 <- c(x2, v$ymin); a4 <- c(v$xmax, v$ymin)
+a5 <- c(v$xmin, y1); a6 <- c(x1, y1); a7 <- c(x2, y1); a8 <- c(v$xmax, y1)
+a9 <- c(v$xmin, v$ymax); a10 <- c(x1, v$ymax); a11 <- c(x2, v$ymax); a12 <- c(v$xmax, v$ymax)
+
+z1 <- rbind(a1, a5, a6, a2)
+z2 <- rbind(a2, a6, a7, a3)
+z3 <- rbind(a3, a7, a8, a4)
+z4 <- rbind(a5, a9, a10, a6)
+z5 <- rbind(a6, a10, a11, a7)
+z6 <- rbind(a7, a11, a12, a8)
+
+z <- rbind(cbind(object=1, part=1, z1, hole=0), cbind(object=2, part=1, z2, hole=0),
+      cbind(object=3, part=1, z3, hole=0), cbind(object=4, part=1, z4, hole=0),
+      cbind(object=5, part=1, z5, hole=0), cbind(object=6, part=1, z6, hole=0))
+colnames(z)[3:4] <- c('x', 'y')
+
+p <- vect(z, "polygons")
+crs(p) <- crs(amaz.basin.shp)
+
+plot(Q1, col=pal(3))
+plot(p, add=T)
+plot(amaz.basin.shp$geometry, add=T)
+```
+
+# K-folds
+
+
+```{r}
+library(rsample)
+vfold_cv(mtcars, v = 10)
+vfold_cv(mtcars, v = 10, repeats = 2)
+
+library(purrr)
+data(wa_churn, package = "modeldata")
+table(wa_churn$churn)
+
+set.seed(13)
+folds1 <- vfold_cv(wa_churn, v = 5)
+xx <- folds1$splits[[1]]$data
+
+map_dbl(
+  folds1$splits,
+  function(x) {
+    dat <- as.data.frame(x)$churn
+    mean(dat == "Yes")
+  }
+)
+
+set.seed(13)
+folds2 <- vfold_cv(wa_churn, strata = churn, v = 5)
+map_dbl(
+  folds2$splits,
+  function(x) {
+    dat <- as.data.frame(x)$churn
+    mean(dat == "Yes")
+  }
+)
+
+set.seed(13)
+folds3 <- vfold_cv(wa_churn, strata = tenure, breaks = 6, v = 5)
+map_dbl(
+  folds3$splits,
+  function(x) {
+    dat <- as.data.frame(x)$churn
+    mean(dat == "Yes")
+  }
+)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

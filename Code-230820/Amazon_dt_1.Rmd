@@ -1,0 +1,1747 @@
+---
+title: "Amazon_dt_1"
+date: "2023-02-18"
+output:
+  html_document: 
+    number_sections: yes
+    fig_caption: yes
+    toc: true
+    toc_float: 
+      collapsed: false
+    theme: cerulean
+    highlight: kate
+    toc_depth: 5
+    keep_md: yes
+    df_print: paged
+---
+
+```{r}
+r <- rast(ncols=10, nrows=10)
+values(r) <- sample(100:200, ncell(r), replace=TRUE)
+s <- c(r, 2*r, 3*r)
+s <- c(s, s-50)
+set.seed(1)
+names(s) <- c("lyr.1","lyr.2","lyr.3","lyr.4","lyr.5","lyr.6")
+values(r) <- sample(2:6, ncell(r), replace=TRUE)
+values(r)[7] <- NA
+plot(r)
+x <- selectRange(s, r)
+
+xsr <- cbind(
+  as.data.frame(values(x)),
+  as.data.frame(values(r)),
+  as.data.frame(values(s))
+)
+plot(x)
+xsr
+```
+
+
+# Load libraries
+
+```{r, load libraries, warning=FALSE, message=FALSE}
+# load libraries
+library(tictoc)
+library(tidyverse)
+# library(raster)
+library(terra)
+library(sf)
+# library(rgdal)
+# library(ggplot2)
+library(RColorBrewer)
+library(rts)
+library(doParallel)
+library(parallel)
+library(foreach)
+library(data.table)
+library(dplyr)
+library(fastDummies)
+library(randomForest)
+library(caTools)
+library(rpart)
+library(VSURF)
+my.path <- "~/Documents/"
+```
+
+# Functions
+
+```{r "Functions"}
+# Function to rename layers
+renameRast <- function(dataRast, fileStart, prefix){
+  library(data.table)
+  # index of file name in the path
+  id.date <- unlist(gregexpr(fileStart, sources(dataRast)[[1]])) + nchar(fileStart)
+  # rename layers
+  dateRast <- 
+    substr(sources(dataRast), id.date, (id.date+50)) %>%
+    gsub(".tif", "_1", .) %>%
+    as.Date("%Y_%m_%d")
+  # Rename layers
+  names(dataRast) <- 
+    dateRast %>%
+    format(., '%Y_%m') %>%
+    paste0(prefix, .)
+  yearRast <- data.table::year(dateRast)
+  monthRast <- data.table::month(dateRast)
+  # return
+  return(list(dataRast, yearRast, monthRast))
+}
+```
+
+# ---
+
+# Import shape file
+
+```{r}
+# Import shape file
+amaz.basin.shp <- st_read("~/Documents/Amazon_new_data/0. Amazon_shapefile/projected/amazon_shp_projected.shp")
+```
+
+# Initialization
+
+```{r}
+# path of variables
+burntArea.path <- "~/Documents/Amazon_new_data/1. Burnt Area/03. Working Data"
+landCover.path <- "~/Documents/Amazon_new_data/2. Land Cover/03. Working Data"
+precip.path <- "~/Documents/Amazon_new_data/3. Precipitation/03. Working Data"
+soilMoisture.path <- "~/Documents/Amazon_new_data/4. Soil Moisture/03. Working Data"
+elevation.path <- "~/Documents/Amazon_new_data/5. Elevation/03. Working Data"
+LandSurfaceTemp.path <- "~/Documents/Amazon_new_data/6. LandSurfaceTemp/03. Working Data"
+humidity.path <- "~/Documents/Amazon_new_data/7. Specific Humidity/03. Working Data"
+evapotranspiration.path <- "~/Documents/Amazon_new_data/8. Evapotranspiration/03. Working Data"
+wind.path <- "~/Documents/Amazon_new_data/9. Wind Speed/03. Working Data"
+airtemp.path <- "~/Documents/Amazon_new_data/10. Air Temperature/03. Working Data"
+
+x_min=-1.25e+06; x_max=0.05e+06; y_min=st_bbox(amaz.basin.shp)$ymin; y_max=2.4e+06    # South of Amazon
+# x_min=-0.8e+06; x_max=-0.4e+06; y_min=1.8e+06; y_max=2.2e+06
+# x_min=-0.6e+06; x_max=-0.4e+06; y_min=2.0e+06; y_max=2.2e+06                          
+# x_min=-0.5e+06; x_max=-0.4e+06; y_min=2.0e+06; y_max=2.1e+06                          # 200 x 200 | 10 Y DF 20 M -> 70 Gb | 5 Y DF 10 M -> 17.5 Gb | 3Y DF 1.4 M -> 10.5 Gb | 2Y DF 0.96 M -> 3.5 Gb
+
+# Number of years
+nbrYears <- 20
+
+# Number of cores to use
+# nbrCores <- detectCores() - 1
+nbrCores <- 40
+
+# Color palette
+pal <- colorRampPalette(c("lightblue", "forestgreen", "firebrick"))
+```
+
+# * =====================
+
+# Create data 1
+
+## Burnt Area 1
+
+```{r}
+tic()
+#Register cluster for parallel processing: Cores to use: all except 1
+cl <- parallel::makeCluster(nbrCores)
+doParallel::registerDoParallel(cl)
+
+# list of files
+amaz.var.list <- list.files(burntArea.path, full.names=TRUE, pattern = ".tif$")
+amaz.var.list <- amaz.var.list[1 : (12*nbrYears-2)]
+
+tic("burntArea")
+#Raster to datatable in parallel: one raster per thread
+ras.list <- 
+  foreach (
+    ras_id=amaz.var.list, 
+    .packages=c('terra', 'sf'), 
+    .combine='c') %dopar% 
+  {
+    # Read all rasters
+    ras <- rast(ras_id)
+    
+    # Rename layers
+    ras.Y.M <- renameRast(ras, 'burntarea_working_', '')
+    ras <- ras.Y.M[[1]]
+    
+    # Crop data 
+    ras <- ras %>% 
+      # crop(ext(x_min, x_max, y_min, y_max)) %>% 
+      mask(mask = amaz.basin.shp)
+    
+    ras[ras <= 0] <- NA
+    # terra::writeRaster(ras, paste0(my.path,"Amazon_new_data/1. Burnt Area/04. cell_1/burntarea1_", names(ras), ".tif"), overwrite=TRUE)
+    
+  }
+stopCluster(cl)
+toc()
+
+gc()
+```
+
+```{r}
+# # list of files
+# amaz.burntArea1.list <- list.files(
+#   paste0(my.path,"Amazon_new_data/1. Burnt Area/04. cell_1"),
+#   full.names=TRUE,
+#   pattern = ".tif$"
+# )
+# # Import data with "Terra"
+# burntArea1.rast <- rast(amaz.burntArea1.list)
+```
+
+## LandCover 1
+
+```{r}
+#Register cluster for parallel processing: Cores to use: all except 1
+cl <- parallel::makeCluster(nbrCores)
+doParallel::registerDoParallel(cl)
+
+amaz.var.list <- list.files(landCover.path, full.names=TRUE, pattern = ".tif$")
+
+tic("landCover")
+#Raster to datatable in parallel: one raster per thread
+dtlist <- foreach (
+  ras_id = amaz.var.list,
+  .packages=c('terra', 'sf', 'data.table'),
+  .combine='c') %dopar% {
+    
+    # Read all rasters
+    ras <- rast(ras_id)
+    
+    # Rename layers
+    ras.Y.M <- renameRast(ras, 'landcover_working_', '')
+    ras <- ras.Y.M[[1]]
+
+    # Crop data and convert to data.frame 
+    ras <- ras %>% 
+      mask(mask = amaz.basin.shp)
+    
+    month.chr <- as.character(ras.Y.M[[3]])
+    month.chr <- ifelse(nchar(month.chr)==1, paste0("0", month.chr), month.chr)
+
+    # Select data for fires cell
+    burntA1 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/04. cell_1/burntarea1_", ras.Y.M[[2]], "_", month.chr, ".tif"))
+    ras1 <- selectRange(ras, burntA1)
+    
+    # Save
+    # terra::writeRaster(ras1, paste0(my.path,"Amazon_new_data/2. Land Cover/04. cell_1/landcover1_", names(ras1), ".tif"), overwrite=TRUE)
+    
+    DT <- terra::as.data.frame(ras1, xy=T)
+    
+    # Add Year and Month as factors
+    Year <- rep(ras.Y.M[[2]], dim(DT)[1]) %>% as.factor()
+    Month <- rep(ras.Y.M[[3]], dim(DT)[1]) %>% as.factor()
+    DT <- cbind(DT, Year, Month)
+    
+    # Modification of the data
+    colnames(DT)[3:5] <- c("LandCover", "Year", "Month")
+    setcolorder(DT, c('x', 'y', 'Year', 'Month'))
+    # Convert data as factor
+    DT$LandCover <- as.factor(DT$LandCover)
+    DT <- na.omit(DT)
+    list(DT)
+  }
+stopCluster(cl)
+
+#Bind all per-raster datatables into one big table
+landCover1.dt <- rbindlist(dtlist, fill=T, use.names=T)
+toc()
+
+landCover1.dt[, c("x", "y") := lapply(.SD, floor), .SDcols = c("x", "y")]
+landCover1.dt
+# rm(dtlist)
+gc()
+```
+
+landCover: 487.95 sec elapsed
+
+## Precipitation 1
+
+```{r}
+#Register cluster for parallel processing: Cores to use: all except 1
+cl <- parallel::makeCluster(nbrCores)
+doParallel::registerDoParallel(cl)
+
+amaz.var.list <- list.files(precip.path, full.names=TRUE, pattern = ".tif$") #
+
+tic("precipitation") #
+#Raster to datatable in parallel: one raster per thread
+dtlist <- foreach (
+  ras_id = amaz.var.list,
+  .packages=c('terra', 'sf', 'data.table'),
+  .combine='c') %dopar% {
+    
+    # Read all rasters
+    ras <- rast(ras_id)
+    
+    # Rename layers
+    ras.Y.M <- renameRast(ras, 'precipitation_working_', '') #
+    ras <- ras.Y.M[[1]]
+
+    # Crop data and convert to data.frame 
+    ras <- ras %>% 
+      mask(mask = amaz.basin.shp)
+    
+    month.chr <- as.character(ras.Y.M[[3]])
+    month.chr <- ifelse(nchar(month.chr)==1, paste0("0", month.chr), month.chr)
+
+    # Select data for fires cell
+    burntA1 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/04. cell_1/burntarea1_", ras.Y.M[[2]], "_", month.chr, ".tif"))
+    ras1 <- selectRange(ras, burntA1)
+    
+    # Save
+    # terra::writeRaster(
+    #   ras1, 
+    #   paste0(my.path,"Amazon_new_data/3. Precipitation/04. cell_1/precipitation1_", names(ras1), ".tif"), #
+    #   overwrite=TRUE
+    # ) 
+    
+    DT <- terra::as.data.frame(ras1, xy=T)
+    
+    # Add Year and Month as factors
+    Year <- rep(ras.Y.M[[2]], dim(DT)[1]) %>% as.factor()
+    Month <- rep(ras.Y.M[[3]], dim(DT)[1]) %>% as.factor()
+    DT <- cbind(DT, Year, Month)
+    
+    # Modification of the data
+    colnames(DT)[3:5] <- c("Precipitation", "Year", "Month") #
+    setcolorder(DT, c('x', 'y', 'Year', 'Month'))
+    DT <- na.omit(DT)
+    
+    list(DT)
+  }
+stopCluster(cl)
+
+#Bind all per-raster datatables into one big table
+precipitation1.dt <- rbindlist(dtlist, fill=T, use.names=T) #
+toc()
+
+precipitation1.dt[, c("x", "y") := lapply(.SD, floor), .SDcols = c("x", "y")] 
+precipitation1.dt #
+# rm(dtlist)
+gc()
+```
+
+## SoilMoisture 1
+
+```{r}
+#Register cluster for parallel processing: Cores to use: all except 1
+cl <- parallel::makeCluster(nbrCores)
+doParallel::registerDoParallel(cl)
+
+amaz.var.list <- list.files(soilMoisture.path, full.names=TRUE, pattern = ".tif$") #
+
+tic("soilMoisture") #
+#Raster to datatable in parallel: one raster per thread
+dtlist <- foreach (
+  ras_id = amaz.var.list,
+  .packages=c('terra', 'sf', 'data.table'),
+  .combine='c') %dopar% {
+    
+    # Read all rasters
+    ras <- rast(ras_id)
+    
+    # Rename layers
+    ras.Y.M <- renameRast(ras, 'soilmoisture_working_', '') #
+    ras <- ras.Y.M[[1]]
+
+    # Crop data and convert to data.frame 
+    ras <- ras %>% 
+      mask(mask = amaz.basin.shp)
+    
+    month.chr <- as.character(ras.Y.M[[3]])
+    month.chr <- ifelse(nchar(month.chr)==1, paste0("0", month.chr), month.chr)
+
+    # Select data for fires cell
+    burntA1 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/04. cell_1/burntarea1_", ras.Y.M[[2]], "_", month.chr, ".tif"))
+    ras1 <- selectRange(ras, burntA1)
+    
+    # Remove negative values. ------<<<
+    ras1[ras1 < 0] <- NA
+    
+    # Save
+    # terra::writeRaster(
+    #   ras1, 
+    #   paste0(my.path,"Amazon_new_data/4. Soil Moisture/04. cell_1/soilMoisture1_", names(ras1), ".tif"), ##
+    #   overwrite=TRUE
+    # ) 
+    
+    DT <- terra::as.data.frame(ras1, xy=T)
+    
+    # Add Year and Month as factors
+    Year <- rep(ras.Y.M[[2]], dim(DT)[1]) %>% as.factor()
+    Month <- rep(ras.Y.M[[3]], dim(DT)[1]) %>% as.factor()
+    DT <- cbind(DT, Year, Month)
+    
+    # Modification of the data
+    colnames(DT)[3:5] <- c("SoilMoisture", "Year", "Month") #
+    setcolorder(DT, c('x', 'y', 'Year', 'Month'))
+    DT <- na.omit(DT)
+    
+    list(DT)
+  }
+stopCluster(cl)
+
+#Bind all per-raster datatables into one big table
+soilMoisture1.dt <- rbindlist(dtlist, fill=T, use.names=T) #
+toc() 
+
+soilMoisture1.dt[, c("x", "y") := lapply(.SD, floor), .SDcols = c("x", "y")] 
+soilMoisture1.dt #
+# rm(dtlist)
+gc()
+```
+
+soilMoisture: 399.954 sec elapsed
+
+## Elevation 1
+
+```{r}
+#Register cluster for parallel processing: Cores to use: all except 1
+cl <- parallel::makeCluster(nbrCores)
+doParallel::registerDoParallel(cl)
+
+amaz.var.list <- list.files(elevation.path, full.names=TRUE, pattern = ".tif$") #
+
+tic("elevation") #
+#Raster to datatable in parallel: one raster per thread
+dtlist <- foreach (
+  ras_id = amaz.var.list,
+  .packages=c('terra', 'sf', 'data.table'),
+  .combine='c') %dopar% {
+    
+    # Read all rasters
+    ras <- rast(ras_id)
+    
+    # Rename layers
+    ras.Y.M <- renameRast(ras, 'elevation_working_', '') #
+    ras <- ras.Y.M[[1]]
+
+    # Crop data and convert to data.frame 
+    ras <- ras %>% 
+      mask(mask = amaz.basin.shp)
+    
+    month.chr <- as.character(ras.Y.M[[3]])
+    month.chr <- ifelse(nchar(month.chr)==1, paste0("0", month.chr), month.chr)
+
+    # Select data for fires cell
+    burntA1 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/04. cell_1/burntarea1_", ras.Y.M[[2]], "_", month.chr, ".tif"))
+    ras1 <- selectRange(ras, burntA1)
+    
+    # Save
+    # terra::writeRaster(
+    #   ras1, 
+    #   paste0(my.path,"Amazon_new_data/5. Elevation/04. cell_1/elevation1_", names(ras1), ".tif"), ##
+    #   overwrite=TRUE
+    # ) 
+    
+    DT <- terra::as.data.frame(ras1, xy=T)
+    
+    # Add Year and Month as factors
+    Year <- rep(ras.Y.M[[2]], dim(DT)[1]) %>% as.factor()
+    Month <- rep(ras.Y.M[[3]], dim(DT)[1]) %>% as.factor()
+    DT <- cbind(DT, Year, Month)
+    
+    # Modification of the data
+    colnames(DT)[3:5] <- c("Elevation", "Year", "Month") #
+    setcolorder(DT, c('x', 'y', 'Year', 'Month'))
+    DT <- na.omit(DT)
+    
+    list(DT)
+  }
+stopCluster(cl)
+
+#Bind all per-raster datatables into one big table
+elevation1.dt <- rbindlist(dtlist, fill=T, use.names=T) #
+toc() 
+
+elevation1.dt[, c("x", "y") := lapply(.SD, floor), .SDcols = c("x", "y")] 
+elevation1.dt #
+# rm(dtlist)
+gc()
+```
+
+elevation: 578.242 sec elapsed
+
+## LandSurfaceTemp 1
+
+```{r}
+#Register cluster for parallel processing: Cores to use: all except 1
+cl <- parallel::makeCluster(nbrCores)
+doParallel::registerDoParallel(cl)
+
+amaz.var.list <- list.files(LandSurfaceTemp.path, full.names=TRUE, pattern = ".tif$") #
+
+tic("LandSurfaceTemp") #
+#Raster to datatable in parallel: one raster per thread
+dtlist <- foreach (
+  ras_id = amaz.var.list,
+  .packages=c('terra', 'sf', 'data.table'),
+  .combine='c') %dopar% {
+    
+    # Read all rasters
+    ras <- rast(ras_id)
+    
+    # Rename layers
+    ras.Y.M <- renameRast(ras, 'landsurftemp_working_', '') #
+    ras <- ras.Y.M[[1]]
+
+    # Crop data and convert to data.frame 
+    ras <- ras %>% 
+      mask(mask = amaz.basin.shp)
+    
+    month.chr <- as.character(ras.Y.M[[3]])
+    month.chr <- ifelse(nchar(month.chr)==1, paste0("0", month.chr), month.chr)
+
+    # Select data for fires cell
+    burntA1 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/04. cell_1/burntarea1_", ras.Y.M[[2]], "_", month.chr, ".tif"))
+    ras1 <- selectRange(ras, burntA1)
+    
+    # Save
+    # terra::writeRaster(
+    #   ras1, 
+    #   paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/04. cell_1/landsurftemp1_", names(ras1), ".tif"), ##
+    #   overwrite=TRUE
+    # ) 
+    
+    DT <- terra::as.data.frame(ras1, xy=T)
+    
+    # Add Year and Month as factors
+    Year <- rep(ras.Y.M[[2]], dim(DT)[1]) %>% as.factor()
+    Month <- rep(ras.Y.M[[3]], dim(DT)[1]) %>% as.factor()
+    DT <- cbind(DT, Year, Month)
+    
+    # Modification of the data
+    colnames(DT)[3:5] <- c("LandSurfaceTemp", "Year", "Month") #
+    setcolorder(DT, c('x', 'y', 'Year', 'Month'))
+    DT <- na.omit(DT)
+    
+    list(DT)
+  }
+stopCluster(cl)
+
+#Bind all per-raster datatables into one big table
+landsurftemp1.dt <- rbindlist(dtlist, fill=T, use.names=T) #
+toc() 
+
+landsurftemp1.dt[, c("x", "y") := lapply(.SD, floor), .SDcols = c("x", "y")] 
+landsurftemp1.dt #
+# rm(dtlist)
+gc()
+```
+
+LandSurfaceTemp: 471.624 sec elapsed
+
+## Specific Humidity 1
+
+```{r}
+#Register cluster for parallel processing: Cores to use: all except 1
+cl <- parallel::makeCluster(nbrCores)
+doParallel::registerDoParallel(cl)
+
+amaz.var.list <- list.files(humidity.path, full.names=TRUE, pattern = ".tif$") #
+
+tic("humidity") #
+#Raster to datatable in parallel: one raster per thread
+dtlist <- foreach (
+  ras_id = amaz.var.list,
+  .packages=c('terra', 'sf', 'data.table'),
+  .combine='c') %dopar% {
+    
+    # Read all rasters
+    ras <- rast(ras_id)
+    
+    # Rename layers
+    ras.Y.M <- renameRast(ras, 'humidity_working_', '') #
+    ras <- ras.Y.M[[1]]
+
+    # Crop data and convert to data.frame 
+    ras <- ras %>% 
+      mask(mask = amaz.basin.shp)
+    
+    month.chr <- as.character(ras.Y.M[[3]])
+    month.chr <- ifelse(nchar(month.chr)==1, paste0("0", month.chr), month.chr)
+
+    # Select data for fires cell
+    burntA1 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/04. cell_1/burntarea1_", ras.Y.M[[2]], "_", month.chr, ".tif"))
+    ras1 <- selectRange(ras, burntA1)
+    
+    # Save
+    # terra::writeRaster(
+    #   ras1, 
+    #   paste0(my.path,"Amazon_new_data/7. Specific Humidity/04. cell_1/humidity1_", names(ras1), ".tif"), ##
+    #   overwrite=TRUE
+    # ) 
+    
+    DT <- terra::as.data.frame(ras1, xy=T)
+    
+    # Add Year and Month as factors
+    Year <- rep(ras.Y.M[[2]], dim(DT)[1]) %>% as.factor()
+    Month <- rep(ras.Y.M[[3]], dim(DT)[1]) %>% as.factor()
+    DT <- cbind(DT, Year, Month)
+    
+    # Modification of the data
+    colnames(DT)[3:5] <- c("Humidity", "Year", "Month") #
+    setcolorder(DT, c('x', 'y', 'Year', 'Month'))
+    DT <- na.omit(DT)
+    
+    list(DT)
+  }
+stopCluster(cl)
+
+#Bind all per-raster datatables into one big table
+humidity1.dt <- rbindlist(dtlist, fill=T, use.names=T) #
+toc() 
+
+humidity1.dt[, c("x", "y") := lapply(.SD, floor), .SDcols = c("x", "y")] 
+humidity1.dt #
+# rm(dtlist)
+gc()
+```
+
+## Evapotranspiration 1
+
+```{r}
+#Register cluster for parallel processing: Cores to use: all except 1
+cl <- parallel::makeCluster(nbrCores)
+doParallel::registerDoParallel(cl)
+
+amaz.var.list <- list.files(evapotranspiration.path, full.names=TRUE, pattern = ".tif$") #
+
+tic("evapotranspiration") #
+#Raster to datatable in parallel: one raster per thread
+dtlist <- foreach (
+  ras_id = amaz.var.list,
+  .packages=c('terra', 'sf', 'data.table'),
+  .combine='c') %dopar% {
+    
+    # Read all rasters
+    ras <- rast(ras_id)
+    
+    # Rename layers
+    ras.Y.M <- renameRast(ras, 'evapotranspiration_working_', '') #
+    ras <- ras.Y.M[[1]]
+
+    # Crop data and convert to data.frame 
+    ras <- ras %>% 
+      mask(mask = amaz.basin.shp)
+    
+    month.chr <- as.character(ras.Y.M[[3]])
+    month.chr <- ifelse(nchar(month.chr)==1, paste0("0", month.chr), month.chr)
+
+    # Select data for fires cell
+    burntA1 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/04. cell_1/burntarea1_", ras.Y.M[[2]], "_", month.chr, ".tif"))
+    ras1 <- selectRange(ras, burntA1)
+    
+    # Save
+    # terra::writeRaster(
+    #   ras1, 
+    #   paste0(my.path,"Amazon_new_data/8. Evapotranspiration/04. cell_1/evapotranspiration1_", names(ras1), ".tif"), ##
+    #   overwrite=TRUE
+    # ) 
+    
+    DT <- terra::as.data.frame(ras1, xy=T)
+    
+    # Add Year and Month as factors
+    Year <- rep(ras.Y.M[[2]], dim(DT)[1]) %>% as.factor()
+    Month <- rep(ras.Y.M[[3]], dim(DT)[1]) %>% as.factor()
+    DT <- cbind(DT, Year, Month)
+    
+    # Modification of the data
+    colnames(DT)[3:5] <- c("Evapotranspiration", "Year", "Month") #
+    setcolorder(DT, c('x', 'y', 'Year', 'Month'))
+    DT <- na.omit(DT)
+    
+    list(DT)
+  }
+stopCluster(cl)
+
+#Bind all per-raster datatables into one big table
+evapotranspiration1.dt <- rbindlist(dtlist, fill=T, use.names=T) #
+toc() 
+
+evapotranspiration1.dt[, c("x", "y") := lapply(.SD, floor), .SDcols = c("x", "y")] 
+evapotranspiration1.dt #
+# rm(dtlist)
+gc()
+```
+
+evapotranspiration: 628.155 sec elapsed
+
+## Wind Speed 1
+
+```{r}
+#Register cluster for parallel processing: Cores to use: all except 1
+cl <- parallel::makeCluster(nbrCores)
+doParallel::registerDoParallel(cl)
+
+amaz.var.list <- list.files(wind.path, full.names=TRUE, pattern = ".tif$") #
+
+tic("wind") #
+#Raster to datatable in parallel: one raster per thread
+dtlist <- foreach (
+  ras_id = amaz.var.list,
+  .packages=c('terra', 'sf', 'data.table'),
+  .combine='c') %dopar% {
+    
+    # Read all rasters
+    ras <- rast(ras_id)
+    
+    # Rename layers
+    ras.Y.M <- renameRast(ras, 'wind_working_', '') #
+    ras <- ras.Y.M[[1]]
+
+    # Crop data and convert to data.frame 
+    ras <- ras %>% 
+      mask(mask = amaz.basin.shp)
+    
+    month.chr <- as.character(ras.Y.M[[3]])
+    month.chr <- ifelse(nchar(month.chr)==1, paste0("0", month.chr), month.chr)
+
+    # Select data for fires cell
+    burntA1 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/04. cell_1/burntarea1_", ras.Y.M[[2]], "_", month.chr, ".tif"))
+    ras1 <- selectRange(ras, burntA1)
+    
+    # Save
+    # terra::writeRaster(
+    #   ras1, 
+    #   paste0(my.path,"Amazon_new_data/9. Wind Speed/04. cell_1/wind1_", names(ras1), ".tif"), ##
+    #   overwrite=TRUE
+    # ) 
+    
+    DT <- terra::as.data.frame(ras1, xy=T)
+    
+    # Add Year and Month as factors
+    Year <- rep(ras.Y.M[[2]], dim(DT)[1]) %>% as.factor()
+    Month <- rep(ras.Y.M[[3]], dim(DT)[1]) %>% as.factor()
+    DT <- cbind(DT, Year, Month)
+    
+    # Modification of the data
+    colnames(DT)[3:5] <- c("WindSpeed", "Year", "Month") #
+    setcolorder(DT, c('x', 'y', 'Year', 'Month'))
+    DT <- na.omit(DT)
+    
+    list(DT)
+  }
+stopCluster(cl)
+
+#Bind all per-raster datatables into one big table
+wind1.dt <- rbindlist(dtlist, fill=T, use.names=T) #
+toc() 
+
+wind1.dt[, c("x", "y") := lapply(.SD, floor), .SDcols = c("x", "y")] 
+wind1.dt #
+# rm(dtlist)
+gc()
+```
+
+wind: 482.379 sec elapsed
+
+## Air Temperature 1
+
+```{r}
+#Register cluster for parallel processing: Cores to use: all except 1
+cl <- parallel::makeCluster(nbrCores)
+doParallel::registerDoParallel(cl)
+
+amaz.var.list <- list.files(airtemp.path, full.names=TRUE, pattern = ".tif$") #
+
+tic("airtemp") #
+#Raster to datatable in parallel: one raster per thread
+dtlist <- foreach (
+  ras_id = amaz.var.list,
+  .packages=c('terra', 'sf', 'data.table'),
+  .combine='c') %dopar% {
+    
+    # Read all rasters
+    ras <- rast(ras_id)
+    
+    # Rename layers
+    ras.Y.M <- renameRast(ras, 'airtemp_working_', '') #
+    ras <- ras.Y.M[[1]]
+
+    # Crop data and convert to data.frame 
+    ras <- ras %>% 
+      mask(mask = amaz.basin.shp)
+    
+    month.chr <- as.character(ras.Y.M[[3]])
+    month.chr <- ifelse(nchar(month.chr)==1, paste0("0", month.chr), month.chr)
+
+    # Select data for fires cell
+    burntA1 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/04. cell_1/burntarea1_", ras.Y.M[[2]], "_", month.chr, ".tif"))
+    ras1 <- selectRange(ras, burntA1)
+    
+    # Save
+    # terra::writeRaster(
+    #   ras1, 
+    #   paste0(my.path,"Amazon_new_data/10. Air Temperature/04. cell_1/airtemp1_", names(ras1), ".tif"), ##
+    #   overwrite=TRUE
+    # ) 
+    
+    DT <- terra::as.data.frame(ras1, xy=T)
+    
+    # Add Year and Month as factors
+    Year <- rep(ras.Y.M[[2]], dim(DT)[1]) %>% as.factor()
+    Month <- rep(ras.Y.M[[3]], dim(DT)[1]) %>% as.factor()
+    DT <- cbind(DT, Year, Month)
+    
+    # Modification of the data
+    colnames(DT)[3:5] <- c("AirTemperature", "Year", "Month") #
+    setcolorder(DT, c('x', 'y', 'Year', 'Month'))
+    DT <- na.omit(DT)
+    
+    list(DT)
+  }
+stopCluster(cl)
+
+#Bind all per-raster datatables into one big table
+airtemp1.dt <- rbindlist(dtlist, fill=T, use.names=T) #
+toc() 
+
+airtemp1.dt[, c("x", "y") := lapply(.SD, floor), .SDcols = c("x", "y")] 
+airtemp1.dt #
+# rm(dtlist)
+gc()
+```
+
+# Merge and save all datatable 1
+
+```{r}
+# tic()
+# amazon1.dt <- list(
+#   landCover1.dt,
+#   precipitation1.dt,
+#   soilMoisture1.dt,
+#   elevation1.dt,
+#   landsurftemp1.dt,
+#   humidity1.dt,
+#   evapotranspiration1.dt,
+#   wind1.dt,
+#   airtemp1.dt
+# ) %>%
+#   reduce(inner_join, by=c("x", "y", "Year", "Month"))
+# toc()
+# 
+# amazon1.dt$burntArea <- rep(1, dim(amazon1.dt)[1]) %>% as.factor()
+# amazon1.dt <- setcolorder(amazon1.dt, c('x', 'y', 'Year', 'Month', 'burntArea'))
+
+# # Transform SoilMoisture and columns name
+# amazon1.dt[amazon1.dt$soilMoisture < 0] <- NA
+# amazon1.dt <- na.omit(amazon1.dt)
+# colnames(amazon1.dt) <- c('x', 'y', 'Year', 'Month', 'burntArea', 'LandCover', 'Precipitation', 'SoilMoisture', 'Elevation', 'LandSurfaceTemp', 'Humidity', 'Evapotranspiration', 'WindSpeed', 'AirTemperature')
+
+# # save
+# save(amazon1.dt, file = paste0(my.path, "R_data/amazon1.Rdata"))
+
+# load data
+load(paste0(my.path, "R_data/amazon1.Rdata"))
+amazon1.dt
+```
+
+```{r}
+amazon1.dt
+```
+
+
+# * =====================
+
+# Create data 0
+
+## Create a sequence of dates
+
+```{r}
+sq.date <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month") %>% 
+  format(., '%Y_%m') %>% 
+  setdiff(., c("2012_07", "2012_09"))
+```
+
+## Determine the cells of Amazon
+
+```{r}
+burntArea.2001.01 <- rast("/home/abidm/Documents/Amazon_new_data/1. Burnt Area/03. Working Data/burntarea_working_2001_1.tif")
+amaz <- burntArea.2001.01 %>% mask(mask = amaz.basin.shp)
+amaz[amaz == -2] <- NA
+amaz[amaz != 0] <- 0
+plot(amaz, col=pal(3), main=paste0("Total number of cells = ", length(cells(amaz) )))
+```
+
+## Burnt Area 0
+
+```{r}
+# #Compute the quartiles
+# q <- terra::quantile(burntArea.rast)
+# q1 <- mask(q[[5]], amaz.basin.shp)
+# writeRaster(q1, paste0(my.path,"Amazon_new_data/1. Burnt Area/q1.tif"), overwrite=TRUE)
+# 
+# q1 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/q1.tif"))
+# names(q1) <-"burntArea"
+# burntArea0.rast <- q1
+# burntArea0.rast[burntArea0.rast %in% c(-1, 1)] <- NA
+# burntArea0.rast[burntArea0.rast == 0] <- 1
+
+# Select a random month for each cell
+set.seed(1)
+rand.index.rast <- burntArea0.rast
+values(rand.index.rast) <- sample(1:238, ncell(rand.index.rast), replace=TRUE)
+rand.index.rast0 <- selectRange(rand.index.rast, burntArea0.rast)
+names(rand.index.rast0) <- "Month_nbr"
+
+# # Save
+# terra::writeRaster(
+#   rand.index.rast0,
+#   paste0(my.path,"Amazon_new_data/1. Burnt Area/05. cell_0/burntArea0.tif"),
+#   overwrite=TRUE
+# )
+
+# Load spatRaster file
+rand.index.rast0 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/05. cell_0/burntArea0.tif"))
+
+# Transform to datatable
+DT <- as.data.table(rand.index.rast0, xy=T)
+# 
+burntAreat0.dt <- DT %>%
+  mutate(
+    x = floor(x),
+    y = floor(y),
+    Year = sq.date[Month_nbr] %>% substr(., start = 1, stop = 4) %>% as.numeric() %>% as.factor(),
+    Month = sq.date[Month_nbr] %>% substr(., start = 6, stop = 7) %>% as.numeric() %>% as.factor(),
+    burntArea = 0,
+    burntArea = as.factor(burntArea)
+  ) %>%
+  na.omit()
+# 
+# saveRDS(burntAreat0.dt, file = paste0(my.path,"Amazon_new_data/1. Burnt Area/05. cell_0/burntAreat0_dt.Rds"))
+burntAreat0.dt <- readRDS(paste0(my.path,"Amazon_new_data/1. Burnt Area/05. cell_0/burntAreat0_dt.Rds"))
+
+burntAreat0.dt
+
+```
+
+```{r}
+# Plot
+plot(burntArea0.rast, col=pal(3)[2], 
+     main=paste0("Total number of cells = ", length(cells(burntArea0.rast))))
+plot(amaz.basin.shp$geometry, add=T)
+#
+plot(rand.index.rast0, 
+     main=paste0("Total number of cells = ", length(cells(rand.index.rast0))))
+plot(amaz.basin.shp$geometry, add=T)
+```
+
+## LandCover 0
+
+```{r}
+# Load data
+amaz.landCover.list <- list.files(landCover.path, full.names=TRUE, pattern = ".tif$")
+landCover.rast <- rast(amaz.landCover.list)
+landCover.rast <- renameRast(landCover.rast, 'landcover_working_', '')[[1]]
+# Order layers
+landCover.rast <- landCover.rast[[sq.date]]
+
+tic() # 162.042 sec elapsed
+landCover0.rast <- selectRange(landCover.rast, rand.index.rast0)
+names(landCover0.rast) <- "LandCover"
+# Add the layer of number of month for each cell
+landCover0.rast <- c(landCover0.rast, rand.index.rast0)
+toc()
+
+# # Save
+# terra::writeRaster(
+#   landCover0.rast,
+#   paste0(my.path,"Amazon_new_data/2. Land Cover/05. cell_0/landCover0.tif"),
+#   overwrite=TRUE
+# )
+
+# Load spatRaster file
+landCover0.rast <- rast(paste0(my.path,"Amazon_new_data/2. Land Cover/05. cell_0/landCover0.tif"))
+
+# # Transform to datatable 
+# DT <- as.data.table(landCover0.rast, xy=T)
+# # 
+# landCover0.dt <- DT %>%
+#   mutate(
+#     x = floor(x),
+#     y = floor(y),
+#     Year = sq.date[Month_nbr] %>% substr(., start = 1, stop = 4) %>% as.numeric() %>% as.factor(),
+#     Month = sq.date[Month_nbr] %>% substr(., start = 6, stop = 7) %>% as.numeric() %>% as.factor(),
+#     LandCover = as.factor(LandCover)
+#   ) %>%
+#   setcolorder(., c('x', 'y', 'Month_nbr', 'Year', 'Month'))
+# 
+# # Save dt
+# saveRDS(landCover0.dt, file = paste0(my.path,"Amazon_new_data/2. Land Cover/05. cell_0/landCover0_dt.Rds"))
+#
+landCover0.dt <- readRDS(paste0(my.path,"Amazon_new_data/2. Land Cover/05. cell_0/landCover0_dt.Rds"))
+landCover0.dt
+```
+
+```{r}
+# Plot
+landCover.rast[[1]] %>% 
+  mask(mask = amaz.basin.shp) %>% 
+  as.factor() %>%
+  plot(col=colorRamps::blue2green(10))
+plot(amaz.basin.shp$geometry, add=T)
+# 
+plot(as.factor(landCover0.rast[[1]]),
+     col=colorRamps::blue2green(10),
+     main=paste0("Total number of cells = ", length(cells(landCover0.rast))))
+plot(amaz.basin.shp$geometry, add=T)
+```
+
+## Precipitation 0
+
+```{r}
+amaz.precipitation.list <- list.files(precip.path, full.names=TRUE, pattern = ".tif$")
+precipitation.rast <- rast(amaz.precipitation.list)
+precipitation.rast <- renameRast(precipitation.rast, 'precipitation_working_', '')[[1]]
+# Order layers
+precipitation.rast <- precipitation.rast[[sq.date]]
+
+# tic() # 216.078 sec elapsed
+# precipitation0.rast <- selectRange(precipitation.rast, rand.index.rast0)
+# names(precipitation0.rast) <- "Precipitation"
+# # Add the layer of number of month for each cell
+# precipitation0.rast <- c(precipitation0.rast, rand.index.rast0)
+# toc()
+# # Save
+# terra::writeRaster(
+#   precipitation0.rast,
+#   paste0(my.path,"Amazon_new_data/3. Precipitation/05. cell_0/precipitation0.tif"),
+#   overwrite=TRUE
+# )
+
+# Load spatRaster file
+precipitation0.rast <- rast(paste0(my.path,"Amazon_new_data/3. Precipitation/05. cell_0/precipitation0.tif"))
+
+# # Transform to datatable 
+# DT <- as.data.table(precipitation0.rast, xy=T)
+# # 
+# precipitation0.dt <- DT %>%
+#   mutate(
+#     x = floor(x),
+#     y = floor(y),
+#     Year = sq.date[Month_nbr] %>% substr(., start = 1, stop = 4) %>% as.numeric() %>% as.factor(),
+#     Month = sq.date[Month_nbr] %>% substr(., start = 6, stop = 7) %>% as.numeric() %>% as.factor(),
+#   ) %>%
+#   setcolorder(., c('x', 'y', 'Month_nbr', 'Year', 'Month'))
+# # Save dt
+# saveRDS(precipitation0.dt, file = paste0(my.path,"Amazon_new_data/3. Precipitation/05. cell_0/precipitation0_dt.Rds"))
+
+precipitation0.dt <- readRDS(paste0(my.path,"Amazon_new_data/3. Precipitation/05. cell_0/precipitation0_dt.Rds"))
+# precipitation0.dt[which(is.na(precipitation0.dt$Precipitation)),]
+precipitation0.dt
+```
+
+```{r}
+# Plot
+precipitation.rast[[1]] %>% 
+  mask(mask = amaz.basin.shp) %>% 
+  plot(col=grDevices::cm.colors(1000))
+plot(amaz.basin.shp$geometry, add=T)
+#
+plot(precipitation0.rast[[1]],
+     col=grDevices::cm.colors(1000),
+     main=paste0("Total number of cells = ", length(cells(precipitation0.rast[[1]]))))
+plot(amaz.basin.shp$geometry, add=T)
+```
+
+## soilMoisture 0
+
+```{r}
+amaz.soilMoisture.list <- list.files(soilMoisture.path, full.names=TRUE, pattern = ".tif$")
+soilMoisture.rast <- rast(amaz.soilMoisture.list)
+soilMoisture.rast <- renameRast(soilMoisture.rast, 'soilmoisture_working_', '')[[1]]
+# Order layers
+soilMoisture.rast <- soilMoisture.rast[[sq.date]]
+
+# tic() # 191.811 sec elapsed
+# soilMoisture0.rast <- selectRange(soilMoisture.rast, rand.index.rast0)
+# names(soilMoisture0.rast) <- "SoilMoisture"
+# # Add the layer of number of month for each cell
+# soilMoisture0.rast <- c(soilMoisture0.rast, rand.index.rast0)
+# toc()
+# # Remove negative values.
+# soilMoisture0.rast[soilMoisture0.rast < 0] <- NA
+# # Save
+# terra::writeRaster(
+#   soilMoisture0.rast,
+#   paste0(my.path,"Amazon_new_data/4. Soil Moisture/05. cell_0/soilmoisture0.tif"),
+#   overwrite=TRUE
+# )
+
+# Load spatRaster file
+soilMoisture0.rast <- rast(paste0(my.path,"Amazon_new_data/4. Soil Moisture/05. cell_0/soilmoisture0.tif"))
+
+# # Transform to datatable 
+# DT <- as.data.table(soilMoisture0.rast, xy=T)
+# 
+# soilMoisture0.dt <- DT %>%
+#   mutate(
+#     x = floor(x),
+#     y = floor(y),
+#     Year = sq.date[Month_nbr] %>% substr(., start = 1, stop = 4) %>% as.numeric() %>% as.factor(),
+#     Month = sq.date[Month_nbr] %>% substr(., start = 6, stop = 7) %>% as.numeric() %>% as.factor(),
+#   ) %>%
+#   setcolorder(., c('x', 'y', 'Month_nbr', 'Year', 'Month'))
+# # Save dt
+# saveRDS(soilMoisture0.dt, file = paste0(my.path,"Amazon_new_data/4. Soil Moisture/05. cell_0/soilMoisture0_dt.Rds"))
+
+soilMoisture0.dt <- readRDS(paste0(my.path,"Amazon_new_data/4. Soil Moisture/05. cell_0/soilMoisture0_dt.Rds"))
+# soilMoisture0.dt[which(is.na(soilMoisture0.dt$soilMoisture)),]
+soilMoisture0.dt
+```
+
+```{r}
+# Plot
+soilMoisture.rast[[1]] %>% 
+  mask(mask = amaz.basin.shp) %>% 
+  plot(col=colorRamps::matlab.like2(1000))
+plot(amaz.basin.shp$geometry, add=T)
+#
+plot(soilMoisture0.rast[[1]],
+     col=colorRamps::matlab.like2(1000),
+     main=paste0("Total number of cells = ", length(cells(soilMoisture0.rast[[1]]))))
+plot(amaz.basin.shp$geometry, add=T)
+```
+
+## Elevation 0
+
+```{r}
+elevation.rast <- rast(paste0(my.path,"Amazon_new_data/5. Elevation/03. Working Data/elevation_working_2001_01.tif"))
+
+# tic() # 2.6 sec elapsed
+# elevation0.rast <- selectRange(elevation.rast, burntArea0.rast)
+# names(elevation0.rast) <- "Elevation"
+# # Add the layer of number of month for each cell
+# elevation0.rast <- c(elevation0.rast, rand.index.rast0)
+# toc()
+# # Save
+# terra::writeRaster(
+#   elevation0.rast,
+#   paste0(my.path,"Amazon_new_data/5. Elevation/05. cell_0/elevation0.tif"),
+#   overwrite=TRUE
+# )
+
+# Load spatRaster file
+elevation0.rast <- rast(paste0(my.path,"Amazon_new_data/5. Elevation/05. cell_0/elevation0.tif"))
+
+# # Transform to datatable 
+# DT <- as.data.table(elevation0.rast, xy=T)
+# # 
+# elevation0.dt <- DT %>%
+#   mutate(
+#     x = floor(x),
+#     y = floor(y),
+#     Year = sq.date[Month_nbr] %>% substr(., start = 1, stop = 4) %>% as.numeric() %>% as.factor(),
+#     Month = sq.date[Month_nbr] %>% substr(., start = 6, stop = 7) %>% as.numeric() %>% as.factor(),
+#   ) %>%
+#   setcolorder(., c('x', 'y', 'Month_nbr', 'Year', 'Month'))
+# # Save dt
+# saveRDS(elevation0.dt, file = paste0(my.path,"Amazon_new_data/5. Elevation/05. cell_0/elevation0_dt.Rds"))
+
+elevation0.dt <- readRDS(paste0(my.path,"Amazon_new_data/5. Elevation/05. cell_0/elevation0_dt.Rds"))
+# elevation0.dt[which(is.na(elevation0.dt$elevation)),]
+elevation0.dt
+```
+
+```{r}
+# Plot
+elevation.rast[[1]] %>% 
+  mask(mask = amaz.basin.shp) %>% 
+  plot(col=colorRamps::matlab.like(1000))
+plot(amaz.basin.shp$geometry, add=T)
+#
+plot(elevation0.rast[[1]],
+     col=colorRamps::matlab.like(1000),
+     main=paste0("Total number of cells = ", length(cells(elevation0.rast[[1]]))))
+plot(amaz.basin.shp$geometry, add=T)
+```
+
+## LandSurfaceTemp 0
+
+```{r}
+amaz.landSurfaceTemp.list <- list.files(LandSurfaceTemp.path, full.names=TRUE, pattern = ".tif$")
+landSurfaceTemp.rast <- rast(amaz.landSurfaceTemp.list)
+landSurfaceTemp.rast <- renameRast(landSurfaceTemp.rast, 'landsurftemp_working_', '')[[1]]
+# Order layers
+landSurfaceTemp.rast <- landSurfaceTemp.rast[[sq.date]]
+
+tic() # 228.581 sec elapsed
+landSurfaceTemp0.rast <- selectRange(landSurfaceTemp.rast, rand.index.rast0)
+names(landSurfaceTemp0.rast) <- "LandSurfaceTemp"
+# Add the layer of number of month for each cell
+landSurfaceTemp0.rast <- c(landSurfaceTemp0.rast, rand.index.rast0)
+toc()
+# Save
+terra::writeRaster(
+  landSurfaceTemp0.rast,
+  paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/05. cell_0/landsurftemp0.tif"),
+  overwrite=TRUE
+)
+
+# Load spatRaster file
+landSurfaceTemp0.rast <- rast(paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/05. cell_0/landsurftemp0.tif"))
+
+# # Transform to datatable 
+# DT <- as.data.table(landSurfaceTemp0.rast, xy=T)
+# # 
+# landSurfaceTemp0.dt <- DT %>%
+#   mutate(
+#     x = floor(x),
+#     y = floor(y),
+#     Year = sq.date[Month_nbr] %>% substr(., start = 1, stop = 4) %>% as.numeric() %>% as.factor(),
+#     Month = sq.date[Month_nbr] %>% substr(., start = 6, stop = 7) %>% as.numeric() %>% as.factor(),
+#   ) %>%
+#   setcolorder(., c('x', 'y', 'Month_nbr', 'Year', 'Month'))
+# # Save dt
+# saveRDS(landSurfaceTemp0.dt, file = paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/05. cell_0/landSurfaceTemp0_dt.Rds"))
+
+landSurfaceTemp0.dt <- readRDS(paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/05. cell_0/landSurfaceTemp0_dt.Rds"))
+# landSurfaceTemp0.dt[which(is.na(landSurfaceTemp0.dt$LandSurfaceTemp)),]
+landSurfaceTemp0.dt
+```
+
+```{r}
+landSurfaceTemp.rast[[1]] %>%  
+  mask(mask = amaz.basin.shp) %>% # cells() %>% length()
+  plot(col=colorRamps::green2red(1000)) 
+#
+plot(landSurfaceTemp0.rast[[1]],
+     col=colorRamps::green2red(1000),
+     main=paste0("Total number of cells = ", length(cells(landSurfaceTemp0.rast[[1]]))))
+plot(amaz.basin.shp$geometry, add=T)
+```
+
+
+## Specific Humidity 0
+
+```{r}
+amaz.humidity.list <- list.files(humidity.path, full.names=TRUE, pattern = ".tif$")
+humidity.rast <- rast(amaz.humidity.list)
+humidity.rast <- renameRast(humidity.rast, 'humidity_working_', '')[[1]]
+# Order layers
+humidity.rast <- humidity.rast[[sq.date]]
+
+# tic() # 193.386 sec elapsed
+# humidity0.rast <- selectRange(humidity.rast, rand.index.rast0)
+# names(humidity0.rast) <- "Humidity"
+# # Add the layer of number of month for each cell
+# humidity0.rast <- c(humidity0.rast, rand.index.rast0)
+# toc()
+# # Save
+# terra::writeRaster(
+#   humidity0.rast,
+#   paste0(my.path,"Amazon_new_data/7. Specific Humidity/05. cell_0/humidity0.tif"),
+#   overwrite=TRUE
+# )
+
+# Load spatRaster file
+humidity0.rast <- rast(paste0(my.path,"Amazon_new_data/7. Specific Humidity/05. cell_0/humidity0.tif"))
+
+# # Transform to datatable 
+# DT <- as.data.table(humidity0.rast, xy=T)
+# # 
+# humidity0.dt <- DT %>%
+#   mutate(
+#     x = floor(x),
+#     y = floor(y),
+#     Year = sq.date[Month_nbr] %>% substr(., start = 1, stop = 4) %>% as.numeric() %>% as.factor(),
+#     Month = sq.date[Month_nbr] %>% substr(., start = 6, stop = 7) %>% as.numeric() %>% as.factor(),
+#   ) %>%
+#   setcolorder(., c('x', 'y', 'Month_nbr', 'Year', 'Month'))
+# # Save dt
+# saveRDS(humidity0.dt, file = paste0(my.path,"Amazon_new_data/7. Specific Humidity/05. cell_0/humidity0_dt.Rds"))
+
+humidity0.dt <- readRDS(paste0(my.path,"Amazon_new_data/7. Specific Humidity/05. cell_0/humidity0_dt.Rds"))
+# humidity0.dt[which(is.na(humidity0.dt$Humidity)),]
+humidity0.dt
+```
+
+```{r}
+humidity.rast[[1]] %>%  
+  mask(mask = amaz.basin.shp) %>% # cells() %>% length()
+  plot(col=topo.colors(20)) 
+#
+plot(humidity0.rast[[1]],
+     col=topo.colors(20),
+     main=paste0("Total number of cells = ", length(cells(humidity0.rast[[1]]))))
+plot(amaz.basin.shp$geometry, add=T)
+```
+
+## Evapotranspiration 0
+
+```{r}
+amaz.evapotranspiration.list <- list.files(evapotranspiration.path, full.names=TRUE, pattern = ".tif$")
+evapotranspiration.rast <- rast(amaz.evapotranspiration.list)
+evapotranspiration.rast <- renameRast(evapotranspiration.rast, 'evapotranspiration_working_', '')[[1]]
+# Order layers
+evapotranspiration.rast <- evapotranspiration.rast[[sq.date]]
+
+# tic() # 203.233 sec elapsed
+# evapotranspiration0.rast <- selectRange(evapotranspiration.rast, rand.index.rast0)
+# names(evapotranspiration0.rast) <- "Evapotranspiration"
+# # Add the layer of number of month for each cell
+# evapotranspiration0.rast <- c(evapotranspiration0.rast, rand.index.rast0)
+# toc()
+# # Save
+# terra::writeRaster(
+#   evapotranspiration0.rast,
+#   paste0(my.path,"Amazon_new_data/8. Evapotranspiration/05. cell_0/evapotranspiration0.tif"),
+#   overwrite=TRUE
+# )
+
+# Load spatRaster file
+evapotranspiration0.rast <- rast(paste0(my.path,"Amazon_new_data/8. Evapotranspiration/05. cell_0/evapotranspiration0.tif"))
+
+# # Transform to datatable 
+# DT <- as.data.table(evapotranspiration0.rast, xy=T)
+# # 
+# evapotranspiration0.dt <- DT %>%
+#   mutate(
+#     x = floor(x),
+#     y = floor(y),
+#     Year = sq.date[Month_nbr] %>% substr(., start = 1, stop = 4) %>% as.numeric() %>% as.factor(),
+#     Month = sq.date[Month_nbr] %>% substr(., start = 6, stop = 7) %>% as.numeric() %>% as.factor(),
+#   ) %>%
+#   setcolorder(., c('x', 'y', 'Month_nbr', 'Year', 'Month'))
+# # Save dt
+# saveRDS(evapotranspiration0.dt, file = paste0(my.path,"Amazon_new_data/8. Evapotranspiration/05. cell_0/evapotranspiration0_dt.Rds"))
+
+evapotranspiration0.dt <- readRDS(paste0(my.path,"Amazon_new_data/8. Evapotranspiration/05. cell_0/evapotranspiration0_dt.Rds"))
+# evapotranspiration0.dt[which(is.na(evapotranspiration0.dt$Evapotranspiration)),]
+evapotranspiration0.dt
+```
+
+```{r}
+nbr_colors <- colorRampPalette(brewer.pal(9, "YlOrBr"))
+evapotranspiration.rast[[1]] %>%  
+  mask(mask = amaz.basin.shp) %>% # cells() %>% length()
+  plot(col=nbr_colors(100)) 
+#
+plot(evapotranspiration0.rast[[1]],
+     col=nbr_colors(100),
+     main=paste0("Total number of cells = ", length(cells(evapotranspiration0.rast[[1]]))))
+plot(amaz.basin.shp$geometry, add=T)
+```
+
+## Wind Speed 0
+
+```{r}
+amaz.wind.list <- list.files(wind.path, full.names=TRUE, pattern = ".tif$")
+wind.rast <- rast(amaz.wind.list)
+wind.rast <- renameRast(wind.rast, 'wind_working_', '')[[1]]
+# Order layers
+wind.rast <- wind.rast[[sq.date]]
+
+# tic() # 195.752 sec elapsed
+# wind0.rast <- selectRange(wind.rast, rand.index.rast0)
+# names(wind0.rast) <- "WindSpeed"
+# # Add the layer of number of month for each cell
+# wind0.rast <- c(wind0.rast, rand.index.rast0)
+# toc()
+# # Save
+# terra::writeRaster(
+#   wind0.rast,
+#   paste0(my.path,"Amazon_new_data/9. Wind Speed/05. cell_0/wind0.tif"),
+#   overwrite=TRUE
+# )
+
+# Load spatRaster file
+wind0.rast <- rast(paste0(my.path,"Amazon_new_data/9. Wind Speed/05. cell_0/wind0.tif"))
+
+# # Transform to datatable 
+# DT <- as.data.table(wind0.rast, xy=T)
+# # 
+# wind0.dt <- DT %>%
+#   mutate(
+#     x = floor(x),
+#     y = floor(y),
+#     Year = sq.date[Month_nbr] %>% substr(., start = 1, stop = 4) %>% as.numeric() %>% as.factor(),
+#     Month = sq.date[Month_nbr] %>% substr(., start = 6, stop = 7) %>% as.numeric() %>% as.factor(),
+#   ) %>%
+#   setcolorder(., c('x', 'y', 'Month_nbr', 'Year', 'Month'))
+# # Save dt
+# saveRDS(wind0.dt, file = paste0(my.path,"Amazon_new_data/9. Wind Speed/05. cell_0/wind0_dt.Rds"))
+
+wind0.dt <- readRDS(paste0(my.path,"Amazon_new_data/9. Wind Speed/05. cell_0/wind0_dt.Rds"))
+# wind0.dt[which(is.na(wind0.dt$WindSpeed)),]
+wind0.dt
+```
+
+```{r}
+wind.rast[[1]] %>%  
+  mask(mask = amaz.basin.shp) %>% # cells() %>% length()
+  plot(col=cm.colors(50)) 
+#
+plot(wind0.rast[[1]],
+     col=cm.colors(50),
+     main=paste0("Total number of cells = ", length(cells(wind0.rast[[1]]))))
+plot(amaz.basin.shp$geometry, add=T)
+```
+
+## Air Temperature 0
+
+```{r}
+amaz.airtemp.list <- list.files(airtemp.path, full.names=TRUE, pattern = ".tif$")
+airtemp.rast <- rast(amaz.airtemp.list)
+airtemp.rast <- renameRast(airtemp.rast, 'airtemp_working_', '')[[1]]
+# Order layers
+airtemp.rast <- airtemp.rast[[sq.date]]
+
+# tic() # 194.236 sec elapsed
+# airtemp0.rast <- selectRange(airtemp.rast, rand.index.rast0)
+# names(airtemp0.rast) <- "AirTemperature"
+# # Add the layer of number of month for each cell
+# airtemp0.rast <- c(airtemp0.rast, rand.index.rast0)
+# toc()
+# # Save
+# terra::writeRaster(
+#   airtemp0.rast,
+#   paste0(my.path,"Amazon_new_data/10. Air Temperature/05. cell_0/airtemp0.tif"),
+#   overwrite=TRUE
+# )
+
+# Load spatRaster file
+airtemp0.rast <- rast(paste0(my.path,"Amazon_new_data/10. Air Temperature/05. cell_0/airtemp0.tif"))
+
+# # Transform to datatable 
+# DT <- as.data.table(airtemp0.rast, xy=T)
+# # 
+# airtemp0.dt <- DT %>%
+#   mutate(
+#     x = floor(x),
+#     y = floor(y),
+#     Year = sq.date[Month_nbr] %>% substr(., start = 1, stop = 4) %>% as.numeric() %>% as.factor(),
+#     Month = sq.date[Month_nbr] %>% substr(., start = 6, stop = 7) %>% as.numeric() %>% as.factor(),
+#   ) %>%
+#   setcolorder(., c('x', 'y', 'Month_nbr', 'Year', 'Month'))
+# # Save dt
+# saveRDS(airtemp0.dt, file = paste0(my.path,"Amazon_new_data/10. Air Temperature/05. cell_0/airtemp0_dt.Rds"))
+
+airtemp0.dt <- readRDS(paste0(my.path,"Amazon_new_data/10. Air Temperature/05. cell_0/airtemp0_dt.Rds"))
+# airtemp0.dt[which(is.na(airtemp0.dt$AirTemperature)),]
+airtemp0.dt
+```
+
+```{r}
+airtemp.rast[[1]] %>%  
+  mask(mask = amaz.basin.shp) %>% # cells() %>% length()
+  plot(col=colorRamps::matlab.like(100)) 
+#
+plot(airtemp0.rast[[1]],
+     col=colorRamps::matlab.like(100),
+     main=paste0("Total number of cells = ", length(cells(airtemp0.rast[[1]]))))
+plot(amaz.basin.shp$geometry, add=T)
+```
+
+# Merge and save all data 0
+
+```{r}
+# tic() # 177.564 sec elapsed
+# amazon0.dt <- list(
+#   burntAreat0.dt,
+#   landCover0.dt,
+#   precipitation0.dt,
+#   soilMoisture0.dt,
+#   elevation0.dt,
+#   landSurfaceTemp0.dt,
+#   humidity0.dt,
+#   evapotranspiration0.dt,
+#   wind0.dt,
+#   airtemp0.dt
+# ) %>%
+#   reduce(inner_join, by=c("x", "y","Month_nbr", "Year", "Month"))
+# toc()
+# amazon0.dt <- na.omit(amazon0.dt)
+
+# amazon0.dt[, Month_nbr:=NULL]
+# colnames(amazon0.dt) <- c('x', 'y', 'Year', 'Month', 'burntArea', 'LandCover', 'Precipitation', 'SoilMoisture', 'Elevation', 'LandSurfaceTemp', 'Humidity', 'Evapotranspiration', 'WindSpeed', 'AirTemperature')
+
+# Save
+save(amazon0.dt, file = paste0(my.path, "R_data/amazon0.Rdata"))
+
+# load data
+load(paste0(my.path, "R_data/amazon0.Rdata"))
+amazon0.dt
+```
+
+# * =====================
+
+# Merge and save data 0 and data 1
+
+```{r}
+amazon.dt <- rbind( amazon0.dt, amazon1.dt)
+amazon.dt <- na.omit(amazon.dt)
+# Save
+save(amazon.dt, file = paste0(my.path, "R_data/amazon.Rdata"))
+
+# load data
+load(paste0(my.path, "R_data/amazon.Rdata"))
+amazon.dt
+```
+
+
+
+
+
+# -----------------------------
+
+
+
+
+
+
+
+
+## Determine the cells of Amazon
+
+```{r}
+burntArea.2001.01 <- rast("/home/abidm/Documents/Amazon_new_data/1. Burnt Area/03. Working Data/burntarea_working_2001_1.tif")
+amaz <- burntArea.2001.01 %>% mask(mask = amaz.basin.shp)
+amaz[amaz == -2] <- NA
+amaz[amaz != 0] <- 0
+plot(amaz, col=pal(3), main=paste0("Total number of cells = ", length(cells(amaz) )))
+```
+
+```{r}
+amaz.ptrn <- amaz
+ras <- landSurfaceTemp.rast
+
+for (i in amaz.cells[1:50]) { # ki<-1; i <- amaz.cells[[ki]] # ki<-ki+1; i <- amaz.cells[[ki]]
+  cat("\n --------------->   ", i, "   <---------------")
+  lyr.id <- sample(1:238, 238, replace = FALSE)
+  amaz.ptrn[i][[1]] <- NA
+  for (j in lyr.id){ # kj<-1; j <- lyr.id[kj] ; kj<-kj+1; j <- lyr.id[kj]
+    r.ij <- ras[i][[j]]  # ras[i] %>% t()
+    if ( !(is.na(r.ij))) { # isTRUE(r.ij) &&
+      amaz.ptrn[i] <- j
+      break
+    }
+  }
+}
+
+plot(amaz.ptrn, col=pal(3), main=paste0("Total number of cells = ", length(cells(amaz.ptrn))))
+```
+
+```{r}
+amaz.ptrn[3789][[1]]
+```
+
+
+```{r}
+
+
+
+
+ras <- landSurfaceTemp.rast
+
+plot(ras[[1]])
+select.layer <- function(i){
+  lyr.id <- sample(1:238, 238, replace = FALSE)
+  id.cell <- NA
+  for (j in lyr.id){
+    if (!(is.na(ras[i][[j]]))){
+      id.cell <- j
+      break
+    }
+  }
+  return(id.cell)
+}
+
+ras.start.end <- ras[[1:2]]
+values(ras.start.end[[1]]) <- 1
+values(ras.start.end[[2]]) <- nlyr(ras)
+
+rr <- rapp(
+  ras, 
+  ras.start.end[[1]], 
+  ras.start.end[[2]], 
+  function(i){
+    lyr.id <- sample(1:238, 238, replace = FALSE)
+    id.cell <- NA
+    for (j in lyr.id){
+      r.ij <- ras[i][[j]]
+      if (isTRUE(r.ij) && !(is.na(r.ij))){
+        id.cell <- j
+        break
+      }
+    }
+    return(id.cell)
+  }
+)
+landSurfTemp.nbr.cell <- cells(ras[[1]])
+
+ras[landSurfTemp.nbr.cell[2545347]] %>% t()
+rr <- mclapply(1:10, pause(0.25), mc.cores = 30)
+
+
+
+
+plot(end.i[[1]], col=pal(3))
+sample(1:238, 1)
+rapply(rapp, function)
+
+i=2545347
+ras[2545347] %>% t()
+ras[2545347][[75]]
+```
+
+
+```{r}
+ras[[1]][23946]
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# -----------------------------
+
+```{r}
+# list of files
+amaz.burntArea.list <- list.files(paste0(my.path,"Amazon_new_data/1. Burnt Area/03. Working Data"),
+                                  full.names=TRUE,
+                                  pattern = ".tif$")
+# Import data with "Terra"
+burntArea.rast <- rast(amaz.burntArea.list)
+# Rename layers
+burntArea.rast <- renameRast(burntArea.rast, 'burntarea_working_', '')[[1]]
+
+# Order layers
+ordered.names.1 <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month") %>% 
+  format(., '%Y_%m') %>% 
+  setdiff(., c("2012_07", "2012_09"))
+burntArea.rast <- burntArea.rast[[ordered.names.1]]
+# burntArea.rast <- mask(burntArea.rast, amaz.basin.shp)
+
+
+burntArea.rast[burntArea.rast %in% c(-2, 1)] <- NA
+```
+
+### Compute and save Q1
+
+```{r}
+#Compute the quartiles
+q <- terra::quantile(burntArea.rast)
+q1 <- mask(q[[5]], amaz.basin.shp)
+writeRaster(q1, paste0(my.path,"Amazon_new_data/1. Burnt Area/q1.tif"), overwrite=TRUE)
+
+q1 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/q1.tif"))
+names(q1) <-"burntArea"
+plot(q1, col=pal(3))
+```
+
+
+
+
+# * =====================
+
+# Burnt Area
+
+```{r}
+# list of files
+amaz.burntArea.list <- list.files(paste0(my.path,"Amazon_new_data/1. Burnt Area/03. Working Data"),
+                                  full.names=TRUE,
+                                  pattern = ".tif$")
+# Import data with "Terra"
+burntArea.rast <- rast(amaz.burntArea.list)
+# Rename layers
+burntArea.rast <- renameRast(burntArea.rast, 'burntarea_working_', 'fire_')[[1]]
+# Order layers
+ordered.names.1 <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month") %>% 
+  format(., '%Y_%m') %>%
+  paste0("fire_", .)
+burntArea.rast <- burntArea.rast[[ordered.names.1]]
+# Create a sequence date for 'rts' object
+seq.dates <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month")
+burntArea.rts <- rts(burntArea.rast, seq.dates)
+```
+
+```{r}
+burntArea.rast <- subset(burntArea.rast, c("fire_2012_07", "fire_2012_09"), negate=TRUE)
+
+# burntArea.rast[burntArea.rast == -2] <- NA
+# minmax(burntArea.rast) %>% t() %>% as.data.frame()
+```
+
+# Load Q1 Terra file
+
+```{r}
+# #Compute the quartiles
+# q <- terra::quantile(burntArea.rast)
+# q1 <- mask(q[[5]], amaz.basin.shp)
+# writeRaster(q1, paste0(my.path,"Amazon_new_data/1. Burnt Area/q1.tif"), overwrite=TRUE)
+
+q1 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/q1.tif"))
+names(q1) <-"burntArea"
+plot(q1, col=pal(3))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

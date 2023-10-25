@@ -1,0 +1,1840 @@
+---
+title: "Amazon_Grid_search"
+date: "2023-02-18"
+output:
+  html_document: 
+    number_sections: yes
+    fig_caption: yes
+    toc: true
+    toc_float: 
+      collapsed: false
+    theme: cerulean
+    highlight: kate
+    toc_depth: 5
+    keep_md: yes
+    df_print: paged
+---
+
+
+# Load libraries
+
+```{r, load libraries, warning=FALSE, message=FALSE}
+# 
+library(terra)
+library(sf)
+library(tidyverse)
+library(data.table)
+library(dplyr)
+# Parallel
+library(foreach)
+library(doSNOW)
+library(parallel)
+library(itertools)
+# 
+library(rsample)
+library(recipes)
+# Plot
+library(RColorBrewer)
+library(tidyterra)
+library(scico)
+library(wesanderson)
+library(viridis)
+library(scales)
+library(latex2exp)
+library(ggplot2)
+# 
+library(tictoc)
+```
+
+# Function
+
+```{r}
+random_dt <- function(DT) {
+  DT.nrow <- nrow(DT)
+  samp <- sample(1:DT.nrow, DT.nrow, replace=F)
+  return(DT[samp,])
+}
+# Plot
+myPlot2 <- function(rast, title=''){
+  p <- ggplot()  +
+    geom_spatraster(data = rast) +
+    geom_spatvector(data = amaz.basin.shp$geometry, fill = NA, color = "gray40") +
+    scale_x_continuous(labels = function(x) format(x, scientific = T)) +
+    scale_y_continuous(labels = function(x) format(x, scientific = T)) +
+    coord_sf(datum = pull_crs(rast)) + 
+    ggtitle(title)  +
+    theme_bw()
+  return(p)
+}
+```
+
+# Initialization
+
+```{r}
+# Import shape file
+amaz.basin.shp <- st_read("~/Documents/Amazon_new_data/0. Amazon_shapefile/projected/amazon_shp_projected.shp")
+
+# path of variables
+my.path <- "~/Documents/"
+burntArea.path <- "~/Documents/Amazon_new_data/1. Burnt Area/03. Working Data"
+landCover.path <- "~/Documents/Amazon_new_data/2. Land Cover/03. Working Data"
+precip.path <- "~/Documents/Amazon_new_data/3. Precipitation/03. Working Data"
+soilMoisture.path <- "~/Documents/Amazon_new_data/4. Soil Moisture/03. Working Data"
+elevation.path <- "~/Documents/Amazon_new_data/5. Elevation/03. Working Data"
+LandSurfaceTemp.path <- "~/Documents/Amazon_new_data/6. LandSurfaceTemp/03. Working Data"
+humidity.path <- "~/Documents/Amazon_new_data/7. Specific Humidity/03. Working Data"
+evapotranspiration.path <- "~/Documents/Amazon_new_data/8. Evapotranspiration/03. Working Data"
+wind.path <- "~/Documents/Amazon_new_data/9. Wind Speed/03. Working Data"
+airtemp.path <- "~/Documents/Amazon_new_data/10. Air Temperature/03. Working Data"
+
+x_min=-1.25e+06; x_max=0.05e+06; y_min=st_bbox(amaz.basin.shp)$ymin; y_max=2.4e+06    # South of Amazon
+# x_min=-0.8e+06; x_max=-0.4e+06; y_min=1.8e+06; y_max=2.2e+06
+# x_min=-0.6e+06; x_max=-0.4e+06; y_min=2.0e+06; y_max=2.2e+06                          
+# x_min=-0.5e+06; x_max=-0.4e+06; y_min=2.0e+06; y_max=2.1e+06                          
+
+# Number of years
+nbrYears <- 20
+
+# Number of cores to use
+# nbrCores <- detectCores() - 1
+nbrCores <- 45
+
+# Color palette
+# pal <- colorRampPalette(c("lightblue", "forestgreen", "firebrick"))
+# pal <- colorRampPalette(c("mediumblue", "darkseagreen3", "firebrick"))
+my.colors <- c("mediumblue", "mediumseagreen", "firebrick")
+pal <- colorRampPalette(c("mediumblue", "mediumseagreen", "firebrick"))
+
+# Create a sequence of dates
+sq.date <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month") %>% 
+  format(., '%Y_%m') %>% 
+  setdiff(., c("2012_07", "2012_09"))
+```
+
+# Load Q0 and Q1 data
+
+```{r, message=FALSE}
+# # Import burntArea data with "Terra"
+# amaz.burntArea.list <- list.files(burntArea.path, full.names=TRUE, pattern = ".tif$")
+# burntArea.rast <- rast(amaz.burntArea.list)
+# burntArea.rast <- renameRast(burntArea.rast, 'burntarea_working_', '')[[1]]
+# burntArea.rast <- burntArea.rast[[sq.date]]
+
+# Compute the quartiles
+# q <- terra::quantile(burntArea.rast)
+# Q0 <- mask(q[[1]], amaz.basin.shp)
+# Q1 <- mask(q[[5]], amaz.basin.shp)
+# names(Q0) <-"burntArea0"
+# names(Q1) <-"burntArea1"
+# writeRaster(Q1, paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/Q1_238.tif"), overwrite=TRUE)
+# writeRaster(Q0, paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/Q0_238.tif"), overwrite=TRUE)
+
+Q0 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/Q0_238.tif"))
+Q1 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/Q1_238.tif"))
+
+# Plot
+levels(Q0) <- data.frame(id=c(-2, 0, 1), cover=c('-2', '0', '1'))
+levels(Q1) <- data.frame(id=c(-2, 0, 1), cover=c('-2', '0', '1'))
+
+my.colors <- c("mediumblue", "mediumseagreen", "firebrick")
+myPlot2(Q0, "Plot of the minimum value for each cell") +
+  scale_fill_manual(name = "Burnt Area", values = my.colors, na.translate=FALSE)
+
+myPlot2(Q1, "Plot of the maximum value for each cell") +
+  scale_fill_manual(name = "Burnt Area", values = my.colors, na.translate=FALSE)
+```
+
+#=======================
+
+# Load final data
+
+```{r}
+# Amazon.data.dt <- rbind(Amazon.data0.dt, Amazon.data1.dt)
+
+#--- Save final data 
+# save(Amazon.data.dt, file = paste0(my.path,"Amazon_selected_data/Amazon_data_dt.Rdata"))
+tic() # 82.894 sec elapsed | 282.194
+load(paste0(my.path,"Amazon_selected_data/Amazon_data_dt.Rdata"))
+toc()
+Amazon.data.dt
+```
+
+# Correlation
+
+```{r}
+library("corrplot")
+# Amazon.data.dt[, c('cell'):=NULL] 
+tic()
+Amazon.data.dt %>%
+    # sample_n(2000) %>% 
+    # mutate_if(is.factor, as.numeric) %>%
+    select(BurntArea, everything()) %>%
+    cor %>%
+    {.[order(abs(.[, 1]), decreasing = TRUE), 
+       order(abs(.[, 1]), decreasing = TRUE)]} %>%
+    corrplot(method = "number", type = "upper", mar = c(0, 0, 1.5, 0),
+             title = "Correlations")
+toc()
+```
+
+```{r}
+# Amazon.data.dt[, c('cell'):=NULL] 
+library(HiClimR)
+tic()
+fastCor(Amazon.data.dt, nSplit = 1, upperTri = TRUE, optBLAS = TRUE, verbose = TRUE)
+toc()
+```
+
+#=======================
+
+# Split data by zone
+
+## Create and plot zones
+
+```{r, message=FALSE}
+v <- ext(amaz.basin.shp)
+x.min <- v$xmin[[1]] - 1; x.max <- v$xmax[[1]] + 1; 
+y.min <- v$ymin[[1]] - 1; y.max <- v$ymax[[1]] + 1; 
+
+XY <- list(
+  c(x.min, -0.84e+06, y.min, y.max),                       # z1
+  c(-0.84e+06, +0.55e+06, 3.75e+06, y.max),                # z2
+  c(-0.84e+06, +0.55e+06, 2.6e+06, 3.75e+06),              # z3
+  c(-0.84e+06, -0.05e+06, 2.22e+06, 2.6e+06),              # z4
+  c(-0.84e+06, -0.51e+06, y.min, 2.22e+06),                # z5
+  c(-0.51e+06, -0.05e+06, y.min, 2.22e+06),                # z6
+  c(-0.05e+06, 0.6e+06, y.min, 2.6e+06),                   # z7
+  c(0.6e+06, 0.95e+06, y.min, 2.6e+06),                    # z8
+  c(+0.55e+06, x.max, 3.24e+06, y.max),                    # z9
+  c(+0.55e+06, x.max, 2.86e+06, 3.24e+06),                 # z10
+  c(+0.55e+06, 0.95e+06, x.max, y.min, 2.6e+06, 2.86e+06)  # z11
+)
+
+nz <- length(XY)
+zl <- list()
+for (i in 1:(nz-1)){
+  zl[[i]] <- rbind(
+    c(XY[[i]][1], XY[[i]][3]), 
+    c(XY[[i]][2], XY[[i]][3]), 
+    c(XY[[i]][2], XY[[i]][4]), 
+    c(XY[[i]][1], XY[[i]][4])
+  ) %>% 
+    cbind(object=i, part=1, ., hole=0) %>% 
+    as.data.table()
+}
+
+i <- nz
+zl[[i]] <- rbind(
+  c(XY[[i]][2], XY[[i]][4]), 
+  c(XY[[i]][3], XY[[i]][4]), 
+  c(XY[[i]][3], XY[[i]][6]), 
+  c(XY[[i]][1], XY[[i]][6]), 
+  c(XY[[i]][1], XY[[i]][5]), 
+  c(XY[[i]][2], XY[[i]][5])
+) %>% 
+  cbind(object=i, part=1, ., hole=0) %>% 
+  as.data.table()
+
+z <- rbindlist(zl, use.names=T) %>% as.matrix()
+colnames(z)[3:4] <- c('x', 'y')
+
+p <- vect(z, "polygons")
+crs(p) <- crs(amaz.basin.shp)
+
+#---- Plot ----
+my.labels <-  c( 'z1',      'z2',      'z3',     'z4',      'z5',      'z6',     'z7',     'z8',     'z9',   'z10',     'z11')
+x.coor <- c(-1.50e+06, -0.50e+06, -0.50e+06, -0.5e+06, -0.70e+06, -0.20e+06, 0.30e+06,  0.8e+06, 1.30e+06, 1.60e+06, 1.30e+06)
+y.coor <- c( 3.05e+06,  4.05e+06,  3.05e+06,  2.4e+06,  1.85e+06,  1.85e+06, 2.05e+06, 2.05e+06, 4.05e+06, 3.05e+06, 2.55e+06)
+
+ggplot()  +
+  geom_spatvector(data = amaz.basin.shp$geometry, fill = 'white', color = "gray40") +
+  geom_spatraster(data = Q1) +
+  geom_spatvector(data = p, fill = NA, color = "black") +
+  scale_x_continuous(labels = function(x) format(x, scientific = T)) +
+  scale_y_continuous(labels = function(x) format(x, scientific = T)) +
+  coord_sf(datum = pull_crs(Q1)) + 
+  ggtitle("Plot of the maximum value for each cell") +
+  theme_bw() +
+  scale_fill_manual(name = "Burnt Area", values = alpha(my.colors, 0.75), na.translate=FALSE) +
+  annotate("text", label = my.labels, x = x.coor, y = y.coor, size = 4, colour = "black")
+```
+
+## Add column `Zones` to data //
+
+```{r}
+tic() # 219.55 sec elapsed
+Amazon.data.dt[, Zones := 0.0]
+Amazon.data.dt %>% setcolorder(., c('cell', 'Zones', 'x', 'y', 'Year', 'Month'))
+
+Amazon.zone.lst <- list()
+dim.zones <- matrix(nrow = nz, ncol = 1, dimnames = list(paste0('z', 1:nz), c('dim')))
+
+for (i in 1:nz){
+  cat("Zone", i, "/", nz, " - ")
+  if (i == nz){
+    Amazon.data.dt[((x > XY[[i]][2] & x <= XY[[i]][3]) & (y > XY[[i]][4] & y <= XY[[i]][5])) | 
+                     ((x > XY[[i]][1] & x <= XY[[i]][3]) & (y > XY[[i]][5] & y <= XY[[i]][6])), Zones := i]
+  }else{
+    Amazon.data.dt[(x > XY[[i]][1] & x <= XY[[i]][2]) & (y > XY[[i]][3] & y <= XY[[i]][4]), Zones := i]
+  }
+}
+toc()
+dim.zones <- Amazon.data.dt[, .N, by=.(Zones)]
+dim.zones[order(Zones)]
+sum(dim.zones$N) == dim(Amazon.data.dt)[1]
+
+#--- Save data with zones
+# save(Amazon.data.dt, file = paste0(my.path,"Amazon_selected_data/Amazon_zones_dt.Rdata"))
+tic() # 82.894 sec elapsed | 282.194
+load(paste0(my.path,"Amazon_selected_data/Amazon_zones_dt.Rdata"))
+toc()
+Amazon.data.dt
+```
+
+#=======================
+
+# Zone1
+
+## Randomise data ---> Zone1 //
+
+```{r}
+# Amazon.z1.dt <- Amazon.data.dt[Amazon.data.dt$Zones == 1,]
+# set.seed(11)
+# AZ1.rnd <- random_dt(Amazon.z1.dt)
+
+#--- Save data with zones
+# save(AZ1.rnd, file = paste0(my.path,"Amazon_selected_data/data_by_zones/AZ1_rnd.Rdata"))
+tic() # 12.007 sec elapsed
+load(paste0(my.path,"Amazon_selected_data/data_by_zones/AZ1_rnd.Rdata"))
+toc()
+AZ1.rnd$Zones <- as.factor(AZ1.rnd$Zones)
+AZ1.rnd
+```
+
+## Create v-fold cross validation samples 
+
+```{r}
+set.seed(1)
+tic() # 56.916 sec elapsed 
+AZ1.rnd.cv <- vfold_cv(AZ1.rnd, v = 10,  strata = BurntArea)
+toc()
+```
+
+```{r}
+AZ1.folds.lst <- list()
+for (i in 1:10){
+  cat(" - Fold", i)
+  AZ1.folds.lst[[i]] <- AZ1.rnd.cv$splits[[i]] %>% assessment() %>% add_column(Folds = i, .before = "BurntArea")
+  AZ1.folds.lst[[i]]$Folds <- as.factor(AZ1.folds.lst[[i]]$Folds)
+}
+AZ1.folds.lst
+```
+
+## Add column `Folds` to the data
+
+```{r}
+AZ1.folds <- rbindlist(AZ1.folds.lst, use.names = T, fill = T)
+AZ1.folds[, c('cell'):=NULL]
+AZ1.folds
+```
+
+## Normalize data
+
+```{r}
+## recipe
+AZ1_recipe0 <- recipe( BurntArea ~ ., data = AZ1.folds) %>% step_normalize(all_numeric(), -c(x, y))
+  # step_normalize(
+  #   Precipitation, SoilMoisture, Elevation, LandSurfaceTemp, Humidity, Evapotranspiration, Wind, AirTemp
+  # )
+
+## Normalize data
+AZ1.norm <- AZ1_recipe0 %>% prep() %>% bake(new_data = NULL) %>% setcolorder(., c('Zones', 'Folds', 'x', 'y', 'Year', 'Month', 'BurntArea'))
+rm(AZ1_recipe0)
+gc()
+```
+
+## Split data to training and testing data //
+
+```{r}
+set.seed(11)
+# randomize data
+# AZ1.norm <- random_dt(AZ1.norm)
+
+# Save zone1 with cv and noralized
+# save(AZ1.norm, file = paste0(my.path,"Amazon_selected_data/data_by_zones/AZ1_norm.Rdata"))
+tic() # 29.647 sec elapsed
+load(paste0(my.path,"Amazon_selected_data/data_by_zones/AZ1_norm.Rdata"))
+toc()
+
+# Split data
+split1 <- initial_split(AZ1.norm, prop = 0.75, strata = BurntArea)
+AZ1.trn <- training(split1)
+AZ1.tst <- testing(split1)
+gc()
+```
+
+## H2O Grid search
+
+```{r}
+options(java.parameters = "-Xmx500g")
+Sys.setenv("OPENBLAS_MAIN_FREE"=1)
+
+library(h2o)
+localH2O <- h2o.init(ip = 'localhost', port = 54321, nthreads = 45, max_mem_size = '500g')
+```
+
+### Prepare data
+
+```{r}
+var.names <- colnames(AZ1.norm)
+Y <- "BurntArea"
+covt.names <- setdiff(var.names, c("BurntArea", "Folds"))
+#
+tic() # 207.606 sec elapsed ~ 3.5 min
+train.h2o <- as.h2o(AZ1.trn)
+test.h2o <- as.h2o(AZ1.tst)
+toc()
+```
+
+###------------------------------------
+### Gradient Boosting Machine (GBM) grid search
+
+####-
+#### Full Cartesian Grid Search 1
+
+```{r}
+# Set hyperparameter grid: 
+hyper_grid.h2o <- list(
+  ntrees = 300,
+  col_sample_rate = 0.5
+)
+
+# The number of models: 
+sapply(hyper_grid.h2o, length) %>% prod()
+```
+
+```{r}
+# 37.6M observations | 1 models | 1564.494 sec ~ 0.43 h
+#  ntrees = 300, col_sample_rate = 0.5
+system.time( 
+  grid_cartesian1 <- h2o.grid(algorithm = "gbm",
+                             grid_id = "gbm_grid0",
+                             x = covt.names, 
+                             y = "BurntArea", 
+                             seed = 1, 
+                             fold_column = "Folds", 
+                             keep_cross_validation_predictions=TRUE,
+                             training_frame = train.h2o,
+                             stopping_metric = "AUC", 
+                             hyper_params = hyper_grid.h2o,
+                             parallelism = 0,
+                             search_criteria = list(strategy = "Cartesian"))
+)
+```
+
+```{r}
+# Save
+# grid1_path <- h2o.saveGrid(grid_directory = "Models/H2O_grid_search/gbm_n300_m0.5",  # tempdir()
+#                           grid_id = grid_cartesian1@grid_id, 
+#                           save_params_references = T, 
+#                           export_cross_validation_predictions = T
+#                         )
+h2o.loadGrid("Models/H2O_grid_search/gbm_n300_m0.5/gbm_grid0")
+
+#---
+grid1.perf <- h2o.getGrid(grid_id = "gbm_grid0", 
+                         sort_by = "auc", 
+                         decreasing = T)
+summary(grid1.perf)
+```
+
+##### Performance of the best model
+
+```{r}
+# Get model performance on a test set
+gbm_model1 <- h2o.getModel(grid1.perf@model_ids[[1]])
+tic() # ~ 2 min
+perf1 <- h2o.performance(gbm_model1, test.h2o)
+toc()
+print(perf1)
+```
+
+##### AUC, Confusion matrix, Plot
+
+```{r}
+# To retreive individual metrics
+h2o.auc(perf1)
+
+# Print confusion matrix
+h2o.confusionMatrix(perf1)
+
+# Plot scoring history over time
+h2o.learning_curve_plot(gbm_model1, metric="AUTO")
+
+# ROC Curve
+plot(perf1)
+```
+
+##### Variable importance
+
+```{r}
+# Retreive feature importance
+vi1 <- h2o.varimp(gbm_model1)
+vi1
+# Plot feature importance
+h2o.varimp_plot(
+  model = gbm_model1,
+  num_of_features = 13
+)
+```
+
+####-
+#### Full Cartesian Grid Search 2
+
+```{r}
+# Set hyperparameter grid: 
+hyper_grid.h2o <- list(
+  ntrees = 600, # seq(300, 600, by = 50), 
+  col_sample_rate = c(0.4, 0.6, 0.8, 1) # 0.8
+)
+
+# The number of models: 
+sapply(hyper_grid.h2o, length) %>% prod()
+```
+
+```{r}
+# 37.6M observations | 4 models | 8266.449 sec ~ 2.3 h
+system.time( 
+  grid_cartesian2 <- h2o.grid(algorithm = "gbm",
+                             grid_id = "gbm_grid2",
+                             x = covt.names, 
+                             y = "BurntArea", 
+                             seed = 1, 
+                             fold_column = "Folds", 
+                             keep_cross_validation_predictions=TRUE,
+                             training_frame = train.h2o,
+                             stopping_metric = "AUC", 
+                             hyper_params = hyper_grid.h2o,
+                             parallelism = 0,
+                             search_criteria = list(strategy = "Cartesian"))
+)
+```
+
+```{r}
+# Save
+# grid2_path <- h2o.saveGrid(grid_directory = "Models/H2O_grid_search/gbm_n600_m04.06.08.1",  # tempdir()
+#                           grid_id = grid_cartesian2@grid_id, 
+#                           save_params_references = T, 
+#                           export_cross_validation_predictions = T
+#                         )
+h2o.loadGrid("Models/H2O_grid_search/gbm_n600_m04.06.08.1/gbm_grid2")
+#---
+grid2.perf <- h2o.getGrid(grid_id = "gbm_grid2", 
+                         sort_by = "auc", 
+                         decreasing = T)
+summary(grid2.perf)
+```
+
+##### Performance of the best model
+
+```{r}
+# Get model performance on a test set
+gbm_model2 <- h2o.getModel(grid2.perf@model_ids[[1]])
+tic() # 259.328 sec elapsed
+perf2 <- h2o.performance(gbm_model2, test.h2o)
+toc()
+print(perf2)
+```
+
+##### AUC, Confusion matrix, Plot
+
+```{r}
+# To retreive individual metrics
+h2o.auc(perf2)
+
+# Print confusion matrix
+h2o.confusionMatrix(perf2)
+
+# Plot scoring history over time
+h2o.learning_curve_plot(gbm_model2, metric="AUTO")
+
+# ROC Curve
+plot(perf2)
+```
+
+##### Variable importance
+
+```{r}
+# Retreive feature importance
+vi2 <- h2o.varimp(gbm_model2)
+vi2
+# Plot feature importance
+h2o.varimp_plot(
+  model = gbm_model2,
+  num_of_features = 13
+)
+```
+
+####-
+#### Full Cartesian Grid Search 3
+
+```{r}
+# Set hyperparameter grid: 
+hyper_grid.h2o <- list(
+  ntrees = seq(300, 700, by = 50), 
+  col_sample_rate = c(0.8, 1) # 0.8
+)
+
+# The number of models: 
+sapply(hyper_grid.h2o, length) %>% prod()
+```
+
+```{r}
+# 37.6M observations | 18 models | 29914.507 sec ~ 8.3 h | Memory: 550 Gb
+#  ntrees = seq(300, 700, by = 50), col_sample_rate = c(0.8, 1)
+system.time( 
+  grid_cartesian3 <- h2o.grid(algorithm = "gbm",
+                             grid_id = "gbm_grid3",
+                             x = covt.names, 
+                             y = "BurntArea", 
+                             seed = 1, 
+                             fold_column = "Folds", 
+                             keep_cross_validation_predictions=TRUE,
+                             training_frame = train.h2o,
+                             stopping_metric = "AUC", 
+                             hyper_params = hyper_grid.h2o,
+                             parallelism = 0,
+                             search_criteria = list(strategy = "Cartesian"))
+)
+```
+
+```{r}
+# Save
+# grid3_path <- h2o.saveGrid(grid_directory = "Models/H2O_grid_search/gbm_n300.50.700_m08.1",  # tempdir()
+#                           grid_id = grid_cartesian3@grid_id, 
+#                           save_params_references = T, 
+#                           export_cross_validation_predictions = T
+#                         )
+h2o.loadGrid("Models/H2O_grid_search/gbm_n300.50.700_m08.1/gbm_grid3")
+#---
+grid3.perf <- h2o.getGrid(grid_id = "gbm_grid3", 
+                         sort_by = "auc", 
+                         decreasing = T)
+summary(grid3.perf)
+```
+
+```{r}
+# Grab the top GBM model, chosen by validation AUC
+best_gbm3 <- h2o.getModel(grid3.perf@model_ids[[1]])
+```
+
+####-
+#### Full Cartesian Grid Search 4
+
+```{r}
+# Set hyperparameter grid: 
+hyper_grid.h2o <- list(
+  ntrees = c(1000, 5000), #seq(1000, 10000, by = 1000), 
+  col_sample_rate = c(0.5, 0.6)
+)
+
+# The number of models: 
+sapply(hyper_grid.h2o, length) %>% prod()
+```
+
+```{r}
+# 37.6M observations | 4 models | 40870.074 sec ~ 11.3 h | Memory: 235 Gb
+#  ntrees = c(1000, 5000), col_sample_rate = c(0.5, 0.6)
+system.time( 
+  grid_cartesian4 <- h2o.grid(algorithm = "gbm",
+                             grid_id = "gbm_grid4",
+                             x = covt.names, 
+                             y = "BurntArea", 
+                             seed = 1, 
+                             fold_column = "Folds", 
+                             keep_cross_validation_predictions=TRUE,
+                             training_frame = train.h2o,
+                             stopping_metric = "AUC", 
+                             hyper_params = hyper_grid.h2o,
+                             parallelism = 0,
+                             search_criteria = list(strategy = "Cartesian"))
+)
+```
+
+```{r}
+# Save
+# grid4_path <- h2o.saveGrid(grid_directory = "Models/H2O_grid_search/gbm_n1000.5000_m05.06",
+#                           grid_id = grid_cartesian4@grid_id, 
+#                           save_params_references = T, 
+#                           export_cross_validation_predictions = T
+#                         )
+h2o.loadGrid("Models/H2O_grid_search/gbm_n1000.5000_m05.06/gbm_grid4")
+#---
+grid4.perf <- h2o.getGrid(grid_id = "gbm_grid4", 
+                         sort_by = "auc", 
+                         decreasing = T)
+summary(grid4.perf)
+```
+
+####-
+#### Random Discrete Grid Search 1
+
+```{r}
+# Set hyperparameter grid: 
+hyper_grid.h2o <- list(
+  ntrees = seq(100, 2000, by = 400), 
+  col_sample_rate = c(0.45, 0.5, 0.6, 0.65, 0.72)
+)
+
+# The number of models: 
+sapply(hyper_grid.h2o, length) %>% prod()
+```
+
+```{r}
+# 33536.032 sec
+# Set random grid search criteria: 
+search_criteria_1 <- list(strategy = "RandomDiscrete",
+                          stopping_metric = "AUC",
+                          stopping_tolerance = 0.001,
+                          stopping_rounds = 10,
+                          max_models = 5)
+
+system.time(random_grid <- h2o.grid(algorithm = "gbm",
+                                    grid_id = "gbm_rnd_grid",
+                                    x = covt.names, 
+                                    y = "BurntArea", 
+                                    seed = 1, 
+                                    fold_column = "Folds", 
+                                    keep_cross_validation_predictions=TRUE,
+                                    training_frame = train.h2o,
+                                    hyper_params = hyper_grid.h2o,
+                                    parallelism = 0,
+                                    search_criteria = search_criteria_1))
+```
+
+
+```{r}
+# Save
+# grid_rnd_path <- h2o.saveGrid(grid_directory = "Models/H2O_grid_search/gbm_rnd1_grid",  # tempdir()
+#                           grid_id = random_grid@grid_id, 
+#                           save_params_references = T, 
+#                           export_cross_validation_predictions = T
+#                         )
+h2o.loadGrid("Models/H2O_grid_search/gbm_rnd1_grid/gbm_rnd_grid")
+#---
+grid.rnd.perf <- h2o.getGrid(grid_id = "gbm_rnd_grid", 
+                             sort_by = "auc", 
+                             decreasing = T)
+summary(grid.rnd.perf)
+```
+
+##### Performance of the best model
+
+```{r}
+# Get model performance on a test set
+gbm_model_rnd <- h2o.getModel(grid.rnd.perf@model_ids[[1]])
+tic() # 408.735 sec elapsed ~ 6.8 min
+perf_rnd <- h2o.performance(gbm_model_rnd, test.h2o)
+toc()
+print(perf_rnd)
+```
+
+##### AUC, Confusion matrix, Plot
+
+```{r}
+# To retreive individual metrics
+h2o.auc(perf_rnd)
+
+# Print confusion matrix
+h2o.confusionMatrix(perf_rnd)
+
+# Plot scoring history over time
+h2o.learning_curve_plot(gbm_model_rnd, metric="AUTO")
+
+# ROC Curve
+plot(perf_rnd)
+```
+
+##### Variable importance
+
+```{r}
+# Retreive feature importance
+vi.rnd <- h2o.varimp(gbm_model_rnd)
+vi.rnd
+# Plot feature importance
+h2o.varimp_plot(
+  model = gbm_model_rnd,
+  num_of_features = 13
+)
+```
+
+####-
+#### Full Cartesian Grid Search 5
+
+```{r}
+# Set hyperparameter grid: 
+hyper_grid.h2o <- list(
+  ntrees = seq(20, 300, by = 20), #seq(1000, 10000, by = 1000), 
+  col_sample_rate = 0.5
+)
+
+# The number of models: 
+sapply(hyper_grid.h2o, length) %>% prod()
+```
+
+```{r}
+# 37.6M observations | 15 models | 15347.140 sec ~ 4.3 h | Memory: 495 Gb
+#  ntrees = seq(20, 300, by = 20), col_sample_rate = 0.5
+system.time( 
+  grid_cartesian5 <- h2o.grid(algorithm = "gbm",
+                             grid_id = "gbm_grid5",
+                             x = covt.names, 
+                             y = "BurntArea", 
+                             seed = 1, 
+                             fold_column = "Folds", 
+                             keep_cross_validation_predictions=TRUE,
+                             training_frame = train.h2o,
+                             stopping_metric = "AUC", 
+                             hyper_params = hyper_grid.h2o,
+                             parallelism = 0,
+                             search_criteria = list(strategy = "Cartesian"))
+)
+```
+
+```{r}
+# Save
+# grid5_path <- h2o.saveGrid(grid_directory = "Models/H2O_grid_search/gbm_n20.20.300_m05",
+#                           grid_id = grid_cartesian5@grid_id, 
+#                           save_params_references = T, 
+#                           export_cross_validation_predictions = T
+#                         )
+h2o.loadGrid("Models/H2O_grid_search/gbm_n20.20.300_m05/gbm_grid5")
+#---
+grid5.perf <- h2o.getGrid(grid_id = "gbm_grid5", 
+                         sort_by = "auc", 
+                         decreasing = T)
+summary(grid5.perf)
+```
+
+##### Performance of the best model
+
+```{r}
+# Get model performance on a test set
+gbm_model5 <- h2o.getModel(grid5.perf@model_ids[[1]])
+perf5 <- h2o.performance(gbm_model5, test.h2o) # ~ 2 min
+print(perf5)
+```
+
+##### AUC, Confusion matrix, Plot
+
+```{r}
+# To retreive individual metrics
+h2o.auc(perf5)
+
+# Print confusion matrix
+h2o.confusionMatrix(perf5)
+
+# Plot scoring history over time
+h2o.learning_curve_plot(gbm_model5, metric="AUTO")
+
+# ROC Curve
+plot(perf5)
+```
+
+##### Variable importance
+
+```{r}
+# Retreive feature importance
+vi5 <- h2o.varimp(gbm_model5)
+vi5
+# Plot feature importance
+h2o.varimp_plot(
+  model = gbm_model5,
+  num_of_features = 13
+)
+```
+
+###------------------------------------
+### RF grid search
+
+####-
+#### Full Cartesian Grid Search 1
+
+
+```{r}
+# Set hyperparameter grid: 
+hyper_grid.h2o <- list(
+  ntrees = 300,
+  max_depth = c(40, 60)
+)
+
+# The number of models: 
+sapply(hyper_grid.h2o, length) %>% prod()
+```
+
+```{r}
+# 37.6M observations | 2 models | 77330.982 sec ~ 21.5 h | Memory: 345 Gb
+#  ntrees = 300, max_depth = c(40, 60)
+system.time(
+  rf.grid.car1 <- h2o.grid(algorithm = "randomForest",
+                             grid_id = "rf_grid1",
+                             x = covt.names, 
+                             y = "BurntArea", 
+                             seed = 1, 
+                             fold_column = "Folds", 
+                             keep_cross_validation_predictions=TRUE,
+                             training_frame = train.h2o,
+                             stopping_metric = "AUC", 
+                             hyper_params = hyper_grid.h2o,
+                             parallelism = 0,
+                             search_criteria = list(strategy = "Cartesian"))
+)
+```
+
+```{r}
+# Save
+# rf.grid1 <- h2o.saveGrid(grid_directory = "Models/RF_grid_search/rf_n300_d40.60",  # tempdir()
+#                           grid_id = rf.grid.car1@grid_id,
+#                           save_params_references = T,
+#                           export_cross_validation_predictions = T
+#                         )
+h2o.loadGrid("Models/RF_grid_search/rf_n300_d40.60/rf_grid1")
+
+#---
+rf.grid1 <- h2o.getGrid(grid_id = "rf_grid1", 
+                          sort_by = "auc", 
+                          decreasing = T)
+summary(rf.grid1)
+```
+
+##### Performance of the best model
+
+```{r}
+# Get model performance on a test set
+rf.model1 <- h2o.getModel(rf.grid1@model_ids[[1]])
+tic() # 103.658 sec elapsed
+rf.perf1 <- h2o.performance(rf.model1, test.h2o)
+toc()
+print(rf.perf1)
+```
+
+##### AUC, Confusion matrix, Plot
+
+```{r}
+# To retreive individual metrics
+h2o.auc(rf.perf1)
+
+# Print confusion matrix
+h2o.confusionMatrix(rf.perf1)
+
+# Plot scoring history over time
+h2o.learning_curve_plot(rf.model1, metric="AUTO")
+
+# ROC Curve
+plot(rf.perf1)
+```
+
+##### Variable importance
+
+```{r}
+# Retreive feature importance
+rf.vi1 <- h2o.varimp(rf.model1)
+rf.vi1
+# Plot feature importance
+h2o.varimp_plot(
+  model = rf.model1,
+  num_of_features = 13
+)
+```
+
+####-
+#### Full Cartesian Grid Search 2
+
+
+```{r}
+# Set hyperparameter grid: 
+hyper_grid.h2o <- list(
+  ntrees = 100,
+  mtries = seq(5, 14, by = 2)
+)
+
+# The number of models: 
+sapply(hyper_grid.h2o, length) %>% prod()
+```
+
+```{r}
+# 37.6M observations | 5 models | 40867.430 sec ~ 11.4 h | Memory: 305 Gb
+#  ntrees = 100, mtries = seq(5, 14, by = 2)
+system.time(
+  rf.grid.cart2 <- h2o.grid(algorithm = "randomForest",
+                             grid_id = "rf_grid2",
+                             x = covt.names, 
+                             y = "BurntArea", 
+                             seed = 1, 
+                             fold_column = "Folds", 
+                             keep_cross_validation_predictions=TRUE,
+                             training_frame = train.h2o,
+                             stopping_metric = "AUC", 
+                             hyper_params = hyper_grid.h2o,
+                             parallelism = 0,
+                             search_criteria = list(strategy = "Cartesian"))
+)
+```
+
+```{r}
+# Save
+# rf.grid2 <- h2o.saveGrid(grid_directory = "Models/RF_grid_search/rf_n100_m5.2.14",
+#                           grid_id = rf.grid.cart2@grid_id,
+#                           save_params_references = T,
+#                           export_cross_validation_predictions = T
+#                         )
+h2o.loadGrid("Models/RF_grid_search/rf_n100_m5.2.14/rf_grid2")
+
+#---
+rf.grid2 <- h2o.getGrid(grid_id = "rf_grid2", 
+                          sort_by = "auc", 
+                          decreasing = T)
+summary(rf.grid2)
+```
+
+##### Performance of the best model
+
+```{r}
+# Get model performance on a test set
+rf.model2 <- h2o.getModel(rf.grid2@model_ids[[1]])
+tic() # 26.296 sec elapsed
+rf.perf2 <- h2o.performance(rf.model2, test.h2o)
+toc()
+print(rf.perf2)
+```
+
+##### AUC, Confusion matrix, Plot
+
+```{r}
+# To retreive individual metrics
+h2o.auc(rf.perf2)
+
+# Print confusion matrix
+h2o.confusionMatrix(rf.perf2)
+
+# Plot scoring history over time
+h2o.learning_curve_plot(rf.model2, metric="AUTO")
+
+# ROC Curve
+plot(rf.perf2)
+```
+
+##### Variable importance
+
+```{r}
+# Retreive feature importance
+rf.vi2 <- h2o.varimp(rf.model2)
+rf.vi2
+# Plot feature importance
+h2o.varimp_plot(
+  model = rf.model2,
+  num_of_features = 13
+)
+```
+
+####-
+#### Full Cartesian Grid Search 3
+
+```{r}
+# Set hyperparameter grid: 
+hyper_grid.h2o <- list(
+  ntrees = 50,
+  mtries = c(6, 7, 8)
+)
+
+# The number of models: 
+sapply(hyper_grid.h2o, length) %>% prod()
+```
+
+```{r}
+# 37.6M observations | 3 models | 11305.257 sec ~ 3.1 h | Memory: 233 Gb
+#  ntrees = 100, mtries = seq(5, 14, by = 2)
+system.time(
+  rf.grid.cart3 <- h2o.grid(algorithm = "randomForest",
+                             grid_id = "rf_grid3",
+                             x = covt.names, 
+                             y = "BurntArea", 
+                             seed = 1, 
+                             fold_column = "Folds", 
+                             keep_cross_validation_predictions=TRUE,
+                             training_frame = train.h2o,
+                             stopping_metric = "AUC", 
+                             hyper_params = hyper_grid.h2o,
+                             parallelism = 0,
+                             search_criteria = list(strategy = "Cartesian"))
+)
+```
+
+```{r}
+# Save
+# rf.grid3 <- h2o.saveGrid(grid_directory = "Models/RF_grid_search/rf_n50_m6.7.8",
+#                           grid_id = rf.grid.cart3@grid_id,
+#                           save_params_references = T,
+#                           export_cross_validation_predictions = T
+#                         )
+h2o.loadGrid("Models/RF_grid_search/rf_n50_m6.7.8/rf_grid3")
+
+#---
+rf.grid3 <- h2o.getGrid(grid_id = "rf_grid3", 
+                          sort_by = "auc", 
+                          decreasing = T)
+summary(rf.grid3)
+```
+
+##### Performance of the best model
+
+```{r}
+# Get model performance on a test set
+rf.model3 <- h2o.getModel(rf.grid3@model_ids[[1]])
+tic() # 26.296 sec elapsed
+rf.perf3 <- h2o.performance(rf.model3, test.h2o)
+toc()
+print(rf.perf3)
+```
+
+##### AUC, Confusion matrix, Plot
+
+```{r}
+# To retreive individual metrics
+h2o.auc(rf.perf3)
+
+# Print confusion matrix
+h2o.confusionMatrix(rf.perf3)
+
+# Plot scoring history over time
+h2o.learning_curve_plot(rf.model3, metric="AUTO")
+
+# ROC Curve
+plot(rf.perf3)
+```
+
+##### Variable importance
+
+```{r}
+# Retreive feature importance
+rf.vi3 <- h2o.varimp(rf.model3)
+rf.vi3
+# Plot feature importance
+h2o.varimp_plot(
+  model = rf.model3,
+  num_of_features = 13
+)
+```
+
+####-
+#### Full Cartesian Grid Search 4
+
+```{r}
+# Set hyperparameter grid: 
+hyper_grid.h2o <- list(
+  ntrees = 500,
+  mtries = c(6, 7)
+)
+
+# The number of models: 
+sapply(hyper_grid.h2o, length) %>% prod()
+```
+
+```{r}
+# 37.6M observations | 2 models | 77032.817 sec ~ 21.4 h | Memory: 347 Gb
+#  ntrees = 100, mtries = seq(5, 14, by = 2)
+system.time(
+  rf.grid.cart4 <- h2o.grid(algorithm = "randomForest",
+                             grid_id = "rf_grid4",
+                             x = covt.names, 
+                             y = "BurntArea", 
+                             seed = 1, 
+                             fold_column = "Folds", 
+                             keep_cross_validation_predictions=TRUE,
+                             training_frame = train.h2o,
+                             stopping_metric = "AUC", 
+                             hyper_params = hyper_grid.h2o,
+                             parallelism = 0,
+                             search_criteria = list(strategy = "Cartesian"))
+)
+```
+
+```{r}
+# Save
+# rf.grid4 <- h2o.saveGrid(grid_directory = "Models/RF_grid_search/rf_n500_m6.7",
+#                           grid_id = rf.grid.cart4@grid_id,
+#                           save_params_references = T,
+#                           export_cross_validation_predictions = T
+#                         )
+h2o.loadGrid("Models/RF_grid_search/rf_n500_m6.7/rf_grid4")
+
+#---
+rf.grid4 <- h2o.getGrid(grid_id = "rf_grid4", 
+                          sort_by = "auc", 
+                          decreasing = T)
+summary(rf.grid4)
+```
+
+##### Performance of the best model
+
+```{r}
+# Get model performance on a test set
+rf.model4 <- h2o.getModel(rf.grid4@model_ids[[1]])
+tic() # 171.657 sec elapsed
+rf.perf4 <- h2o.performance(rf.model4, test.h2o)
+toc()
+print(rf.perf4)
+```
+
+##### Report model parameters
+
+```{r}
+rf.grid4@summary_table[1,]
+rf.model4@model$model_summary
+```
+
+##### AUC, Confusion matrix, Plot
+
+```{r}
+# To retreive individual metrics
+h2o.auc(rf.perf4)
+
+# Print confusion matrix
+h2o.confusionMatrix(rf.perf4)
+
+# Plot scoring history over time
+h2o.learning_curve_plot(rf.model4, metric="AUTO") #c("AUTO", "auc", "aucpr", "mae", "rmse", "logloss",...)
+
+# ROC Curve
+plot(rf.perf4)
+# h2o.fair_roc_plot(rf.perf4)
+```
+
+##### Variable importance
+
+```{r}
+# Retreive feature importance
+rf.vi4 <- h2o.varimp(rf.model4)
+rf.vi4
+# Plot feature importance
+h2o.varimp_plot(
+  model = rf.model4,
+  num_of_features = 13
+)
+```
+
+###------------------------------------
+### XGBoost grid search
+
+####-
+#### Full Cartesian Grid Search 4
+
+```{r}
+# Set hyperparameter grid: 
+hyper_grid.h2o <- list(
+  ntrees = 300,
+  col_sample_rate = c(0.45, 0.5, 0.6, 0.65, 0.72)
+)
+
+# The number of models: 
+sapply(hyper_grid.h2o, length) %>% prod()
+```
+
+```{r}
+# 37.6M observations | 5 models | __ sec ~ __ h | Memory: __ Gb
+#  ntrees = 300, col_sample_rate = c(0.45, 0.5, 0.6, 0.65, 0.72)
+system.time(
+  xgb.grid.cart1 <- h2o.grid(algorithm = "xgboost",
+                             grid_id = "xgb_grid1",
+                             x = covt.names, 
+                             y = "BurntArea", 
+                             seed = 1, 
+                             fold_column = "Folds", 
+                             keep_cross_validation_predictions=TRUE,
+                             training_frame = train.h2o,
+                             stopping_metric = "AUC", 
+                             hyper_params = hyper_grid.h2o,
+                             parallelism = 0,
+                             search_criteria = list(strategy = "Cartesian"))
+)
+```
+
+```{r}
+# Save
+xgb.grid1 <- h2o.saveGrid(grid_directory = "Models/xgb_grid_search/xgb_n300_m45.5.6.65.72",
+                          grid_id = xgb.grid.cart1@grid_id,
+                          save_params_references = T,
+                          export_cross_validation_predictions = T
+                        )
+h2o.loadGrid("Models/xgb_grid_search/xgb_n300_m45.5.6.65.72/xgb_grid1")
+
+#---
+xgb.grid1 <- h2o.getGrid(grid_id = "xgb_grid1", 
+                          sort_by = "auc", 
+                          decreasing = T)
+summary(xgb.grid1)
+```
+
+##### Performance of the best model
+
+```{r}
+# Get model performance on a test set
+xgb.model1 <- h2o.getModel(xgb.grid1@model_ids[[1]])
+tic() # 171.657 sec elapsed
+xgb.perf1 <- h2o.performance(xgb.model1, test.h2o)
+toc()
+print(xgb.perf1)
+```
+
+##### Report model parameters
+
+```{r}
+xgb.grid1@summary_table[1,]
+xgb.model1@model$model_summary
+```
+
+##### AUC, Confusion matrix, Plot
+
+```{r}
+# To retreive individual metrics
+h2o.auc(xgb.perf1)
+
+# Print confusion matrix
+h2o.confusionMatrix(xgb.perf1)
+
+# Plot scoring history over time
+h2o.learning_curve_plot(xgb.model1, metric="AUTO") #c("AUTO", "auc", "aucpr", "mae", "rmse", "logloss",...)
+
+# ROC Curve
+plot(xgb.perf1)
+# h2o.fair_roc_plot(xgb.perf4)
+```
+
+##### Variable importance
+
+```{r}
+# Retreive feature importance
+xgb.vi1 <- h2o.varimp(xgb.model1)
+xgb.vi1
+# Plot feature importance
+h2o.varimp_plot(
+  model = xgb.model1,
+  num_of_features = 13
+)
+```
+
+#=======================
+
+# Zone6
+
+## Randomise data ---> Zone6 //
+
+```{r}
+Amazon.z6.dt <- Amazon.data.dt[Amazon.data.dt$Zones == 6,]
+set.seed(11)
+AZ6.rnd <- random_dt(Amazon.z6.dt)
+
+#--- Save data with zones
+save(AZ6.rnd, file = paste0(my.path,"Amazon_selected_data/data_by_zones/AZ6_rnd.Rdata"))
+tic() # -- sec elapsed
+load(paste0(my.path,"Amazon_selected_data/data_by_zones/AZ6_rnd.Rdata"))
+toc()
+AZ6.rnd$Zones <- as.factor(AZ6.rnd$Zones)
+AZ6.rnd
+```
+
+## Create v-fold cross validation samples 
+
+```{r}
+set.seed(1)
+tic() # 66.206 sec elapsed 
+AZ6.rnd.cv <- vfold_cv(AZ6.rnd, v = 10,  strata = BurntArea)
+toc()
+```
+
+```{r}
+AZ6.folds.lst <- list()
+for (i in 1:10){
+  cat(" - Fold", i)
+  AZ6.folds.lst[[i]] <- AZ6.rnd.cv$splits[[i]] %>% assessment() %>% add_column(Folds = i, .before = "BurntArea")
+  AZ6.folds.lst[[i]]$Folds <- as.factor(AZ6.folds.lst[[i]]$Folds)
+}
+AZ6.folds.lst
+```
+
+## Add column `Folds` to the data
+
+```{r}
+AZ6.folds <- rbindlist(AZ6.folds.lst, use.names = T, fill = T)
+AZ6.folds[, c('cell') := NULL]
+AZ6.folds
+```
+
+## Normalize data
+
+```{r}
+## recipe
+AZ6_recipe0 <- recipe( BurntArea ~ ., data = AZ6.folds) %>% step_normalize(all_numeric(), -c(x, y))
+  # step_normalize(
+  #   Precipitation, SoilMoisture, Elevation, LandSurfaceTemp, Humidity, Evapotranspiration, Wind, AirTemp
+  # )
+
+## Normalize data
+AZ6.norm <- AZ6_recipe0 %>% prep() %>% bake(new_data = NULL) %>% setcolorder(., c('Zones', 'Folds', 'x', 'y', 'Year', 'Month', 'BurntArea'))
+rm(AZ6_recipe0)
+gc()
+```
+
+## Split data to training and testing data //
+
+```{r}
+set.seed(11)
+# # randomize data
+# AZ6.norm <- random_dt(AZ6.norm)
+# 
+# # Save zone6 with cv and noralized
+# save(AZ6.norm, file = paste0(my.path,"Amazon_selected_data/data_by_zones/AZ6_norm.Rdata"))
+tic() # __ sec elapsed
+load(paste0(my.path,"Amazon_selected_data/data_by_zones/AZ6_norm.Rdata"))
+toc()
+
+# Split data
+split1 <- initial_split(AZ6.norm, prop = 0.75, strata = BurntArea)
+AZ6.trn <- training(split1)
+AZ6.tst <- testing(split1)
+gc()
+```
+
+## H2O Grid search
+
+```{r}
+options(java.parameters = "-Xmx650g")
+Sys.setenv("OPENBLAS_MAIN_FREE"=1)
+
+library(h2o)
+localH2O <- h2o.init(ip = 'localhost', port = 50001, nthreads = 40, max_mem_size = '650g')
+```
+
+### Prepare data
+
+```{r}
+var.names <- colnames(AZ6.norm)
+Y <- "BurntArea"
+covt.names <- setdiff(var.names, c("BurntArea", "Folds"))
+#
+tic() # 207.606 sec elapsed ~ 3.5 min
+train.h2o <- as.h2o(AZ6.trn)
+test.h2o <- as.h2o(AZ6.tst)
+toc()
+```
+
+###------------------------------------
+### Gradient Boosting Machine (GBM) grid search
+
+####-
+#### Full Cartesian Grid Search AZ6.1
+
+```{r}
+# Set hyperparameter grid: 
+hyper_grid.h2o <- list(
+  ntrees = c(500, 750, 1000), 
+  col_sample_rate = c(0.5, 0.6, 0.72)
+)
+
+# The number of models: 
+sapply(hyper_grid.h2o, length) %>% prod()
+```
+
+```{r}
+# 37.6M observations | 9 models | 32895.906 sec ~ 9.1 h | Memory: 400 Gb
+#  ntrees = c(500, 750, 1000), col_sample_rate = c(0.5, 0.6, 0.72)
+system.time( 
+  grid.AZ6.1 <- h2o.grid(algorithm = "gbm",
+                             grid_id = "gbm_az6_grid1",
+                             x = covt.names, 
+                             y = "BurntArea", 
+                             seed = 1, 
+                             fold_column = "Folds", 
+                             keep_cross_validation_predictions=TRUE,
+                             training_frame = train.h2o,
+                             stopping_metric = "AUC", 
+                             hyper_params = hyper_grid.h2o,
+                             parallelism = 0,
+                             search_criteria = list(strategy = "Cartesian"))
+)
+```
+
+```{r}
+# Save
+# grid.AZ6.1.path <- h2o.saveGrid(grid_directory = "Models/H2O_grid_search/AZ6/gbm_n500.750.1000_m05.06.072", 
+#                           grid_id = grid.AZ6.1@grid_id,
+#                           save_params_references = T,
+#                           export_cross_validation_predictions = T
+#                         )
+h2o.loadGrid("Models/H2O_grid_search/AZ6/gbm_n500.750.1000_m05.06.072/gbm_az6_grid1")
+
+#---
+grid.AZ6.1.perf <- h2o.getGrid(grid_id = "gbm_az6_grid1", 
+                         sort_by = "auc", 
+                         decreasing = T)
+summary(grid.AZ6.1.perf)
+```
+
+##### Performance of the best model
+
+```{r}
+# Get model performance on a test set
+gbm.AZ6.model1 <- h2o.getModel(grid.AZ6.1.perf@model_ids[[1]])
+tic() # 94.069 sec elapsed
+AZ6.perf1 <- h2o.performance(gbm.AZ6.model1, test.h2o)
+toc()
+print(AZ6.perf1)
+```
+
+##### AUC, Confusion matrix, Plot
+
+```{r}
+# To retreive individual metrics
+h2o.auc(AZ6.perf1)
+
+# Print confusion matrix
+h2o.confusionMatrix(AZ6.perf1)
+
+# Plot scoring history over time
+h2o.learning_curve_plot(gbm.AZ6.model1, metric="AUTO")
+
+# ROC Curve
+plot(AZ6.perf1)
+```
+
+##### Variable importance
+
+```{r}
+# Retreive feature importance
+vi6 <- h2o.varimp(gbm.AZ6.model1)
+vi6
+# Plot feature importance
+h2o.varimp_plot(
+  model = gbm.AZ6.model1,
+  num_of_features = 13
+)
+```
+
+####-
+#### Full Cartesian Grid Search AZ6.2
+
+```{r}
+# Set hyperparameter grid: 
+hyper_grid.h2o <- list(
+  ntrees = 5000, 
+  col_sample_rate = 0.6
+)
+
+# The number of models: 
+sapply(hyper_grid.h2o, length) %>% prod()
+```
+
+```{r}
+# 37.6M observations | 1 model | 19147.374 sec ~ 5.3 h | Memory: 136 Gb
+#  ntrees = 5000, col_sample_rate = 0.6
+system.time( 
+  grid.AZ6.2 <- h2o.grid(algorithm = "gbm",
+                             grid_id = "gbm_az6_grid2",
+                             x = covt.names, 
+                             y = "BurntArea", 
+                             seed = 1, 
+                             fold_column = "Folds", 
+                             keep_cross_validation_predictions=TRUE,
+                             training_frame = train.h2o,
+                             stopping_metric = "AUC", 
+                             hyper_params = hyper_grid.h2o,
+                             parallelism = 0,
+                             search_criteria = list(strategy = "Cartesian"))
+)
+```
+
+```{r}
+# Save
+# grid.AZ6.2.path <- h2o.saveGrid(grid_directory = "Models/H2O_grid_search/AZ6/gbm_n5000_m06",
+#                           grid_id = grid.AZ6.2@grid_id,
+#                           save_params_references = T,
+#                           export_cross_validation_predictions = T
+#                         )
+h2o.loadGrid("Models/H2O_grid_search/AZ6/gbm_n5000_m06/gbm_az6_grid2")
+
+#---
+grid.AZ6.2.perf <- h2o.getGrid(grid_id = "gbm_az6_grid2", 
+                         sort_by = "auc", 
+                         decreasing = T)
+summary(grid.AZ6.2.perf)
+```
+
+##### Performance of the best model
+
+```{r}
+# Get model performance on a test set
+gbm.AZ6.model2 <- h2o.getModel(grid.AZ6.2.perf@model_ids[[1]])
+tic() # 94.069 sec elapsed
+AZ6.perf2 <- h2o.performance(gbm.AZ6.model2, test.h2o)
+toc()
+print(AZ6.perf2)
+```
+
+##### AUC, Confusion matrix, Plot
+
+```{r}
+# To retreive individual metrics
+h2o.auc(AZ6.perf2)
+
+# Print confusion matrix
+h2o.confusionMatrix(AZ6.perf2)
+
+# Plot scoring history over time
+h2o.learning_curve_plot(gbm.AZ6.model2, metric="AUTO")
+
+# ROC Curve
+plot(AZ6.perf2)
+```
+
+##### Variable importance
+
+```{r}
+# Retreive feature importance
+vi6.2 <- h2o.varimp(gbm.AZ6.model2)
+vi6.2
+# Plot feature importance
+h2o.varimp_plot(
+  model = gbm.AZ6.model2,
+  num_of_features = 13
+)
+```
+
+###------------------------------------
+### RF grid search
+
+####-
+#### Full Cartesian Grid Search AZ6.RF1
+
+```{r}
+# Set hyperparameter grid: 
+hyper_grid.h2o <- list(
+  ntrees = 300,
+  mtries = c(6, 7)
+)
+
+# The number of models: 
+sapply(hyper_grid.h2o, length) %>% prod()
+```
+
+```{r}
+# 37.6M observations | 2 models | 58527.207 sec ~ 16.3 h | Memory: 292 Gb
+#  ntrees = 300, mtries = c(6, 7)
+system.time(
+  rf.az6.cart1 <- h2o.grid(algorithm = "randomForest",
+                             grid_id = "rf_az6_grid1",
+                             x = covt.names, 
+                             y = "BurntArea", 
+                             seed = 1, 
+                             fold_column = "Folds", 
+                             keep_cross_validation_predictions=TRUE,
+                             training_frame = train.h2o,
+                             stopping_metric = "AUC", 
+                             hyper_params = hyper_grid.h2o,
+                             parallelism = 0,
+                             search_criteria = list(strategy = "Cartesian"))
+)
+```
+
+```{r}
+# Save
+# rf.az6.grid1 <- h2o.saveGrid(grid_directory = "Models/RF_grid_search/AZ6/rf_n300_m6.7",
+#                           grid_id = rf.az6.cart1@grid_id,
+#                           save_params_references = T,
+#                           export_cross_validation_predictions = T
+#                         )
+h2o.loadGrid("Models/RF_grid_search/AZ6/rf_n300_m6.7/rf_az6_grid1")
+
+#---
+rf.az6.grid1 <- h2o.getGrid(grid_id = "rf_az6_grid1", 
+                          sort_by = "auc", 
+                          decreasing = T)
+summary(rf.az6.grid1)
+```
+
+##### Performance of the best model
+
+```{r}
+# Get model performance on a test set
+rf.az6.model1 <- h2o.getModel(rf.az6.grid1@model_ids[[1]])
+tic() # 102.951 sec elapsed
+rf.az6.perf1 <- h2o.performance(rf.az6.model1, test.h2o)
+toc()
+print(rf.az6.perf1)
+```
+
+##### Report model parameters
+
+```{r}
+rf.az6.grid1@summary_table[1,]
+rf.az6.model1@model$model_summary
+```
+
+##### AUC, Confusion matrix, Plot
+
+```{r}
+# To retreive individual metrics
+h2o.auc(rf.az6.perf1)
+
+# Print confusion matrix
+h2o.confusionMatrix(rf.az6.perf1)
+
+# Plot scoring history over time
+h2o.learning_curve_plot(rf.az6.model1, metric="AUTO") #c("AUTO", "auc", "aucpr", "mae", "rmse", "logloss",...)
+
+# ROC Curve
+plot(rf.az6.perf1)
+# h2o.fair_roc_plot(rf.az6.perf1)
+```
+
+##### Variable importance
+
+```{r}
+# Retreive feature importance
+h2o.varimp(rf.az6.model1)
+
+# Plot feature importance
+h2o.varimp_plot(
+  model = rf.az6.model1,
+  num_of_features = 13
+)
+```
+
+
+
+
+# Clear and Shutdown H2O
+
+```{r}
+h2o.removeAll()
+h2o:::.h2o.garbageCollect()
+h2o:::.h2o.garbageCollect()
+h2o:::.h2o.garbageCollect()
+h2o.ls()
+# h2o.shutdown(prompt = FALSE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

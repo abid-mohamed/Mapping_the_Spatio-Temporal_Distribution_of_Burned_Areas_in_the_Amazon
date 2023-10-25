@@ -1,0 +1,2201 @@
+---
+title: "Amazon_select_data"
+date: "2023-02-18"
+output:
+  html_document: 
+    number_sections: yes
+    fig_caption: yes
+    toc: true
+    toc_float: 
+      collapsed: false
+    theme: cerulean
+    highlight: kate
+    toc_depth: 5
+    keep_md: yes
+    df_print: paged
+---
+
+# Load libraries
+
+```{r, load libraries, warning=FALSE, message=FALSE}
+# load libraries
+library(tictoc)
+library(tidyverse)
+library(raster) # %in% operator
+library(terra)
+library(sf)
+# library(rgdal)
+library(rts)
+library(doParallel)
+library(parallel)
+library(foreach)
+library(data.table)
+library(dplyr)
+library(fastDummies)
+library(randomForest)
+library(caTools)
+library(rpart)
+# library(VSURF)
+# Plot
+library(RColorBrewer)
+library(tidyterra)
+library(scico)
+library(wesanderson)
+library(viridis)
+library(scales)
+library(latex2exp)
+library(ggplot2)
+```
+
+# Functions
+
+```{r "Functions"}
+# Function to rename layers
+renameRast <- function(dataRast, fileStart, prefix){
+  library(data.table)
+  # index of file name in the path
+  id.date <- unlist(gregexpr(fileStart, sources(dataRast)[[1]])) + nchar(fileStart)
+  # rename layers
+  dateRast <- 
+    substr(sources(dataRast), id.date, (id.date+50)) %>%
+    gsub(".tif", "_1", .) %>%
+    as.Date("%Y_%m_%d")
+  # Rename layers
+  names(dataRast) <- 
+    dateRast %>%
+    format(., '%Y_%m') %>%
+    paste0(prefix, .)
+  yearRast <- data.table::year(dateRast)
+  monthRast <- data.table::month(dateRast)
+  # return
+  return(list(dataRast, yearRast, monthRast))
+}
+# Plot
+myPlot <- function(rast, title='', sub_title = ''){
+  p <- ggplot()  +
+    geom_spatvector(data = amaz.basin.shp$geometry, fill = 'white', color = "black") +
+    geom_spatraster(data = rast) +
+    scale_x_continuous(labels = function(x) format(x, scientific = T)) +
+    scale_y_continuous(labels = function(x) format(x, scientific = T)) +
+    coord_sf(datum = pull_crs(rast)) + 
+    ggtitle(label=title, subtitle=sub_title)  +
+    theme_bw()
+  return(p)
+}
+```
+
+# Initialization
+
+```{r}
+# Import shape file
+amaz.basin.shp <- st_read("~/Documents/Amazon_new_data/0. Amazon_shapefile/projected/amazon_shp_projected.shp")
+
+# path of variables
+my.path <- "~/Documents/"
+burntArea.path <- "~/Documents/Amazon_new_data/1. Burnt Area/03. Working Data"
+landCover.path <- "~/Documents/Amazon_new_data/2. Land Cover/03. Working Data"
+precip.path <- "~/Documents/Amazon_new_data/3. Precipitation/03. Working Data"
+soilMoisture.path <- "~/Documents/Amazon_new_data/4. Soil Moisture/03. Working Data"
+elevation.path <- "~/Documents/Amazon_new_data/5. Elevation/03. Working Data"
+LandSurfaceTemp.path <- "~/Documents/Amazon_new_data/6. LandSurfaceTemp/03. Working Data"
+humidity.path <- "~/Documents/Amazon_new_data/7. Specific Humidity/03. Working Data"
+evapotranspiration.path <- "~/Documents/Amazon_new_data/8. Evapotranspiration/03. Working Data"
+wind.path <- "~/Documents/Amazon_new_data/9. Wind Speed/03. Working Data"
+airtemp.path <- "~/Documents/Amazon_new_data/10. Air Temperature/03. Working Data"
+
+x_min=-1.25e+06; x_max=0.05e+06; y_min=st_bbox(amaz.basin.shp)$ymin; y_max=2.4e+06    # South of Amazon
+# x_min=-0.8e+06; x_max=-0.4e+06; y_min=1.8e+06; y_max=2.2e+06
+# x_min=-0.6e+06; x_max=-0.4e+06; y_min=2.0e+06; y_max=2.2e+06                          
+# x_min=-0.5e+06; x_max=-0.4e+06; y_min=2.0e+06; y_max=2.1e+06                          
+
+# Number of years
+nbrYears <- 20
+
+# Number of cores to use
+# nbrCores <- detectCores() - 1
+nbrCores <- 45
+
+# Color palette
+pal <- colorRampPalette(c("mediumblue", "mediumseagreen", "firebrick"))
+my.colors <- c("mediumblue", "mediumseagreen", "firebrick")
+
+# Create a sequence of dates
+sq.date <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month") %>% 
+  format(., '%Y_%m') %>% 
+  setdiff(., c("2012_07", "2012_09"))
+```
+
+# ---
+
+# Determine the cells of Amazon
+
+```{r}
+amaz <- rast(
+  "/home/abidm/Documents/Amazon_new_data/1. Burnt Area/03. Working Data/burntarea_working_2005_8.tif") %>% 
+  mask(mask = amaz.basin.shp)
+# 3,903,000 * 2,930,000
+# Plot
+levels(amaz) <- data.frame(id=c(-2, 0, 1), cover=c('-2', '0', '1'))
+myPlot(amaz, '', paste0("Total number of cells = ", length( cells(amaz) ))) +
+  scale_fill_manual(name='Burnt Area', values = my.colors, na.translate=FALSE)
+```
+
+# Split cells to 4 categories
+
+## Load Q0 and Q1 data
+
+```{r, message=FALSE}
+# # Import burntArea data with "Terra"
+# amaz.burntArea.list <- list.files(burntArea.path, full.names=TRUE, pattern = ".tif$")
+# burntArea.rast <- rast(amaz.burntArea.list)
+# burntArea.rast <- renameRast(burntArea.rast, 'burntarea_working_', '')[[1]]
+# burntArea.rast <- burntArea.rast[[sq.date]]
+
+# Compute the quartiles
+# q <- terra::quantile(burntArea.rast)
+# Q0 <- mask(q[[1]], amaz.basin.shp)
+# Q1 <- mask(q[[5]], amaz.basin.shp)
+# names(Q0) <-"burntArea0"
+# names(Q1) <-"burntArea1"
+# writeRaster(Q1, paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/Q1_238.tif"), overwrite=TRUE)
+# writeRaster(Q0, paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/Q0_238.tif"), overwrite=TRUE)
+
+Q0 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/Q0_238.tif"))
+Q1 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/Q1_238.tif"))
+
+# Plot
+levels(Q0) <- data.frame(id=c(-2, 0, 1), cover=c('-2', '0', '1'))
+levels(Q1) <- data.frame(id=c(-2, 0, 1), cover=c('-2', '0', '1'))
+myPlot(Q0, 
+       "Plot of the minimum value for each cell",
+        paste0("Total number of cells = ", length( cells(Q0) )) ) +
+  scale_fill_manual(name = "Burnt Area", values = my.colors, na.translate=FALSE)
+myPlot(Q1, 
+       "Plot of the maximum value for each cell", 
+       paste0("Total number of cells = ", length( cells(Q1) )) ) +
+  scale_fill_manual(name = "Burnt Area", values = my.colors, na.translate=FALSE)
+```
+
+## Split data into 4 parts
+
+```{r, message=FALSE}
+ras0 <- ras1 <- ras2 <- Q1
+
+# Create a pattern for burntArea = 0
+ras0[ras0 %in% c(-2, 1)] <- NA
+ras0[ras0 == 0] <- 1
+
+
+# Create a pattern for burntArea = 1
+ras1[ras1 %in% c(-2, 0)] <- NA
+
+# Create a pattern for burntArea = -2
+ras2[ras2 %in% c(0, 1)] <- NA
+ras2[ras2 == -2] <- 1
+
+# Plot
+levels(ras2) <- data.frame(id=1, cover=c('-2'))
+levels(ras0) <- data.frame(id=1, cover=c('0'))
+levels(ras1) <- data.frame(id=1, cover=c('1'))
+
+myPlot(ras2, "Cells are always water",
+       paste0("Total number of cells = ", length(cells(ras2)) )) +
+  scale_fill_manual(name = "Burnt Area", values = my.colors[1], na.translate=FALSE)
+
+myPlot(ras0, "Cells didn't have fire event",
+       paste0("Total number of cells = ", length(cells(ras0)) )) +
+  scale_fill_manual(name = "Burnt Area", values = my.colors[2], na.translate=FALSE)
+
+myPlot(ras1, "Cells had fire event",
+       paste0("Total number of cells = ", length(cells(ras1)) )) +
+  scale_fill_manual(name = "Burnt Area", values = my.colors[3], na.translate=FALSE)
+```
+
+```{r, message=FALSE}
+# ras0.0 <- Q0
+# ras0.0[ras0.0 == -2] <- NA
+# ras0.0[ras0.0 == 0] <- 1
+# ras0.0 <- selectRange(ras0.0, ras0)
+# 
+# ras2.min <- Q0
+# ras2.min[ras2.min == 0] <- NA
+# ras2.min[ras2.min == -2] <- 1
+# ras2.0 <- selectRange(ras2.min, ras0)
+# 
+# # Save 
+# writeRaster(ras1, paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras1_fires.tif"), overwrite=TRUE)
+# writeRaster(ras2, paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras2_alwaysWater.tif"), overwrite=TRUE)
+# writeRaster(ras2.0, paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras2_0_ChangeWaterNofire.tif"), overwrite=TRUE)
+# writeRaster(ras0.0, paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras0_0_alwaysNoFire.tif"), overwrite=TRUE)
+
+# Load 
+ras1 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras1_fires.tif"))
+ras2 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras2_alwaysWater.tif"))
+ras2.0 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras2_0_ChangeWaterNofire.tif"))
+ras0.0 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras0_0_alwaysNoFire.tif"))
+
+# Plot
+levels(ras2) <- data.frame(id=1, cover=c('-2'))
+levels(ras2.0) <- data.frame(id=1, cover=c('-2'))
+levels(ras0.0) <- data.frame(id=1, cover=c('0'))
+levels(ras1) <- data.frame(id=1, cover=c('1'))
+
+myPlot(ras2, "Cells are always 'water'",
+       paste0("Total number of cells = ", length(cells(ras2)) )) +
+  scale_fill_manual(name = "Burnt Area", values = my.colors[1], na.translate=FALSE)
+
+myPlot(ras2.0, "Cells change between 'water' and 'no fire'",
+       paste0("Total number of cells = ", length(cells(ras2.0)) )) +
+  scale_fill_manual(name = "Burnt Area", values = my.colors[1], na.translate=FALSE)
+
+myPlot(ras0.0, "Cells are always 'no fire'",
+       paste0("Total number of cells = ", length(cells(ras0.0)) )) +
+  scale_fill_manual(name = "Burnt Area", values = my.colors[2], na.translate=FALSE)
+
+myPlot(ras1, "Cells had fire event",
+       paste0("Total number of cells = ", length(cells(ras1)) )) +
+  scale_fill_manual(name = "Burnt Area", values = my.colors[3], na.translate=FALSE)
+```
+
+# ---
+
+# Verification
+
+```{r}
+ras2.bar <- ras2
+ras2.bar[is.na(ras2.bar)] <- 10
+ras2.bar[ras2.bar == 1] <- NA
+ras2.bar[ras2.bar == 10] <- 1
+ras2.bar <- mask(ras2.bar, amaz.basin.shp)
+
+ras2.01 <- selectRange(ras2.min, ras2.bar)
+
+
+plot(ras2.min,
+     col=pal(3), 
+     main=paste0("Total number of cells = ", length( cells(ras2.min) )))
+plot(ras2, 
+     col=pal(3),
+     main=paste0("Total number of cells = ", length( cells(ras2) )))
+plot(ras2.01, 
+     col=pal(3), 
+     main=paste0("Total number of cells = ", length( cells(ras2.01) )))
+plot(ras2.0, 
+     col=pal(3), 
+     main=paste0("Total number of cells = ", length( cells(ras2.0) )))
+```
+
+#======================
+
+# Create data 0 : Cell are always without fire
+
+## Select a random month for each cell
+
+```{r, message=FALSE}
+set.seed(1)
+rand.rast0 <- ras0.0
+values(rand.rast0) <- sample(1:238, ncell(rand.rast0), replace=TRUE)
+rand.rast0 <- selectRange(rand.rast0, ras0.0)
+names(rand.rast0) <- "Month_nbr"
+
+myPlot(rand.rast0, "Pattern for cells with 'no fire'",
+       paste0("Total number of cells = ", length(cells(rand.rast0)) )) + 
+  scale_fill_hypso_c(
+    name = TeX(r"(Number of month)"),
+    palette = "wiki-schwarzwald-cont", 
+    na.value = "transparent")
+```
+
+## LandSurfaceTemp 0
+
+```{r}
+#---- Random values from Land Surface Temperature ----
+amaz.landSurfaceTemp.list <- list.files(LandSurfaceTemp.path, full.names=TRUE, pattern = ".tif$")
+landSurfaceTemp.rast <- rast(amaz.landSurfaceTemp.list)
+landSurfaceTemp.rast <- renameRast(landSurfaceTemp.rast, 'landsurftemp_working_', '')[[1]]
+landSurfaceTemp.rast <- landSurfaceTemp.rast[[sq.date]]
+
+tic() # 217.767 sec elapsed
+landSurfaceTemp0.rand <- selectRange(landSurfaceTemp.rast, rand.rast0)
+names(landSurfaceTemp0.rand) <- "LandSurfaceTemp"
+toc()
+
+# # Save / Load
+# writeRaster(landSurfaceTemp0.rand, paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/ras/landSurfaceTemp0_rand.tif"), overwrite=TRUE)
+landSurfaceTemp0.rand <-rast(paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/ras/landSurfaceTemp0_rand.tif"))
+
+#---- Missing data ----
+
+# landSurfaceTemp0.rand.NA <- landSurfaceTemp0.rand
+# landSurfaceTemp0.rand.NA[is.na(landSurfaceTemp0.rand.NA)] <- -10
+# landSurfaceTemp0.rand.NA[landSurfaceTemp0.rand.NA > 0] <- NA
+# 
+# landSurfaceTemp0.rand.NA.mask <- mask(landSurfaceTemp0.rand.NA, amaz.basin.shp)
+# landSurfaceTemp0.rand.NA.mask <- intersect(landSurfaceTemp0.rand.NA.mask, ras0.0)
+# landSurfaceTemp0.rand.NA.mask[isFALSE(landSurfaceTemp0.rand.NA.mask)] <- NA
+# 
+# # Save / Load
+# writeRaster(landSurfaceTemp0.rand.NA.mask, paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/ras/landSurfaceTemp0_rand_NA_mask.tif"), overwrite=TRUE)
+landSurfaceTemp0.rand.NA.mask <-rast(paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/ras/landSurfaceTemp0_rand_NA_mask.tif"))
+
+# plot(landSurfaceTemp0.rand.NA.mask,
+#      col=pal(3)[2],
+#      main=paste0("Total number of cells = ", length( cells(landSurfaceTemp0.rand.NA.mask) )))
+# plot(amaz.basin.shp$geometry, add=T)
+
+#---- Pattern for cells with no fires and no missing data ----
+temp <- landSurfaceTemp0.rand
+temp[!is.na(temp)] <- 1
+landSurfaceTemp0.ind.rand <- selectRange(rand.rast0, temp)
+
+# tic()
+# landSurfaceTemp0.NA.rast <- selectRange(landSurfaceTemp.rast, landSurfaceTemp0.rand.NA.mask, 238)
+# toc()
+```
+
+```{r, message=FALSE}
+myPlot(landSurfaceTemp0.rand, "Random values from Land Surface Temperature",
+       paste0("Total number of cells = ", length(cells(landSurfaceTemp0.rand)) )) + 
+  scale_fill_hypso_c(
+    name = TeX(r"(Number of month)"),
+    palette = "wiki-schwarzwald-cont", 
+    na.value = "transparent")
+
+myPlot(landSurfaceTemp0.rand.NA.mask, "Missing data",
+       paste0("Total number of cells = ", length(cells(landSurfaceTemp0.rand.NA.mask)) )) + 
+  scale_fill_hypso_c(
+    name = TeX(r"(Number of month)"),
+    palette = "wiki-schwarzwald-cont", 
+    na.value = "transparent")
+
+myPlot(landSurfaceTemp0.ind.rand, "Pattern for cells with 'no fire' and no missing data",
+       paste0("Total number of cells = ", length(cells(landSurfaceTemp0.ind.rand)) )) + 
+  scale_fill_hypso_c(
+    name = TeX(r"(Number of month)"),
+    palette = "wiki-schwarzwald-cont", 
+    na.value = "transparent")
+```
+
+## LandSurfaceTemp0.NA.dt
+
+```{r}
+#Register cluster for parallel processing: Cores to use: all except 1
+cl <- parallel::makeCluster(nbrCores)
+doParallel::registerDoParallel(cl)
+
+# list of files
+amaz.var.list <- list.files(LandSurfaceTemp.path, full.names=TRUE, pattern = ".tif$") #
+
+tic() # 300.92 sec elapsed | 1473.375
+#Raster to datatable in parallel: one raster per thread
+listDF <- 
+  foreach (
+    ras_id=amaz.var.list, # ras_id=amaz.var.list[[1]]
+    .packages=c('terra', 'sf', 'data.table'), 
+    .combine='c') %dopar% 
+  {
+    # Read all rasters
+    ras <- rast(ras_id)
+    
+    # Rename layers
+    ras.Y.M <- renameRast(ras, 'landsurftemp_working_', '') #
+    ras <- ras.Y.M[[1]]
+
+    # Crop data and convert to data.frame 
+    ras <- ras %>% mask(mask = amaz.basin.shp)
+    plot(ras)
+    
+    # Select data 
+    landSurfaceTemp0.rand.NA.mask <-rast(paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/ras/landSurfaceTemp0_rand_NA_mask.tif"))
+
+    ras1 <- selectRange(ras, landSurfaceTemp0.rand.NA.mask)
+    
+    DT <- terra::as.data.frame(ras1, xy=T, cells=T)
+    
+    # Modification of the data
+    DT$x <- floor(DT$x)
+    DT$y <- floor(DT$y)
+    setcolorder(DT, c('cell', 'x', 'y'))
+
+    list(DT)
+  }
+stopCluster(cl)
+toc()
+
+
+tic() # 56.538 sec elapsed | 233.798
+landSurfaceTemp0.NA.dt <- listDF %>% reduce(full_join, by=c('cell', 'x', 'y'))
+toc()
+
+# save(landSurfaceTemp0.NA.dt, file = paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/05. cell_0/landSurfaceTemp0_NA_dt.Rdata"))
+load(paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/05. cell_0/landSurfaceTemp0_NA_dt.Rdata"))
+
+landSurfaceTemp0.NA.dt
+# rm(listDF)
+gc()
+```
+
+### Select a random value : Parallel
+
+```{r}
+library(doSNOW)
+library(itertools)
+
+df <- landSurfaceTemp0.NA.dt
+n <- rowSums(is.na(df[, -(1:3)])) %>% as.data.frame()
+min(n)
+
+NumberOfCluster <- 45
+cl <- makeCluster(NumberOfCluster) 
+registerDoSNOW(cl)
+
+# init the progress bar
+pb <- txtProgressBar(max = 100, style = 3)
+progress <- function(n) setTxtProgressBar(pb, n)
+opts <- list(progress = progress)
+
+tic() # 2082.204 sec elapsed
+# conduct the parallelisation
+Result.list <- foreach(i = 1:(dim(df)[1]),
+                       .combine='rbind',
+                       .packages=c('dplyr', 'tidyverse', 'data.table'),
+                       .options.snow = opts) %dopar% {
+                            df.i <- df[i,] %>% select_if(~ !any(is.na(.)))
+                            dim.df.i <- dim(df.i)[2]
+                            if (dim.df.i != 3) {
+                              id.col <- sample(4:dim.df.i, 1)
+                              x1 <- colnames(df.i)[id.col]
+                              x2 <- df.i[1, id.col]
+                              Result.list <- c(df.i[1, 'cell'], df.i[1, 'x'], df.i[1, 'y'], x1, x2)
+                            }
+                            return(Result.list)
+                          }
+# close progress bar
+close(pb)
+# stop cluster
+stopCluster(cl) 
+toc()
+landSurfaceTemp0.NA.sample.dt <- Result.list %>% as.data.table()
+colnames(landSurfaceTemp0.NA.sample.dt) <- c('cell', 'x', 'y', 'Month', 'LandSurfaceTemp0')
+landSurfaceTemp0.NA.sample.dt$Month_nbr <- match(landSurfaceTemp0.NA.sample.dt$Month , sq.date)
+
+# Change class of certain columns
+cols <- c('cell', 'x', 'y')
+landSurfaceTemp0.NA.sample.dt <- landSurfaceTemp0.NA.sample.dt[ , (cols) := lapply(.SD, as.numeric), .SDcols = cols]
+
+#---
+# save(landSurfaceTemp0.NA.sample.dt, file = paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/05. cell_0/landSurfaceTemp0_NA_sample_dt.Rdata"))
+load(paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/05. cell_0/landSurfaceTemp0_NA_sample_dt.Rdata"))
+
+landSurfaceTemp0.NA.sample.dt
+```
+
+```{r, message=FALSE}
+landSurfaceTemp0.rand.NA.mask[is.na(landSurfaceTemp0.rand.NA.mask)] <- -1
+landSurfaceTemp0.allcell.NA.dt <- terra::as.data.frame(landSurfaceTemp0.rand.NA.mask, xy=T, cells=T)
+landSurfaceTemp0.allcell.NA.dt$x <- floor(landSurfaceTemp0.allcell.NA.dt$x)
+landSurfaceTemp0.allcell.NA.dt$y <- floor(landSurfaceTemp0.allcell.NA.dt$y)
+landSurfaceTemp0.allcell.NA.dt <- as.data.table(landSurfaceTemp0.allcell.NA.dt)
+
+landSurfaceTemp0.allcell.NA.sample.dt <- merge(x=landSurfaceTemp0.allcell.NA.dt[, c('cell', 'x', 'y')], y=landSurfaceTemp0.NA.sample.dt[, c('cell', 'x', 'y', 'Month_nbr')], by = c('cell', 'x', 'y'), all = TRUE)
+landSurfaceTemp0.allcell.NA.sample.dt
+
+values(landSurfaceTemp0.rand.NA.mask) <- landSurfaceTemp0.allcell.NA.sample.dt$Month_nbr
+
+myPlot(landSurfaceTemp0.rand.NA.mask, "Pattern for cells with 'no fire' and missing data",
+       paste0("Total number of cells = ", length(cells(landSurfaceTemp0.rand.NA.mask)) )) + 
+  scale_fill_hypso_c(
+    name = TeX(r"(Number of month)"),
+    palette = "wiki-schwarzwald-cont", 
+    na.value = "transparent")
+```
+
+### Merge
+
+```{r, message=FALSE}
+rand.p0.rast <- c(landSurfaceTemp0.ind.rand, landSurfaceTemp0.rand.NA.mask)
+rand.p0.all.rast <- max(rand.p0.rast, na.rm = T)
+
+# Save
+# writeRaster(rand.p0.all.rast, paste0(my.path,"Amazon_new_data/1. Burnt Area/ras_pattern/rand_p0_all_rast.tif"), overwrite=TRUE)
+# Load 
+rand.p0.all.rast <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras_pattern/rand_p0_all_rast.tif"))
+
+myPlot(rand.p0.all.rast, "Pattern for cells with 'no fire'",
+       paste0("Total number of cells = ", length(cells(rand.p0.all.rast)) )) + 
+  scale_fill_hypso_c(
+    name = TeX(r"(Number of month)"),
+    palette = "wiki-schwarzwald-cont", 
+    na.value = "transparent")
+```
+
+# Create data 02 : 
+
+```{r, message=FALSE}
+myPlot(ras2.0, "Cells change between 'water' and 'no fire'",
+       paste0("Total number of cells = ", length(cells(ras2.0)) )) +
+  scale_fill_manual(name = "Burnt Area", values = my.colors[1], na.translate=FALSE)
+```
+
+## LandSurfaceTemp02.NA.dt
+
+```{r}
+#Register cluster for parallel processing: Cores to use: all except 1
+cl <- parallel::makeCluster(nbrCores)
+doParallel::registerDoParallel(cl)
+
+tic() # 374.472 sec elapsed
+#Raster to datatable in parallel: one raster per thread
+listDF <- 
+  foreach (
+    i=1:238,
+    .packages=c('terra', 'sf', 'data.table'), 
+    .combine='c') %dopar% 
+  {
+    month.chr <- substr(sq.date[i], 6, 7) %>% as.numeric() %>% as.character()
+    year.chr <- substr(sq.date[i], 1, 4) 
+
+    # load data
+    ras2.0 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras2_0_ChangeWaterNofire.tif"))
+    burntA.ras <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/03. Working Data/burntarea_working_", year.chr, "_", month.chr, ".tif"))
+    LandSurfTemp.ras <- rast(paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/03. Working Data/landsurftemp_working_", year.chr, "_", month.chr, ".tif"))
+    
+    # Select cells = -2
+    burntA2.0.ras <- selectRange(burntA.ras, ras2.0) 
+    burntA2.0.ras[burntA2.0.ras==-2] <- NA
+    LandSurfTemp2.0.ras <- selectRange(LandSurfTemp.ras, ras2.0) 
+    
+    # Intersection of the two variables
+    ras <- intersect(burntA2.0.ras, LandSurfTemp2.0.ras)
+    ras[isFALSE(ras)] <- NA
+    names(ras) <- paste0(year.chr, '_', month.chr)
+    
+    # Convert to data frame
+    DT <- terra::as.data.frame(ras, xy=T, cells=T)
+    
+    # Modification of the data
+    DT$x <- floor(DT$x)
+    DT$y <- floor(DT$y)
+
+    list(DT)
+  }
+stopCluster(cl)
+toc()
+
+tic() # 56.538 sec elapsed
+intersc.burntA.LandSurfTemp.dt <- listDF %>% reduce(full_join, by=c('cell', 'x', 'y'))
+toc()
+
+#---
+# save(intersc.burntA.LandSurfTemp.dt, file = paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/06. cell_2/intersc_burntA_LandSurfTemp_dt.Rdata"))
+load(paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/06. cell_2/intersc_burntA_LandSurfTemp_dt.Rdata"))
+intersc.burntA.LandSurfTemp.dt
+```
+
+```{r}
+library(doSNOW)
+library(itertools)
+
+df <- intersc.burntA.LandSurfTemp.dt
+n <- rowSums(is.na(df[, -(1:3)])) %>% as.data.frame()
+min(n)
+
+NumberOfCluster <- 45
+cl <- makeCluster(NumberOfCluster)
+registerDoSNOW(cl)
+
+# init the progress bar
+pb <- txtProgressBar(max = 100, style = 3)
+progress <- function(n) setTxtProgressBar(pb, n)
+opts <- list(progress = progress)
+
+tic() # 3033.423 sec elapsed
+# conduct the parallelisation
+Result.list <- foreach(i = 1:(dim(df)[1]),
+                          .combine='rbind',
+                          .packages=c('dplyr', 'tidyverse', 'data.table'),
+                          .options.snow = opts) %dopar% {
+                            df.i <- df[i,] %>% select_if(~ !any(is.na(.)))
+                            dim.df.i <- dim(df.i)[2]
+                            if (dim.df.i != 3) {
+                              id.col <- sample(4:dim.df.i, 1)
+                              x1 <- colnames(df.i)[id.col]
+                              x2 <- df.i[1, id.col]
+                              Result.list <- c(df.i[1, 'cell'], df.i[1, 'x'], df.i[1, 'y'], x1, x2)
+                            }
+                            return(Result.list)
+                          }
+# close progress bar
+close(pb)
+# stop cluster
+stopCluster(cl) 
+toc()
+
+# Add month numbers
+
+intersc.burntA.LandSurfTemp.sample.dt <- Result.list %>% as.data.table()
+colnames(intersc.burntA.LandSurfTemp.sample.dt) <- c('cell', 'x', 'y', 'Month', 'Intersc_BurntA_LandSurfTemp')
+month.chr <- substr(intersc.burntA.LandSurfTemp.sample.dt$Month, 6, 7)
+month.chr <- ifelse(nchar(month.chr)==1, paste0("0", month.chr), month.chr)
+month.nbr <- paste0(substr(intersc.burntA.LandSurfTemp.sample.dt$Month, 1, 5), month.chr)
+intersc.burntA.LandSurfTemp.sample.dt$Month0 <- month.nbr
+intersc.burntA.LandSurfTemp.sample.dt$Month_nbr <- match(intersc.burntA.LandSurfTemp.sample.dt$Month0 , sq.date)
+
+# Change class of certain columns
+cols <- c('cell', 'x', 'y')
+intersc.burntA.LandSurfTemp.sample.dt <- intersc.burntA.LandSurfTemp.sample.dt[ , (cols) := lapply(.SD, as.numeric), .SDcols = cols]
+
+#---
+# save(intersc.burntA.LandSurfTemp.sample.dt, file = paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/06. cell_2/intersc_burntA_LandSurfTemp_sample_dt.Rdata"))
+load(paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/06. cell_2/intersc_burntA_LandSurfTemp_sample_dt.Rdata"))
+
+intersc.burntA.LandSurfTemp.sample.dt
+```
+
+```{r, message=FALSE}
+rand.p2.all.rast <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/03. Working Data/burntarea_working_2001_1.tif"))
+rand.p2.all.rast[is.na(rand.p2.all.rast)] <- -1
+rand.p2.all.dt <- terra::as.data.frame(rand.p2.all.rast, xy=T, cells=T)
+rand.p2.all.dt$x <- floor(rand.p2.all.dt$x); rand.p2.all.dt$y <- floor(rand.p2.all.dt$y)
+rand.p2.all.dt <- as.data.table(rand.p2.all.dt)
+
+intersc.burntA.LandSurfTemp.allcell.sample.dt <- merge(x=rand.p2.all.dt[, c('cell', 'x', 'y')], y=intersc.burntA.LandSurfTemp.sample.dt[, c('cell', 'x', 'y', 'Month_nbr')], by = c('cell', 'x', 'y'), all = TRUE)
+intersc.burntA.LandSurfTemp.allcell.sample.dt
+
+values(rand.p2.all.rast) <- intersc.burntA.LandSurfTemp.allcell.sample.dt$Month_nbr
+
+# Save
+# writeRaster(rand.p2.all.rast, paste0(my.path,"Amazon_new_data/1. Burnt Area/ras_pattern/rand_p2_all_rast.tif"), overwrite=TRUE)
+# Load 
+rand.p2.all.rast <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras_pattern/rand_p2_all_rast.tif"))
+
+myPlot(rand.p2.all.rast, "Pattern for cells that change between 'water' and 'no fire'",
+       paste0("Total number of cells = ", length(cells(rand.p2.all.rast)) )) +
+  scale_fill_hypso_c(
+    name = TeX(r"(Number of month)"),
+    palette = "wiki-schwarzwald-cont", 
+    na.value = "transparent")
+```
+
+#---
+
+# Merge the two pattern p0 and p2
+
+```{r, message=FALSE}
+rand.p0.p2.rast <- c(rand.p0.all.rast, rand.p2.all.rast)
+rand.p0.p2.all.rast <- max(rand.p0.p2.rast, na.rm = T)
+
+# Save
+# writeRaster(rand.p0.p2.all.rast, paste0(my.path,"Amazon_new_data/1. Burnt Area/ras_pattern/rand_p0_p2_all_rast.tif"), overwrite=TRUE)
+# Load 
+rand.p0.p2.all.rast <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras_pattern/rand_p0_p2_all_rast.tif"))
+
+myPlot(rand.p0.p2.all.rast, "Pattern for cells that didn't have fire event",
+       paste0("Total number of cells = ", length(cells(rand.p0.p2.all.rast)) )) +
+  scale_fill_hypso_c(
+    name = TeX(r"(Number of month)"),
+    palette = "wiki-schwarzwald-cont", 
+    na.value = "transparent")
+```
+
+#---
+
+# Select data 0 as spatRaster
+
+```{r}
+#--- BurntArea 0 ----
+
+## 
+names(rand.p0.p2.all.rast) <- 'Month_nbr'
+
+## Load data and order layers
+amaz.BurntArea.list <- list.files(burntArea.path, full.names=TRUE, pattern = ".tif$")
+BurntArea.rast <- rast(amaz.BurntArea.list)
+BurntArea.rast <- renameRast(BurntArea.rast, 'burntarea_working_', '')[[1]]
+BurntArea.rast <- BurntArea.rast[[sq.date]]
+## 
+tic() # 139.152 sec elapsed
+BurntArea0.rast <- selectRange(BurntArea.rast, rand.p0.p2.all.rast)
+names(BurntArea0.rast) <- 'BurntArea'
+toc()
+
+#--- LandCover 0 ----
+
+## Load data and order layers
+amaz.LandCover.list <- list.files(landCover.path, full.names=TRUE, pattern = ".tif$")
+LandCover.rast <- rast(amaz.LandCover.list)
+LandCover.rast <- renameRast(LandCover.rast, 'landcover_working_', '')[[1]]
+LandCover.rast <- LandCover.rast[[sq.date]]
+## Select layer
+tic() # 166.857 sec elapsed
+LandCover0.rast <- selectRange(LandCover.rast, rand.p0.p2.all.rast)
+names(LandCover0.rast) <- 'LandCover'
+toc()
+
+#--- Precipitation 0 ----
+
+## Load data and order layers
+amaz.Precipitation.list <- list.files(precip.path, full.names=TRUE, pattern = ".tif$")
+Precipitation.rast <- rast(amaz.Precipitation.list)
+Precipitation.rast <- renameRast(Precipitation.rast, 'precipitation_working_', '')[[1]]
+Precipitation.rast <- Precipitation.rast[[sq.date]]
+## Select layer
+tic() # 211.791 sec elapsed
+Precipitation0.rast <- selectRange(Precipitation.rast, rand.p0.p2.all.rast)
+names(Precipitation0.rast) <- 'Precipitation'
+toc()
+
+#--- SoilMoisture 0 ----
+
+## Load data and order layers
+amaz.SoilMoisture.list <- list.files(soilMoisture.path, full.names=TRUE, pattern = ".tif$")
+SoilMoisture.rast <- rast(amaz.SoilMoisture.list)
+SoilMoisture.rast <- renameRast(SoilMoisture.rast, 'soilmoisture_working_', '')[[1]]
+SoilMoisture.rast <- SoilMoisture.rast[[sq.date]]
+## Select layer
+tic() # 161.116 sec elapsed
+SoilMoisture0.rast <- selectRange(SoilMoisture.rast, rand.p0.p2.all.rast)
+names(SoilMoisture0.rast) <- 'SoilMoisture'
+SoilMoisture0.rast[SoilMoisture0.rast < 0] <- NA # 
+toc()
+
+#--- Elevation 0 ----
+
+## Load data and order layers
+Elevation.rast <- rast(paste0(my.path,"Amazon_new_data/5. Elevation/03. Working Data/elevation_working_2001_01.tif"))
+p0.p2.all.1.rast <- rand.p0.p2.all.rast
+p0.p2.all.1.rast[p0.p2.all.1.rast > 0] <- 1
+## Select layer
+tic() # 2.15 sec elapsed
+Elevation0.rast <- selectRange(Elevation.rast, p0.p2.all.1.rast)
+names(Elevation0.rast) <- 'Elevation'
+toc()
+
+#--- LandSurfaceTemp 0 ----
+
+## Load data and order layers
+amaz.LandSurfaceTemp.list <- list.files(LandSurfaceTemp.path, full.names=TRUE, pattern = ".tif$")
+LandSurfaceTemp.rast <- rast(amaz.LandSurfaceTemp.list)
+LandSurfaceTemp.rast <- renameRast(LandSurfaceTemp.rast, 'landsurftemp_working_', '')[[1]]
+LandSurfaceTemp.rast <- LandSurfaceTemp.rast[[sq.date]]
+## Select layer
+tic() # 196.227 sec elapsed
+LandSurfaceTemp0.rast <- selectRange(LandSurfaceTemp.rast, rand.p0.p2.all.rast)
+names(LandSurfaceTemp0.rast) <- 'LandSurfaceTemp'
+toc()
+
+#--- Specific Humidity 0 ----
+
+## Load data and order layers
+amaz.Humidity.list <- list.files(humidity.path, full.names=TRUE, pattern = ".tif$")
+Humidity.rast <- rast(amaz.Humidity.list)
+Humidity.rast <- renameRast(Humidity.rast, 'humidity_working_', '')[[1]]
+Humidity.rast <- Humidity.rast[[sq.date]]
+## Select layer
+tic() # 196.227 sec elapsed
+Humidity0.rast <- selectRange(Humidity.rast, rand.p0.p2.all.rast)
+names(Humidity0.rast) <- 'Humidity'
+toc()
+
+#--- Evapotranspiration 0 ----
+
+## Load data and order layers
+amaz.Evapotranspiration.list <- list.files(evapotranspiration.path, full.names=TRUE, pattern = ".tif$")
+Evapotranspiration.rast <- rast(amaz.Evapotranspiration.list)
+Evapotranspiration.rast <- renameRast(Evapotranspiration.rast, 'evapotranspiration_working_', '')[[1]]
+Evapotranspiration.rast <- Evapotranspiration.rast[[sq.date]]
+## Select layer
+tic() # 186.893 sec elapsed
+Evapotranspiration0.rast <- selectRange(Evapotranspiration.rast, rand.p0.p2.all.rast)
+names(Evapotranspiration0.rast) <- 'Evapotranspiration'
+toc()
+
+#--- Wind Speed 0 ----
+
+## Load data and order layers
+amaz.Wind.list <- list.files(wind.path, full.names=TRUE, pattern = ".tif$")
+Wind.rast <- rast(amaz.Wind.list)
+Wind.rast <- renameRast(Wind.rast, 'wind_working_', '')[[1]]
+Wind.rast <- Wind.rast[[sq.date]]
+## Select layer
+tic() # 191.571 sec elapsed
+Wind0.rast <- selectRange(Wind.rast, rand.p0.p2.all.rast)
+names(Wind0.rast) <- 'Wind'
+toc()
+
+#--- Air Temperature 0 ----
+
+## Load data and order layers
+amaz.AirTemp.list <- list.files(airtemp.path, full.names=TRUE, pattern = ".tif$")
+AirTemp.rast <- rast(amaz.AirTemp.list) %>% renameRast(., 'airtemp_working_', '')[[1]]
+AirTemp.rast <- AirTemp.rast[[sq.date]]
+## Select layer
+tic() # 197.687 sec elapsed
+AirTemp0.rast <- selectRange(AirTemp.rast, rand.p0.p2.all.rast)
+names(AirTemp0.rast) <- 'AirTemp'
+toc()
+
+#--- Combine all the layers of covariates  for data 0 ----
+
+Amazon.data0.rast <- 
+  c(rand.p0.p2.all.rast,
+    BurntArea0.rast, 
+    LandCover0.rast, 
+    Precipitation0.rast, 
+    SoilMoisture0.rast, 
+    Elevation0.rast,
+    LandSurfaceTemp0.rast,
+    Humidity0.rast,
+    Evapotranspiration0.rast, 
+    Wind0.rast,
+    AirTemp0.rast
+  )
+
+#--- Save / Load ----
+
+# writeRaster(Amazon.data0.rast, paste0(my.path,"Amazon_selected_data/Amazon_data0_rast.tif"), overwrite=TRUE)
+Amazon.data0.rast <- rast(paste0(my.path,"Amazon_selected_data/Amazon_data0_rast.tif"))
+
+Amazon.data0.rast
+```
+
+# Convert and save data 0 to data.table
+
+```{r}
+#--- Convert spatRaster to DT ----
+DT0 <- as.data.table(Amazon.data0.rast, cells = T, xy=T) # ~ 1 min
+
+tic() # 60.967 sec elapsed
+DT00 <- DT0 %>% 
+  mutate(
+    x = floor(x),
+    y = floor(y),
+    Year = sq.date[Month_nbr] %>% substr(., start = 1, stop = 4) %>% as.numeric() %>% as.factor(),
+    Month = sq.date[Month_nbr] %>% substr(., start = 6, stop = 7) %>% as.numeric() %>% as.factor(),
+    BurntArea = as.factor(BurntArea),
+    LandCover = as.factor(LandCover),
+    Month_nbr = NULL
+  ) %>%
+  setcolorder(., c('cell', 'x', 'y', 'Year', 'Month'))
+toc()
+
+#--- Verification of `NA` values ----
+DT00[(is.na(DT00$Evapotranspiration)), ]
+DT00[rowSums(is.na(DT00)) > 0, ] 
+
+#--- Remove the `NA` values ----
+Amazon.data0.dt <- na.omit(DT00)
+
+#--- Save data 0 ----
+# save(Amazon.data0.dt, file = paste0(my.path,"Amazon_selected_data/Amazon_data0_dt.Rdata"))
+load(paste0(my.path,"Amazon_selected_data/Amazon_data0_dt.Rdata"))
+Amazon.data0.dt
+```
+
+#=======================
+
+# Create data1 : Cell with fires
+
+## Burnt Area 1
+
+```{r}
+library(doSNOW)
+library(itertools)
+
+#--- list of files
+amaz.var.list <- list.files(burntArea.path, full.names=TRUE, pattern = ".tif$")
+
+nbrCores <- 45
+cl <- snow::makeCluster(nbrCores); registerDoSNOW(cl)
+
+#--- init the progress bar
+pb <- txtProgressBar(max = 100, style = 3)
+progress <- function(n) setTxtProgressBar(pb, n)
+opts <- list(progress = progress)
+
+tic() # 466.149 sec elapsed
+#--- conduct the parallelisation
+BurntArea1.dt <- 
+  foreach(
+    ras_id=amaz.var.list, # ras_id=amaz.var.list[1]
+    .combine='rbind',
+    .packages=c('terra', 'sf', 'data.table', 'dplyr', 'tidyverse', 'data.table'),
+    .options.snow = opts) %dopar% 
+  {
+    # Read all rasters
+    ras <- rast(ras_id)
+    
+    # Rename layers
+    ras.Y.M <- renameRast(ras, 'burntarea_working_', '')
+    ras <- ras.Y.M[[1]]
+    
+    # select data
+    ras1.fires <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras1_fires.tif"))
+    ras_1 <- selectRange(ras, ras1.fires)
+    ras_1[ras_1 < 0] <- NA
+    names(ras_1) <- 'BurntArea'
+    
+    # convert to data table
+    DT <- as.data.table(ras_1, cell=T, xy=T)
+    DT <- DT %>%
+      mutate(
+        x = floor(x),
+        y = floor(y),
+        Year = rep(ras.Y.M[[2]], dim(DT)[1]) %>% as.factor(),
+        Month = rep(ras.Y.M[[3]], dim(DT)[1]) %>% as.factor(),
+        BurntArea = as.factor(BurntArea)
+      ) %>%
+      na.omit() %>%
+      setcolorder(., c('cell', 'x', 'y', 'Year', 'Month'))
+    return(DT)
+  }
+
+#--- close progress bar
+close(pb)
+# stop cluster
+snow::stopCluster(cl) 
+toc()
+
+#--- Save / Load
+# save(BurntArea1.dt, file = paste0(my.path,"Amazon_selected_data/data1_by_var/BurntArea1_dt.Rdata"))
+load(paste0(my.path,"Amazon_selected_data/data1_by_var/BurntArea1_dt.Rdata"))
+BurntArea1.dt
+
+#--- Merge data
+tic()
+Amazon.data1.dt <- BurntArea1.dt
+toc
+```
+
+## LandCover 1
+
+```{r}
+library(doSNOW)
+library(itertools)
+
+#--- list of files
+amaz.var.list <- list.files(landCover.path, full.names=TRUE, pattern = ".tif$")   #--
+
+nbrCores <- 45
+cl <- snow::makeCluster(nbrCores); registerDoSNOW(cl)
+
+#--- init the progress bar
+pb <- txtProgressBar(max = 100, style = 3)
+progress <- function(n) setTxtProgressBar(pb, n)
+opts <- list(progress = progress)
+
+tic() # 479.771 sec elapsed
+#--- conduct the parallelisation
+LandCover1.dt <-                                                                #--
+  foreach(
+    ras_id=amaz.var.list, # ras_id=amaz.var.list[1]
+    .combine='rbind',
+    .packages=c('terra', 'sf', 'data.table', 'dplyr', 'tidyverse', 'data.table'),
+    .options.snow = opts) %dopar% 
+  {
+    # Read all rasters
+    ras <- rast(ras_id)
+    
+    # Rename layers
+    ras.Y.M <- renameRast(ras, 'landcover_working_', '')                          #--
+    ras <- ras.Y.M[[1]]
+    
+    # select data
+    ras1.fires <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras1_fires.tif"))
+    ras_1 <- selectRange(ras, ras1.fires)
+    names(ras_1) <- 'LandCover'                                                   #--
+    
+    # convert to data table
+    DT <- as.data.table(ras_1, cell=T, xy=T)
+    DT <- DT %>%
+      mutate(
+        x = floor(x),
+        y = floor(y),
+        Year = rep(ras.Y.M[[2]], dim(DT)[1]) %>% as.factor(),
+        Month = rep(ras.Y.M[[3]], dim(DT)[1]) %>% as.factor(),
+        LandCover = as.factor(LandCover)                                          #--
+      ) %>%
+      na.omit() %>%
+      setcolorder(., c('cell', 'x', 'y', 'Year', 'Month'))
+    return(DT)
+  }
+
+#--- close progress bar
+close(pb)
+# stop cluster
+snow::stopCluster(cl) 
+toc()
+
+#--- Save / Load
+# save(LandCover1.dt, file = paste0(my.path,"Amazon_selected_data/data1_by_var/LandCover1_dt.Rdata"))
+load(paste0(my.path,"Amazon_selected_data/data1_by_var/LandCover1_dt.Rdata"))
+LandCover1.dt
+
+#--- Merge data
+tic()
+Amazon.data1.dt <- merge(x = Amazon.data1.dt, y = LandCover1.dt, by = c("cell", "x", "y", "Year", "Month"))
+toc()
+Amazon.data1.dt
+```
+
+## Precipitation 1
+
+```{r}
+library(doSNOW)
+library(itertools)
+
+#--- list of files
+amaz.var.list <- list.files(precip.path, full.names=TRUE, pattern = ".tif$")   #--
+
+nbrCores <- 45
+cl <- snow::makeCluster(nbrCores); registerDoSNOW(cl)
+
+#--- init the progress bar
+pb <- txtProgressBar(max = 100, style = 3)
+progress <- function(n) setTxtProgressBar(pb, n)
+opts <- list(progress = progress)
+
+tic() # 147.968  sec elapsed
+#--- conduct the parallelisation
+Precipitation1.dt <-                                                            #--
+  foreach(
+    ras_id=amaz.var.list, # ras_id=amaz.var.list[1]
+    .combine='rbind',
+    .packages=c('terra', 'sf', 'data.table', 'dplyr', 'tidyverse', 'data.table'),
+    .options.snow = opts) %dopar% 
+  {
+    # Read all rasters
+    ras <- rast(ras_id)
+    
+    # Rename layers
+    ras.Y.M <- renameRast(ras, 'precipitation_working_', '')                     #--
+    ras <- ras.Y.M[[1]]
+    
+    # select data
+    ras1.fires <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras1_fires.tif"))
+    ras_1 <- selectRange(ras, ras1.fires)
+    names(ras_1) <- 'Precipitation'                                              #--
+    
+    # convert to data table
+    DT <- as.data.table(ras_1, cell=T, xy=T)
+    DT <- DT %>%
+      mutate(
+        x = floor(x),
+        y = floor(y),
+        Year = rep(ras.Y.M[[2]], dim(DT)[1]) %>% as.factor(),
+        Month = rep(ras.Y.M[[3]], dim(DT)[1]) %>% as.factor(),
+      ) %>%
+      na.omit() %>%
+      setcolorder(., c('cell', 'x', 'y', 'Year', 'Month'))
+    return(DT)
+  }
+
+#--- close progress bar
+close(pb)
+# stop cluster
+snow::stopCluster(cl) 
+toc()
+
+#--- Save / Load
+# save(Precipitation1.dt, file = paste0(my.path,"Amazon_selected_data/data1_by_var/Precipitation1_dt.Rdata"))
+load(paste0(my.path,"Amazon_selected_data/data1_by_var/Precipitation1_dt.Rdata"))
+Precipitation1.dt
+
+#--- Merge data
+tic() # 153.538 sec elapsed
+Amazon.data1.dt <- merge(x = Amazon.data1.dt, y = Precipitation1.dt, by = c("cell", "x", "y", "Year", "Month"))
+toc()
+Amazon.data1.dt
+```
+
+## SoilMoisture 1
+
+```{r}
+library(doSNOW)
+library(itertools)
+
+#--- list of files
+amaz.var.list <- list.files(soilMoisture.path, full.names=TRUE, pattern = ".tif$")   #--
+
+nbrCores <- 45
+cl <- snow::makeCluster(nbrCores); registerDoSNOW(cl)
+
+#--- init the progress bar
+pb <- txtProgressBar(max = 100, style = 3)
+progress <- function(n) setTxtProgressBar(pb, n)
+opts <- list(progress = progress)
+
+tic() # 209.107  sec elapsed
+#--- conduct the parallelisation
+SoilMoisture1.dt <-                                                            #--
+  foreach(
+    ras_id=amaz.var.list, # ras_id=amaz.var.list[1]
+    .combine='rbind',
+    .packages=c('terra', 'sf', 'data.table', 'dplyr', 'tidyverse', 'data.table'),
+    .options.snow = opts) %dopar% 
+  {
+    # Read all rasters
+    ras <- rast(ras_id)
+    
+    # Rename layers
+    ras.Y.M <- renameRast(ras, 'soilmoisture_working_', '')                     #--
+    ras <- ras.Y.M[[1]]
+    
+    # select data
+    ras1.fires <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras1_fires.tif"))
+    ras_1 <- selectRange(ras, ras1.fires)
+    names(ras_1) <- 'SoilMoisture'                                              #--
+    # Remove negative values. ------<<<
+    ras_1[ras_1 < 0] <- NA
+    
+    # convert to data table
+    DT <- as.data.table(ras_1, cell=T, xy=T)
+    DT <- DT %>%
+      mutate(
+        x = floor(x),
+        y = floor(y),
+        Year = rep(ras.Y.M[[2]], dim(DT)[1]) %>% as.factor(),
+        Month = rep(ras.Y.M[[3]], dim(DT)[1]) %>% as.factor(),
+      ) %>%
+      na.omit() %>%
+      setcolorder(., c('cell', 'x', 'y', 'Year', 'Month'))
+    return(DT)
+  }
+
+#--- close progress bar
+close(pb)
+# stop cluster
+snow::stopCluster(cl) 
+toc()
+
+#--- Save / Load
+# save(SoilMoisture1.dt, file = paste0(my.path,"Amazon_selected_data/data1_by_var/SoilMoisture1_dt.Rdata"))
+load(paste0(my.path,"Amazon_selected_data/data1_by_var/SoilMoisture1_dt.Rdata"))
+SoilMoisture1.dt
+
+#--- Merge data
+tic() # 161.188 sec elapsed
+Amazon.data1.dt <- merge(x = Amazon.data1.dt, y = SoilMoisture1.dt, by = c("cell", "x", "y", "Year", "Month"))
+toc()
+Amazon.data1.dt
+```
+
+## Elevation 1
+
+```{r}
+library(doSNOW)
+library(itertools)
+
+#--- list of files
+amaz.var.list <- list.files(elevation.path, full.names=TRUE, pattern = ".tif$")   #--
+
+nbrCores <- 45
+cl <- snow::makeCluster(nbrCores); registerDoSNOW(cl)
+
+#--- init the progress bar
+pb <- txtProgressBar(max = 100, style = 3)
+progress <- function(n) setTxtProgressBar(pb, n)
+opts <- list(progress = progress)
+
+tic() # 663.898 sec elapsed
+#--- conduct the parallelisation
+Elevation1.dt <-                                                            #--
+  foreach(
+    ras_id=amaz.var.list, # ras_id=amaz.var.list[1]
+    .combine='rbind',
+    .packages=c('terra', 'sf', 'data.table', 'dplyr', 'tidyverse', 'data.table'),
+    .options.snow = opts) %dopar% 
+  {
+    # Read all rasters
+    ras <- rast(ras_id)
+    
+    # Rename layers
+    ras.Y.M <- renameRast(ras, 'elevation_working_', '')                     #--
+    ras <- ras.Y.M[[1]]
+    
+    # select data
+    ras1.fires <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras1_fires.tif"))
+    ras_1 <- selectRange(ras, ras1.fires)
+    names(ras_1) <- 'Elevation'                                              #--
+    
+    # convert to data table
+    DT <- as.data.table(ras_1, cell=T, xy=T)
+    DT <- DT %>%
+      mutate(
+        x = floor(x),
+        y = floor(y),
+        Year = rep(ras.Y.M[[2]], dim(DT)[1]) %>% as.factor(),
+        Month = rep(ras.Y.M[[3]], dim(DT)[1]) %>% as.factor(),
+      ) %>%
+      na.omit() %>%
+      setcolorder(., c('cell', 'x', 'y', 'Year', 'Month'))
+    return(DT)
+  }
+
+# close progress bar
+close(pb)
+#--- stop cluster
+snow::stopCluster(cl) 
+toc()
+
+#--- Save / Load
+# save(Elevation1.dt, file = paste0(my.path,"Amazon_selected_data/data1_by_var/Elevation1_dt.Rdata"))
+load(paste0(my.path,"Amazon_selected_data/data1_by_var/Elevation1_dt.Rdata"))
+Elevation1.dt
+
+#--- Merge data
+tic() # 160.436 sec elapsed
+Amazon.data1.dt <- merge(x = Amazon.data1.dt, y = Elevation1.dt, by = c("cell", "x", "y", "Year", "Month"))
+toc()
+Amazon.data1.dt
+```
+
+## LandSurfaceTemp 1
+
+```{r}
+library(doSNOW)
+library(itertools)
+
+#--- list of files
+amaz.var.list <- list.files(LandSurfaceTemp.path, full.names=TRUE, pattern = ".tif$")   #--
+
+nbrCores <- 45
+cl <- snow::makeCluster(nbrCores); registerDoSNOW(cl)
+
+#--- init the progress bar
+pb <- txtProgressBar(max = 100, style = 3)
+progress <- function(n) setTxtProgressBar(pb, n)
+opts <- list(progress = progress)
+
+tic() # 189.949 sec elapsed
+#--- conduct the parallelisation
+LandSurfaceTemp1.dt <-                                                            #--
+  foreach(
+    ras_id=amaz.var.list, # ras_id=amaz.var.list[1]
+    .combine='rbind',
+    .packages=c('terra', 'sf', 'data.table', 'dplyr', 'tidyverse', 'data.table'),
+    .options.snow = opts) %dopar% 
+  {
+    # Read all rasters
+    ras <- rast(ras_id)
+    
+    # Rename layers
+    ras.Y.M <- renameRast(ras, 'landsurftemp_working_', '')                     #--
+    ras <- ras.Y.M[[1]]
+    
+    # select data
+    ras1.fires <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras1_fires.tif"))
+    ras_1 <- selectRange(ras, ras1.fires)
+    names(ras_1) <- 'LandSurfaceTemp'                                              #--
+    
+    # convert to data table
+    DT <- as.data.table(ras_1, cell=T, xy=T)
+    DT <- DT %>%
+      mutate(
+        x = floor(x),
+        y = floor(y),
+        Year = rep(ras.Y.M[[2]], dim(DT)[1]) %>% as.factor(),
+        Month = rep(ras.Y.M[[3]], dim(DT)[1]) %>% as.factor(),
+      ) %>%
+      na.omit() %>%
+      setcolorder(., c('cell', 'x', 'y', 'Year', 'Month'))
+    return(DT)
+  }
+
+#--- close progress bar
+close(pb)
+# stop cluster
+snow::stopCluster(cl) 
+toc()
+
+#--- Save / Load
+# save(LandSurfaceTemp1.dt, file = paste0(my.path,"Amazon_selected_data/data1_by_var/LandSurfaceTemp1_dt.Rdata"))
+load(paste0(my.path,"Amazon_selected_data/data1_by_var/LandSurfaceTemp1_dt.Rdata"))
+LandSurfaceTemp1.dt
+
+#--- Merge data
+tic() # 170.133 sec elapsed
+Amazon.data1.dt <- merge(x = Amazon.data1.dt, y = LandSurfaceTemp1.dt, by = c("cell", "x", "y", "Year", "Month"))
+toc()
+Amazon.data1.dt
+```
+
+## Specific Humidity 1
+
+```{r}
+library(doSNOW)
+library(itertools)
+
+#--- list of files
+amaz.var.list <- list.files(humidity.path, full.names=TRUE, pattern = ".tif$")   #--
+
+nbrCores <- 45
+cl <- snow::makeCluster(nbrCores); registerDoSNOW(cl)
+
+#--- init the progress bar
+pb <- txtProgressBar(max = 100, style = 3)
+progress <- function(n) setTxtProgressBar(pb, n)
+opts <- list(progress = progress)
+
+tic() # 301.272 sec elapsed
+#--- conduct the parallelisation
+Humidity1.dt <-                                                            #--
+  foreach(
+    ras_id=amaz.var.list, # ras_id=amaz.var.list[1]
+    .combine='rbind',
+    .packages=c('terra', 'sf', 'data.table', 'dplyr', 'tidyverse', 'data.table'),
+    .options.snow = opts) %dopar% 
+  {
+    # Read all rasters
+    ras <- rast(ras_id)
+    
+    # Rename layers
+    ras.Y.M <- renameRast(ras, 'humidity_working_', '')                     #--
+    ras <- ras.Y.M[[1]]
+    
+    # select data
+    ras1.fires <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras1_fires.tif"))
+    ras_1 <- selectRange(ras, ras1.fires)
+    names(ras_1) <- 'Humidity'                                              #--
+    
+    # convert to data table
+    DT <- as.data.table(ras_1, cell=T, xy=T)
+    DT <- DT %>%
+      mutate(
+        x = floor(x),
+        y = floor(y),
+        Year = rep(ras.Y.M[[2]], dim(DT)[1]) %>% as.factor(),
+        Month = rep(ras.Y.M[[3]], dim(DT)[1]) %>% as.factor(),
+      ) %>%
+      na.omit() %>%
+      setcolorder(., c('cell', 'x', 'y', 'Year', 'Month'))
+    return(DT)
+  }
+
+#--- close progress bar
+close(pb)
+# stop cluster
+snow::stopCluster(cl) 
+toc()
+
+#--- Save / Load
+# save(Humidity1.dt, file = paste0(my.path,"Amazon_selected_data/data1_by_var/Humidity1_dt.Rdata"))
+load(paste0(my.path,"Amazon_selected_data/data1_by_var/Humidity1_dt.Rdata"))
+Humidity1.dt
+
+#--- Merge data
+tic() # 157.014 sec elapsed
+Amazon.data1.dt <- merge(x = Amazon.data1.dt, y = Humidity1.dt, by = c("cell", "x", "y", "Year", "Month"))
+toc()
+Amazon.data1.dt
+```
+
+## Evapotranspiration 1
+
+```{r}
+library(doSNOW)
+library(itertools)
+
+#--- list of files
+amaz.var.list <- list.files(evapotranspiration.path, full.names=TRUE, pattern = ".tif$")   #--
+
+nbrCores <- 45
+cl <- snow::makeCluster(nbrCores); registerDoSNOW(cl)
+
+#--- init the progress bar
+pb <- txtProgressBar(max = 100, style = 3)
+progress <- function(n) setTxtProgressBar(pb, n)
+opts <- list(progress = progress)
+
+tic() # 408.655 sec elapsed
+#--- conduct the parallelisation
+Evapotranspiration1.dt <-                                                            #--
+  foreach(
+    ras_id=amaz.var.list, # ras_id=amaz.var.list[1]
+    .combine='rbind',
+    .packages=c('terra', 'sf', 'data.table', 'dplyr', 'tidyverse', 'data.table'),
+    .options.snow = opts) %dopar% 
+  {
+    # Read all rasters
+    ras <- rast(ras_id)
+    
+    # Rename layers
+    ras.Y.M <- renameRast(ras, 'evapotranspiration_working_', '')                     #--
+    ras <- ras.Y.M[[1]]
+    
+    # select data
+    ras1.fires <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras1_fires.tif"))
+    ras_1 <- selectRange(ras, ras1.fires)
+    names(ras_1) <- 'Evapotranspiration'                                              #--
+    
+    # convert to data table
+    DT <- as.data.table(ras_1, cell=T, xy=T)
+    DT <- DT %>%
+      mutate(
+        x = floor(x),
+        y = floor(y),
+        Year = rep(ras.Y.M[[2]], dim(DT)[1]) %>% as.factor(),
+        Month = rep(ras.Y.M[[3]], dim(DT)[1]) %>% as.factor(),
+      ) %>%
+      na.omit() %>%
+      setcolorder(., c('cell', 'x', 'y', 'Year', 'Month'))
+    return(DT)
+  }
+
+#--- close progress bar
+close(pb)
+# stop cluster
+snow::stopCluster(cl) 
+toc()
+
+#--- Save
+# save(Evapotranspiration1.dt, file = paste0(my.path,"Amazon_selected_data/data1_by_var/Evapotranspiration1_dt.Rdata"))
+load(paste0(my.path,"Amazon_selected_data/data1_by_var/Evapotranspiration1_dt.Rdata"))
+Evapotranspiration1.dt
+
+#--- Merge data
+tic() # 186.27 sec elapsed
+Amazon.data1.dt <- merge(x = Amazon.data1.dt, y = Evapotranspiration1.dt, by = c("cell", "x", "y", "Year", "Month"))
+toc()
+Amazon.data1.dt
+```
+
+## Wind Speed 1
+
+```{r}
+library(doSNOW)
+library(itertools)
+
+#--- list of files
+amaz.var.list <- list.files(wind.path, full.names=TRUE, pattern = ".tif$")   #--
+
+nbrCores <- 45
+cl <- snow::makeCluster(nbrCores); registerDoSNOW(cl)
+
+#--- init the progress bar
+pb <- txtProgressBar(max = 100, style = 3)
+progress <- function(n) setTxtProgressBar(pb, n)
+opts <- list(progress = progress)
+
+tic() # 324 sec elapsed
+#--- conduct the parallelisation
+Wind1.dt <-                                                            #--
+  foreach(
+    ras_id=amaz.var.list, # ras_id=amaz.var.list[1]
+    .combine='rbind',
+    .packages=c('terra', 'sf', 'data.table', 'dplyr', 'tidyverse', 'data.table'),
+    .options.snow = opts) %dopar% 
+  {
+    # Read all rasters
+    ras <- rast(ras_id)
+    
+    # Rename layers
+    ras.Y.M <- renameRast(ras, 'wind_working_', '')                     #--
+    ras <- ras.Y.M[[1]]
+    
+    # select data
+    ras1.fires <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras1_fires.tif"))
+    ras_1 <- selectRange(ras, ras1.fires)
+    names(ras_1) <- 'Wind'                                              #--
+    
+    # convert to data table
+    DT <- as.data.table(ras_1, cell=T, xy=T)
+    DT <- DT %>%
+      mutate(
+        x = floor(x),
+        y = floor(y),
+        Year = rep(ras.Y.M[[2]], dim(DT)[1]) %>% as.factor(),
+        Month = rep(ras.Y.M[[3]], dim(DT)[1]) %>% as.factor(),
+      ) %>%
+      na.omit() %>%
+      setcolorder(., c('cell', 'x', 'y', 'Year', 'Month'))
+    return(DT)
+  }
+
+#--- close progress bar
+close(pb)
+# stop cluster
+snow::stopCluster(cl) 
+toc()
+
+#--- Save
+# save(Wind1.dt, file = paste0(my.path,"Amazon_selected_data/data1_by_var/Wind1_dt.Rdata"))
+load(paste0(my.path,"Amazon_selected_data/data1_by_var/Wind1_dt.Rdata"))
+Wind1.dt
+
+#--- Merge data
+tic() # 162.074 sec elapsed
+Amazon.data1.dt <- merge(x = Amazon.data1.dt, y = Wind1.dt, by = c("cell", "x", "y", "Year", "Month"))
+toc()
+Amazon.data1.dt
+```
+
+## Air Temperature 1
+
+```{r}
+library(doSNOW)
+library(itertools)
+
+#--- list of files
+amaz.var.list <- list.files(airtemp.path, full.names=TRUE, pattern = ".tif$")   #--
+
+nbrCores <- 45
+cl <- snow::makeCluster(nbrCores); registerDoSNOW(cl)
+
+#--- init the progress bar
+pb <- txtProgressBar(max = 100, style = 3)
+progress <- function(n) setTxtProgressBar(pb, n)
+opts <- list(progress = progress)
+
+tic() # 301.386 sec elapsed
+#--- conduct the parallelisation
+AirTemp1.dt <-                                                            #--
+  foreach(
+    ras_id=amaz.var.list, # ras_id=amaz.var.list[1]
+    .combine='rbind',
+    .packages=c('terra', 'sf', 'data.table', 'dplyr', 'tidyverse', 'data.table'),
+    .options.snow = opts) %dopar% 
+  {
+    # Read all rasters
+    ras <- rast(ras_id)
+    
+    # Rename layers
+    ras.Y.M <- renameRast(ras, 'airtemp_working_', '')                     #--
+    ras <- ras.Y.M[[1]]
+    
+    # select data
+    ras1.fires <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras1_fires.tif"))
+    ras_1 <- selectRange(ras, ras1.fires)
+    names(ras_1) <- 'AirTemp'                                              #--
+    
+    # convert to data table
+    DT <- as.data.table(ras_1, cell=T, xy=T)
+    DT <- DT %>%
+      mutate(
+        x = floor(x),
+        y = floor(y),
+        Year = rep(ras.Y.M[[2]], dim(DT)[1]) %>% as.factor(),
+        Month = rep(ras.Y.M[[3]], dim(DT)[1]) %>% as.factor(),
+      ) %>%
+      na.omit() %>%
+      setcolorder(., c('cell', 'x', 'y', 'Year', 'Month'))
+    return(DT)
+  }
+
+#--- close progress bar
+close(pb)
+# stop cluster
+snow::stopCluster(cl) 
+toc()
+
+#--- Save
+# save(AirTemp1.dt, file = paste0(my.path,"Amazon_selected_data/data1_by_var/AirTemp1_dt.Rdata"))
+load(paste0(my.path,"Amazon_selected_data/data1_by_var/AirTemp1_dt.Rdata"))
+AirTemp1.dt
+
+#--- Merge data
+tic() # 157.547 sec elapsed
+Amazon.data1.dt <- merge(x = Amazon.data1.dt, y = AirTemp1.dt, by = c("cell", "x", "y", "Year", "Month"))
+toc()
+Amazon.data1.dt
+```
+
+# Save datatable 1
+
+```{r}
+#--- Save data 1
+# save(Amazon.data1.dt, file = paste0(my.path,"Amazon_selected_data/Amazon_data1_dt.Rdata"))
+load(paste0(my.path,"Amazon_selected_data/Amazon_data1_dt.Rdata"))
+Amazon.data1.dt
+
+#--- Remove unused DT
+rm(BurntArea1.dt, LandCover1.dt, Precipitation1.dt, SoilMoisture1.dt, Elevation1.dt, LandSurfaceTemp1.dt, Humidity1.dt, Evapotranspiration1.dt, Wind1.dt, AirTemp1.dt)
+gc()
+```
+
+#=======================
+
+# Save final data
+
+```{r}
+# Amazon.data.dt <- rbind(Amazon.data0.dt, Amazon.data1.dt)
+
+#--- Save final data 
+# save(Amazon.data.dt, file = paste0(my.path,"Amazon_selected_data/Amazon_data_dt.Rdata"))
+tic() # 82.894 sec elapsed | 282.194
+load(paste0(my.path,"Amazon_selected_data/Amazon_data_dt.Rdata"))
+toc()
+Amazon.data.dt
+```
+
+# Correlation
+
+```{r}
+library("corrplot")
+# Amazon.data.dt[, c('cell'):=NULL]
+tic()
+Amazon.data.dt %>%
+    # sample_n(2000) %>% 
+    # mutate_if(is.factor, as.numeric) %>%
+    select(BurntArea, everything()) %>%
+    cor %>%
+    {.[order(abs(.[, 1]), decreasing = TRUE), 
+       order(abs(.[, 1]), decreasing = TRUE)]} %>%
+    corrplot(method = "number", type = "upper", mar = c(0, 0, 1.5, 0),
+             title = "Correlations")
+toc()
+```
+
+```{r}
+# Amazon.data.dt[, c('cell'):=NULL] 
+library(HiClimR)
+tic()
+fastCor(Amazon.data.dt, nSplit = 1, upperTri = TRUE, optBLAS = FALSE, verbose = TRUE)
+toc()
+```
+
+
+#=======================
+
+# Data preparation
+
+## Split data by zone
+
+```{r}
+v <- ext(amaz.basin.shp)
+x.min <- v$xmin[[1]] - 1; x.max <- v$xmax[[1]] + 1; 
+y.min <- v$ymin[[1]] - 1; y.max <- v$ymax[[1]] + 1; 
+
+XY <- list(
+  c(x.min, -0.84e+06, y.min, y.max),                       # z1
+  c(-0.84e+06, +0.55e+06, 3.75e+06, y.max),                # z2
+  c(-0.84e+06, +0.55e+06, 2.6e+06, 3.75e+06),              # z3
+  c(-0.84e+06, -0.05e+06, 2.22e+06, 2.6e+06),              # z4
+  c(-0.84e+06, -0.51e+06, y.min, 2.22e+06),                # z5
+  c(-0.51e+06, -0.05e+06, y.min, 2.22e+06),                # z6
+  c(-0.05e+06, 0.6e+06, y.min, 2.6e+06),                   # z7
+  c(0.6e+06, 0.95e+06, y.min, 2.6e+06),                    # z8
+  c(+0.55e+06, x.max, 3.24e+06, y.max),                    # z9
+  c(+0.55e+06, x.max, 2.86e+06, 3.24e+06),                 # z10
+  c(+0.55e+06, 0.95e+06, x.max, y.min, 2.6e+06, 2.86e+06)  # z11
+)
+
+nz <- length(XY)
+zl <- list()
+for (i in 1:(nz-1)){
+  zl[[i]] <- rbind(
+    c(XY[[i]][1], XY[[i]][3]), 
+    c(XY[[i]][2], XY[[i]][3]), 
+    c(XY[[i]][2], XY[[i]][4]), 
+    c(XY[[i]][1], XY[[i]][4])
+  ) %>% 
+    cbind(object=i, part=1, ., hole=0) %>% 
+    as.data.table()
+}
+
+i <- nz
+zl[[i]] <- rbind(
+  c(XY[[i]][2], XY[[i]][4]), 
+  c(XY[[i]][3], XY[[i]][4]), 
+  c(XY[[i]][3], XY[[i]][6]), 
+  # c(XY[[i]][2], XY[[i]][6]), 
+  c(XY[[i]][1], XY[[i]][6]), 
+  c(XY[[i]][1], XY[[i]][5]), 
+  c(XY[[i]][2], XY[[i]][5])
+) %>% 
+  cbind(object=i, part=1, ., hole=0) %>% 
+  as.data.table()
+
+z <- rbindlist(zl, use.names=T) %>% as.matrix()
+colnames(z)[3:4] <- c('x', 'y')
+
+p <- vect(z, "polygons")
+crs(p) <- crs(amaz.basin.shp)
+
+plot(Q1, col=pal(3))
+plot(p, add=T)
+plot(amaz.basin.shp$geometry, add=T)
+
+```
+
+```{r}
+tic() # 219.55 sec elapsed
+XY <- list(
+  c(x.min, -0.84e+06, y.min, y.max),                       # z1
+  c(-0.84e+06, +0.55e+06, 3.75e+06, y.max),                # z2
+  c(-0.84e+06, +0.55e+06, 2.6e+06, 3.75e+06),              # z3
+  c(-0.84e+06, -0.05e+06, 2.22e+06, 2.6e+06),              # z4
+  c(-0.84e+06, -0.51e+06, y.min, 2.22e+06),                # z5
+  c(-0.51e+06, -0.05e+06, y.min, 2.22e+06),                # z6
+  c(-0.05e+06, 0.6e+06, y.min, 2.6e+06),                   # z7
+  c(0.6e+06, 0.95e+06, y.min, 2.6e+06),                    # z8
+  c(+0.55e+06, x.max, 3.24e+06, y.max),                    # z9
+  c(+0.55e+06, x.max, 2.86e+06, 3.24e+06),                 # z10
+  c(+0.55e+06, 0.95e+06, x.max, y.min, 2.6e+06, 2.86e+06)  # z11
+)
+Amazon.data.dt[, Zones := 0.0]
+Amazon.data.dt %>% setcolorder(., c('cell', 'x', 'y', 'Zones', 'Year', 'Month'))
+
+Amazon.zone.lst <- list()
+dim.zones <- matrix(nrow = nz, ncol = 1, dimnames = list(paste0('z', 1:nz), c('dim')))
+
+for (i in 1:nz){
+  cat("Zone", i, "/", nz, " - ")
+  if (i == nz){
+    Amazon.data.dt[((x > XY[[i]][2] & x <= XY[[i]][3]) & (y > XY[[i]][4] & y <= XY[[i]][5])) | 
+                     ((x > XY[[i]][1] & x <= XY[[i]][3]) & (y > XY[[i]][5] & y <= XY[[i]][6])), Zones := i]
+  }else{
+    Amazon.data.dt[(x > XY[[i]][1] & x <= XY[[i]][2]) & (y > XY[[i]][3] & y <= XY[[i]][4]), Zones := i]
+  }
+}
+toc()
+dim.zones <- Amazon.data.dt[, .N, by=.(Zones)]
+dim.zones[order(Zones)]
+sum(dim.zones$N) == dim(Amazon.data.dt)[1]
+
+#--- Save data with zones
+# save(Amazon.data.dt, file = paste0(my.path,"Amazon_selected_data/Amazon_zones_dt.Rdata"))
+tic() # 82.894 sec elapsed | 282.194
+load(paste0(my.path,"Amazon_selected_data/Amazon_zones_dt.Rdata"))
+toc()
+Amazon.data.dt
+```
+
+## Zone1
+
+### Libraries
+
+```{r, warning=FALSE, message=FALSE}
+library(rsample)
+library(parsnip)
+library(workflows)
+library(recipes)
+library(tune)
+library(ranger)
+library(sparklyr)
+library(agua)
+```
+
+### Randomise data ---> Zone1
+
+```{r}
+# Amazon.z1.dt <- Amazon.data.dt[Amazon.data.dt$Zones == 1,]
+# set.seed(11)
+# amaz.nrow <- nrow(Amazon.z1.dt)
+# samp <- sample(1:amaz.nrow, amaz.nrow, replace=F)
+# AZ1.rnd <- Amazon.z1.dt[samp,]
+
+#--- Save data with zones
+# save(AZ1.rnd, file = paste0(my.path,"Amazon_selected_data/data_by_zones/AZ1_rnd.Rdata"))
+tic() # 12.007 sec elapsed
+load(paste0(my.path,"Amazon_selected_data/data_by_zones/AZ1_rnd.Rdata"))
+toc()
+AZ1.rnd[, c('cell', 'Zones'):=NULL] 
+AZ1.rnd
+```
+
+### Small part of zone 1
+
+```{r}
+tic() # 47.636 sec elapsed
+AZ1.p1 <- vfold_cv(AZ1.rnd, v = 5,  strata = BurntArea)
+AZ1.p1 <- AZ1.p1$splits[[1]] %>% assessment()
+toc()
+AZ1.p1
+```
+
+### Normalize data
+
+```{r}
+# ## recipe
+# AZ1_recipe0 <- recipe( BurntArea ~ ., data = AZ1.rnd) %>%
+# step_normalize(
+#   Precipitation, SoilMoisture, Elevation, LandSurfaceTemp, Humidity, Evapotranspiration, Wind, AirTemp
+# )
+# 
+# ## Normalize data
+# AZ1.norm <- AZ1_recipe0 %>% prep() %>% bake(new_data = NULL) %>% setcolorder(., c('x', 'y', 'Year', 'Month', 'BurntArea'))
+# AZ1.norm
+# rm(AZ1_recipe0); gc()
+```
+
+### Split data to training and testing data 
+
+```{r}
+set.seed(11)
+split1 <- initial_split(AZ1.p1, prop = 0.75, strata = BurntArea) # AZ1.norm | AZ1.rnd | AZ1.p1
+# display the split
+split1
+```
+
+```{r}
+AZ1.trn <- training(split1)
+AZ1.tst <- testing(split1)
+gc()
+```
+
+### Create v-fold cross validation samples 
+
+```{r}
+set.seed(111)
+tic() # 47.99 sec elapsed 
+AZ1.rnd.cv <- vfold_cv(AZ1.trn, v = 5,  strata = BurntArea)
+toc()
+# display the 5 folds
+# AZ1.rnd.cv$splits
+```
+
+#=======================
+
+# Grid (Hyperparameter) Search
+
+```{r}
+library(tidymodels)
+library(tidyverse)
+library(workflows)
+library(tune)
+```
+
+## Define a recipe
+
+```{r}
+# define the recipe
+AZ1.recipe <- recipe(BurntArea ~ ., data = AZ1.p1) %>%
+  # and some pre-processing steps
+  step_normalize(all_numeric()) # %>%
+#   step_knnimpute(all_predictors())
+```
+
+```{r}
+# AZ1.trn.prep <- AZ1.recipe %>%
+#   prep(AZ1.trn) %>%
+#   juice()
+# AZ1.trn.prep
+```
+
+## Specify the model
+
+```{r}
+rf_model <- 
+  # specify that the model is a random forest
+  rand_forest() %>%
+  # specify that the `mtry` parameter needs to be tuned
+  set_args(mtry = tune(), trees = tune()) %>%
+  # select the engine/package that underlies the model
+  set_engine("ranger", importance = "impurity") %>%
+  # choose either the continuous regression or binary classification mode
+  set_mode("classification") 
+```
+
+## Put it all together in a workflow
+
+```{r}
+# set the workflow
+rf_workflow <- workflow() %>%
+  # add the recipe
+  add_recipe(AZ1.recipe) %>%
+  # add the model
+  add_model(rf_model)
+```
+
+## Tune the parameters
+
+```{r}
+# specify which values eant to try
+rf_grid <- expand.grid(mtry = 5:13, trees=seq(300, 600, 50))
+# extract results
+tic()
+rf_tune_results <- rf_workflow %>%
+  tune_grid(resamples = AZ1.rnd.cv, #CV object
+            grid = rf_grid, # grid of values to try
+            metrics = metric_set(accuracy, roc_auc) # metrics we care about
+            )
+toc()
+```
+
+
+
+#---
+
+## H2O engine
+
+```{r, warning=FALSE, message=FALSE}
+library(h2o)
+```
+
+### Initiate H2O
+
+```{r}
+options(java.parameters = "-Xmx400g")
+Sys.setenv("OPENBLAS_MAIN_FREE"=1)
+
+library(h2o)
+localH2O <- h2o.init(ip = 'localhost', port = 50001, nthreads = 40, max_mem_size = '400g')
+```
+
+## Define a recipe
+
+```{r}
+# define the recipe
+AZ1.recipe <- recipe(BurntArea ~ ., data = AZ1.p1) %>%
+  # and some pre-processing steps
+  step_normalize(all_numeric()) # %>%
+#   step_knnimpute(all_predictors())
+```
+
+```{r}
+# AZ1.trn.prep <- AZ1.recipe %>%
+#   prep(AZ1.trn) %>%
+#   juice()
+# AZ1.trn.prep
+```
+
+## Specify the model
+
+```{r}
+rf_model <- 
+  # specify that the model is a random forest
+  rand_forest() %>%
+  # specify that the `mtry` parameter needs to be tuned
+  set_args(mtry = tune(), trees = 600) %>%
+  # select the engine/package that underlies the model
+  set_engine("h2o") %>%
+  # choose either the continuous regression or binary classification mode
+  set_mode("classification") 
+```
+
+## Put it all together in a workflow
+
+```{r}
+# set the workflow
+rf_workflow <- workflow() %>%
+  # add the recipe
+  add_recipe(AZ1.recipe) %>%
+  # add the model
+  add_model(rf_model)
+```
+
+## Tune the parameters
+
+```{r}
+# specify which values eant to try
+rf_grid <- expand.grid(mtry = 5:13, trees=seq(300, 600, 50))
+# extract results
+tic()
+rf_tune_results <- rf_workflow %>%
+  tune_grid(resamples = AZ1.rnd.cv, #CV object
+            grid = rf_grid, # grid of values to try
+            metrics = metric_set(accuracy, roc_auc) # metrics we care about
+            )
+toc()
+```
+
+
+
+
+### Set up the model specification
+
+```{r}
+AZ1_rf <- rand_forest(trees = tune()) %>%
+  set_engine("h2o") %>%
+  set_mode("classification") 
+AZ1_rf
+```
+
+### Create a model recipe
+
+```{r}
+# create an empty tibble to store the results
+accuracies <- tibble(size = integer(), 
+                     model_string = character(), 
+                     accuracy = numeric())
+
+names <- colnames(AZ1.trn %>% select(-c(BurntArea)))
+
+# store the total number of predictors
+n_total <- length(names)
+
+# stores selected predictors
+selected <- c()
+
+tunegrid <- expand.grid(trees=300) # seq(300, 700, 100)
+
+# for every size from 1 to the total number of predictors
+for (i in 1:n_total) {
+    # for every predictor still not added yet
+    accs <- list()
+    models <- list()
+    for (j in 5:length(names)) {
+        # create a model string for this combination of predictors
+        preds_new <- c(selected, names[[j]])
+        model_string <- paste("BurntArea", "~", paste('x + y + Year + Month +',preds_new, collapse="+"))
+
+        # create a recipe from the model string
+        AZ1_recipe <- recipe(as.formula(model_string), data = AZ1.trn)
+
+        # tune the KNN classifier with these predictors, 
+        # and collect the accuracy for the best K
+        tic()
+        acc <- workflow() %>%
+          add_recipe(AZ1_recipe) %>%
+          add_model(AZ1_rf) %>%
+          tune_grid(resamples = AZ1.rnd.cv, grid = tunegrid) %>%
+          collect_metrics() %>%
+          filter(.metric == "accuracy") %>%
+          summarize(mx = max(mean))
+        toc()
+        acc <- acc$mx %>% unlist()
+
+        # add this result to the dataframe
+        accs[[j]] <- acc
+        models[[j]] <- model_string
+    }
+    jstar <- which.max(unlist(accs))
+    accuracies <- accuracies %>% 
+      add_row(size = i, 
+              model_string = models[[jstar]], 
+              accuracy = accs[[jstar]])
+    selected <- c(selected, names[[jstar]])
+    names <- names[-jstar]
+}
+accuracies
+```
+
+15:12
+
+### Stop H2O server
+
+```{r}
+h2o.shutdown()
+```
+
+#---
+
+```{r}
+## recipe
+# AZ1_recipe <- recipe( BurntArea ~ ., data = AZ1.trn ) %>%
+# step_normalize(
+#   Precipitation, SoilMoisture, Elevation, LandSurfaceTemp, Humidity, Evapotranspiration, Wind, AirTemp
+# )
+# AZ1_recipe
+# 
+# ## check that normalization and NA imputation occurred in the training data
+# AZ1_recipe %>%
+# prep() %>%
+# bake(new_data = NULL)
+# 
+# ## check that normalization and NA imputation occurred in the testing data
+# AZ1_recipe %>%
+# prep() %>%
+# bake(new_data = AZ1.tst)
+```
+
+```{r}
+# create an empty tibble to store the results
+accuracies <- tibble(size = integer(), 
+                     model_string = character(), 
+                     accuracy = numeric())
+
+# # create a model specification
+# knn_spec <- nearest_neighbor(weight_func = "rectangular", 
+#                              neighbors = tune()) %>%
+#      set_engine("kknn") %>%
+#      set_mode("classification")
+# 
+# AZ1_rf <- rand_forest(mtry = tune(), trees = tune()) %>%
+#   set_engine("randomForest") %>%
+#   set_mode("classification") 
+# AZ1_rf
+# 
+# 
+# # create a 5-fold cross-validation object
+# cancer_vfold <- vfold_cv(cancer_subset, v = 5, strata = Class)
+
+names <- colnames(AZ1.trn %>% select(-c(cell, BurntArea, Zones)))
+
+# store the total number of predictors
+n_total <- length(names)
+
+# stores selected predictors
+selected <- c()
+
+tunegrid <- expand.grid(trees=seq(200, 1000, 100))
+
+# for every size from 1 to the total number of predictors
+for (i in 1:n_total) {
+    # for every predictor still not added yet
+    accs <- list()
+    models <- list()
+    for (j in 5:length(names)) {
+        # create a model string for this combination of predictors
+        preds_new <- c(selected, names[[j]])
+        model_string <- paste("BurntArea", "~", paste('x + y + Year + Month +',preds_new, collapse="+"))
+
+        # create a recipe from the model string
+        if (j > 5){
+          AZ1_recipe <- recipe(as.formula(model_string), data = AZ1.trn) %>%
+            step_scale(all_predictors(), - c(x, y,Year, Month, LandCover)) %>%
+            step_center(all_predictors(), - c(x, y,Year, Month, LandCover))
+        }else{
+          AZ1_recipe <- recipe(as.formula(model_string), data = AZ1.trn) 
+        }
+
+        # tune the KNN classifier with these predictors, 
+        # and collect the accuracy for the best K
+        tic()
+        acc <- workflow() %>%
+          add_recipe(AZ1_recipe) %>%
+          add_model(AZ1_rf) %>%
+          tune_grid(resamples = AZ1.rnd.cv, grid = tunegrid) %>%
+          collect_metrics() %>%
+          filter(.metric == "accuracy") %>%
+          summarize(mx = max(mean))
+        toc()
+        acc <- acc$mx %>% unlist()
+
+        # add this result to the dataframe
+        accs[[j]] <- acc
+        models[[j]] <- model_string
+    }
+    jstar <- which.max(unlist(accs))
+    accuracies <- accuracies %>% 
+      add_row(size = i, 
+              model_string = models[[jstar]], 
+              accuracy = accs[[jstar]])
+    selected <- c(selected, names[[jstar]])
+    names <- names[-jstar]
+}
+accuracies
+```
+
+#---
+
+## Parallel
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

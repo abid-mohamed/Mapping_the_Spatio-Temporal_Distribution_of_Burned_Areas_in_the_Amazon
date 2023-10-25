@@ -1,0 +1,1418 @@
+---
+title: "Preparation_Amazon_data"
+date: "2023-04-05"
+output:
+  html_document: 
+    number_sections: yes
+    fig_caption: yes
+    toc: true
+    toc_float: 
+      collapsed: true
+    theme: cerulean
+    highlight: kate
+    toc_depth: 5
+    keep_md: yes
+    df_print: paged
+---
+
+# Load libraries
+
+```{r warning=FALSE, message=FALSE}
+# load libraries
+library(raster)
+library(tictoc)
+library(tidyverse)
+library(terra)
+library(sf)
+library(RColorBrewer)
+library(rts)
+library(doParallel)
+library(parallel)
+library(foreach)
+library(data.table)
+library(tidyterra)
+# Plot
+library(RColorBrewer)
+library(tidyterra)
+library(scico)
+library(wesanderson)
+library(viridis)
+library(scales)
+library(latex2exp)
+library(ggplot2)# Select a palette
+library(ggpubr)
+```
+
+# Functions
+
+```{r "Functions"}
+# Function to save layers
+saveLayers = function(dataRast, shapeFile, pathFile, strRemove,
+                      x_min=xmin(dataRast), x_max=xmax(dataRast), 
+                      y_min=ymin(dataRast), y_max=ymax(dataRast)){
+  
+  # Iterate all the layers
+  for (i in 1:nlyr(dataRast)){
+    print(i)
+    dataRast.i <- dataRast[[i]]
+    # Crop data
+    dataRast.basin.i <- mask(dataRast.i, mask = shapeFile) %>%
+      crop(ext(x_min, x_max, y_min, y_max))
+    # Path of the file
+    path <- gsub(strRemove, "", names(dataRast.basin.i)) %>%
+      paste0(pathFile, ., ".tif")
+    # Save file
+    writeRaster(dataRast.basin.i, path, overwrite=TRUE)
+    # Clear memory
+    gc()
+  }
+}
+
+# Function to rename layers
+renameLayers <- function(dataRast, fileStart, prefix){
+  # index of file name in the path
+  id.date <- unlist(gregexpr(fileStart, sources(dataRast)[[1]])) + nchar(fileStart)
+  # rename layers
+  names(dataRast) <- 
+    substr(sources(dataRast), id.date, (id.date+50)) %>%
+    gsub(".tif", "_1", .) %>%
+    as.Date("%Y_%m_%d") %>%
+    format(., '%Y_%m') %>%
+    paste0(prefix, .)
+  
+  return(dataRast)
+}
+#---- Plot ----
+myPlot <- function(
+  rast, 
+  title=NULL, 
+  sub_title=NULL, 
+  theme=2, 
+  na_value=NULL, 
+  max_cell=1e6,
+  x_angle=0,
+  b_size=16,
+  v_unit=c(2, 2, 2, 2) # c(t, r, b, l)
+){
+  # Prepare missing data
+  if (!is.null(na_value)) {
+    min.rast <- minmax(rast)[1]
+    rast.na <- rast
+    rast.na[is.na(rast.na)] <- min.rast - 1e3
+    rast.na[rast.na >= min.rast] <- NA
+    # levels(rast.na) <- data.frame(id=c(min.rast - 1e3), val=c('1'))
+    rast.na <- rast.na %>% mask(mask = amaz.basin.shp)
+    # rast.na[rast.na < min.rast] <- -1e-09
+    p1 <- ggplot() +
+      geom_spatraster(data = rast.na, maxcell = max_cell)
+  }else{
+    p1 <- ggplot()
+  }
+  p1 <- switch(
+    theme,
+    p1,
+    p1 + theme_bw(base_size=b_size),
+    p1 + theme_linedraw(base_size=b_size),
+    p1 + theme_light(base_size=b_size),
+    p1 + theme_minimal(base_size=b_size),
+    p1 + theme_classic(base_size=b_size),
+    p1 + theme_gray(base_size=b_size),
+    p1 + theme_dark(base_size=b_size)
+  )
+  p1 <- p1  +
+    geom_spatraster(data = rast, maxcell = max_cell) +
+    geom_spatvector(data = amaz.basin.shp$geometry, fill = NA, color = "gray40") +
+    scale_x_continuous(labels = function(x) format(x, scientific = T)) +
+    scale_y_continuous(labels = function(x) format(x, scientific = T)) +
+    ggtitle(label=title, subtitle=sub_title) +
+    coord_sf(datum = pull_crs(rast)) +
+    theme(
+      axis.text.x = element_text(angle = x_angle)
+      , plot.margin = unit(v_unit, "pt")
+    )
+  if (theme == 1) {p1 <- p1 + theme_void(base_size=b_size)}
+  # coord_sf(crs = st_crs(4326))
+  return(p1)
+}
+#--------------------------------------
+myPlot2 <- function(rast, title=NULL, sub_title=NULL, theme=2, na_value="black"){
+  # Load data
+  title=NULL; sub_title=NULL; theme=2; na_value=-2
+  rast <- landSurfaceTemp.rts[['2016-02-01']] %>% mask(mask = amaz.basin.shp)
+  # Parasmeter
+  max_cell <- 1e6
+  # Prepare missing data
+  if (!is.null(na.value)) {
+    min.rast <- minmax(rast)[1]
+    rast.na <- rast
+    rast.na[is.na(rast.na)] <- min.rast - 1e3
+    # rast.na[rast.na >= min.rast] <- NA
+    # levels(rast.na) <- data.frame(id=c(min.rast - 1e3), val=c('1'))
+    rast.na <- rast.na  %>% mask(mask = amaz.basin.shp)
+    # rast.na[rast.na < min.rast] <- -2
+    rast.na <- rast.na %>% mask(mask = amaz.basin.shp)
+    # levels(rast.na) <- data.frame(id=c(min.rast - 1e03), val='1')
+    p1 <-  ggplot()  +
+      geom_spatraster(data = rast.na, maxcell = max_cell) +
+      scale_fill_gradientn(colours = na_value, na.value = NA) +
+      # scale_fill_manual(values = na_value) +
+      theme(
+        legend.position = "none",
+        axis.text        = element_blank(),
+        axis.ticks       = element_blank(),
+        axis.title       = element_blank(),
+        panel.background = element_blank())
+  }
+  p2 <- ggplot()  +
+    geom_spatraster(data = rast, maxcell = max_cell) +
+    geom_spatvector(data = amaz.basin.shp$geometry, fill = NA, color = "gray40") +
+    scale_x_continuous(labels = function(x) format(x, scientific = T)) +
+    scale_y_continuous(labels = function(x) format(x, scientific = T)) +
+    ggtitle(label=title, subtitle=sub_title) +
+    coord_sf(datum = pull_crs(rast))
+    # coord_sf(crs = st_crs(4326))
+  p2 <- switch(
+    theme,
+    p2 + theme_void(),
+    p2 + theme_bw(),
+    p2 + theme_linedraw(),
+    p2 + theme_light(),
+    p2 + theme_minimal(),
+    p2 + theme_classic(),
+    p2 + theme_gray(),
+    p2 + theme_dark()
+  )
+  return(p2)
+  
+  my.colors <- c("mediumblue", "mediumseagreen", "firebrick")
+
+  ggplot()  +
+    geom_spatraster(data = rast.na, maxcell = max_cell) +
+    geom_spatvector(data = amaz.basin.shp$geometry, fill = NA, color = "gray40") +
+    geom_spatraster(data = rast, maxcell = max_cell) +
+    scale_x_continuous(labels = function(x) format(x, scientific = T)) +
+    scale_y_continuous(labels = function(x) format(x, scientific = T)) +
+    ggtitle(label=title, subtitle=sub_title) +
+    coord_sf(datum = pull_crs(rast)) + 
+    theme_bw() +
+    # scale_fill_manual(name = "Burnt Area", values = my.colors, na.translate=FALSE)
+    
+    
+    
+    p2 + scale_fill_whitebox_c(
+      name = TeX(r"(\overset{Land Surface }{Temperature $\textit{(K)}$})"),
+      palette = "muted", 
+      na.value = "transparent"
+    )
+  
+  
+  
+}
+```
+
+# Test
+
+```{r}
+lst <- landSurfaceTemp.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+rast <- lst
+myPlot(lst) +
+  scale_fill_whitebox_c(
+    name = TeX(r"(\overset{Land Surface }{Temperature $\textit{(K)}$})"),
+    palette = "muted", 
+    na.value = "transparent")
+```
+
+
+
+
+
+# Initialization
+
+```{r}
+my.path <- "/Users/ABIDM/Documents/Project/Code_official_data/"
+
+# Import shape file
+amaz.basin.shp <- st_read("/Users/ABIDM/Documents/Project/Code_official_data/Amazon_new_data/0. Amazon_shapefile/projected/amazon_shp_projected.shp")
+
+# path of variables
+burntArea.path <- "/Users/ABIDM/Documents/Project/Code_official_data/Amazon_new_data/1. Burnt Area/03. Working Data"
+landCover.path <- "/Users/ABIDM/Documents/Project/Code_official_data/Amazon_new_data/2. Land Cover/03. Working Data"
+precip.path <- "/Users/ABIDM/Documents/Project/Code_official_data/Amazon_new_data/3. Precipitation/03. Working Data"
+soilMoisture.path <- "/Users/ABIDM/Documents/Project/Code_official_data/Amazon_new_data/4. Soil Moisture/03. Working Data"
+elevation.path <- "/Users/ABIDM/Documents/Project/Code_official_data/Amazon_new_data/5. Elevation/03. Working Data"
+LandSurfaceTemp.path <- "/Users/ABIDM/Documents/Project/Code_official_data/Amazon_new_data/6. LandSurfaceTemp/03. Working Data"
+humidity.path <- "/Users/ABIDM/Documents/Project/Code_official_data/Amazon_new_data/7. Specific Humidity/03. Working Data"
+evapotranspiration.path <- "/Users/ABIDM/Documents/Project/Code_official_data/Amazon_new_data/8. Evapotranspiration/03. Working Data"
+wind.path <- "/Users/ABIDM/Documents/Project/Code_official_data/Amazon_new_data/9. Wind Speed/03. Working Data"
+airtemp.path <- "/Users/ABIDM/Documents/Project/Code_official_data/Amazon_new_data/10. Air Temperature/03. Working Data"
+
+# Inverse basin shape
+
+
+x_min=-1.25e+06; x_max=0.05e+06; y_min=st_bbox(amaz.basin.shp)$ymin; y_max=2.4e+06    # South of Amazon
+
+# Number of cores to use
+# nbrCores <- detectCores() - 1
+nbrCores <- 45
+
+# Color palette
+pal <- colorRampPalette(c("mediumblue", "forestgreen", "firebrick"))
+pals <- unique(hypsometric_tints_db$pal)
+```
+
+#=====================
+
+# Import data
+
+```{r "1.Import data"}
+#---- Burnt Area data ----
+burntArea.rast <- 
+  list.files(burntArea.path, full.names=TRUE, pattern = ".tif$") %>%
+  rast()
+#---- Land Cover ----
+landCover.rast <- 
+  list.files(landCover.path, full.names=TRUE, pattern = ".tif$") %>%
+  rast()
+#---- Precipitation ----
+precipitation.rast <- 
+  list.files(precip.path, full.names=TRUE, pattern = ".tif$") %>% 
+  rast()
+#----- Soil Moisture ----
+soilMoisture.rast <- 
+  list.files(soilMoisture.path, full.names=TRUE, pattern = ".tif$") %>%
+  rast()
+#---- Elevation ----
+elevation.rast <- 
+  list.files(elevation.path,  full.names=TRUE, pattern = ".tif$") %>%
+  rast()
+#---- LandSurfaceTemp ----
+landSurfaceTemp.rast <- 
+  list.files(LandSurfaceTemp.path, full.names=TRUE, pattern = ".tif$") %>% 
+  rast()
+#---- Specific Humidity ----
+humidity.rast <- 
+  list.files(humidity.path, full.names=TRUE, pattern = ".tif$") %>% 
+  rast()
+#---- Evapotranspiration ----
+evapotranspiration.rast <- 
+  list.files(evapotranspiration.path, full.names=TRUE, pattern = ".tif$") %>%
+  rast()
+#---- Wind Speed ----
+wind.rast <- 
+  list.files(wind.path, full.names=TRUE, pattern = ".tif$") %>%
+  rast()
+#---- Air Temperature ----
+airtemp.rast <- 
+  list.files(airtemp.path, full.names=TRUE, pattern = ".tif$") %>%
+  rast()
+```
+
+# Modifications
+
+```{r "2.Modifications"}
+#----- Soil Moisture ----
+# # Repalce negative values by `NA` for all data
+# soilMoisture.rast[soilMoisture.rast < 0] <- NA
+# # Save/Load raster file
+# writeRaster(soilMoisture.rast, "Amazon_new_data/4. Soil Moisture/soilmoisture_working_na.tif", overwrite=TRUE)
+soilMoisture.rast <- rast("Amazon_new_data/4. Soil Moisture/soilmoisture_working_na.tif")
+# Remove September and November 2012
+soilMoisture238.rast <- soilMoisture.rast[[!(names(soilMoisture.rast) %in% c("2012_07", "2012_09"))]]
+# # Save/Load raster file
+# writeRaster(soilMoisture238.rast, "Amazon_new_data/4. Soil Moisture/soilmoisture_working_238.tif", overwrite=TRUE)
+soilMoisture.rast <- rast("Amazon_new_data/4. Soil Moisture/soilmoisture_working_238.tif")
+```
+
+# Rename and order layers
+
+```{r}
+ordered.names<- 
+  seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month") %>% 
+  format(., '%Y_%m') %>% 
+  setdiff(., c("2012_07", "2012_09"))
+#---- Burnt Area data ----
+burntArea.rast <- renameLayers(burntArea.rast, 'burntarea_working_', '')
+burntArea.rast <- burntArea.rast[[ordered.names]]
+#---- Land Cover ----
+landCover.rast <- renameLayers(landCover.rast, 'landcover_working_', '')
+landCover.rast <- landCover.rast[[ordered.names]]
+#---- Precipitation ----
+precipitation.rast <- renameLayers(precipitation.rast, 'precipitation_working_', '')
+precipitation.rast <- precipitation.rast[[ordered.names]]
+#----- Soil Moisture ----
+# soilMoisture.rast <- renameLayers(soilMoisture.rast, 'soilmoisture_working_', '')
+# names(soilMoisture.rast) <- ordered.names
+#---- Elevation ----
+names(elevation.rast) <- "elevation"
+#---- LandSurfaceTemp ----
+landSurfaceTemp.rast <- renameLayers(landSurfaceTemp.rast, 'landsurftemp_working_', '')
+landSurfaceTemp.rast <- landSurfaceTemp.rast[[ordered.names]]
+#---- Specific Humidity ----
+humidity.rast <- renameLayers(humidity.rast, 'humidity_working_', '')
+humidity.rast <- humidity.rast[[ordered.names]]
+#---- Evapotranspiration ----
+evapotranspiration.rast <- renameLayers(evapotranspiration.rast, 'evapotranspiration_working_', '')
+evapotranspiration.rast <- evapotranspiration.rast[[ordered.names]]
+#---- Wind Speed ----
+wind.rast <- renameLayers(wind.rast, 'wind_working_', '')
+wind.rast <- wind.rast[[ordered.names]]
+#---- Air Temperature ----
+airtemp.rast <- renameLayers(airtemp.rast, 'airtemp_working_', '')
+airtemp.rast <- airtemp.rast[[ordered.names]]
+```
+
+# Create `rts` object
+
+```{r}
+# Dates
+seq.dates <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month")
+seq.dates <- seq.dates[!((seq.dates == "2012-07-01") | (seq.dates == "2012-09-01"))]
+date.2020.12 <- seq(as.Date("2020-12-1"), as.Date("2020-12-1"), by = "month")
+# Create 'rts' objects
+burntArea.rts <- rts(burntArea.rast, seq.dates)
+landCover.rts <- rts(landCover.rast, seq.dates)
+precipitation.rts <- rts(precipitation.rast, seq.dates)
+soilMoisture.rts <- rts(soilMoisture.rast, seq.dates)
+elevation.rts <- rts(elevation.rast, date.2020.12)
+landSurfaceTemp.rts <- rts(landSurfaceTemp.rast, seq.dates)
+humidity.rts <- rts(humidity.rast, seq.dates)
+evapotranspiration.rts <- rts(evapotranspiration.rast, seq.dates)
+wind.rts <- rts(wind.rast, seq.dates)
+airtemp.rts <- rts(airtemp.rast, seq.dates)
+```
+
+# Plot
+
+## Burnt Area
+
+```{r "1.1.Burnt Area", warning=FALSE}
+ba <- burntArea.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+levels(ba) <- data.frame(id=c(-2, 0, 1), val=c('-2', '0', '1'))
+my.colors <- c("mediumblue", "mediumseagreen", "firebrick")
+p.ba <- myPlot(ba, title = "Burnt Area", v_unit=c(3, 55, 3, 0)) +
+  scale_fill_manual(
+    name = NULL, 
+    values = my.colors, 
+    na.translate=FALSE
+  ) 
+p.ba
+```
+
+```{r "1.2.Q1", message=FALSE}
+Q1 <- rast("/Users/ABIDM/Documents/Project/Code_official_data/Amazon_new_data/1. Burnt Area/ras/Q1_238.tif") 
+levels(Q1) <- data.frame(id=c(-2, 0, 1), val=c('-2', '0', '1'))
+my.colors <- c("mediumblue", "mediumseagreen", "firebrick")
+p.q1 <- myPlot(Q1, "Maximum value for each cell", theme=1) +
+  scale_fill_manual(name = "Burnt Area", values = my.colors, na.translate=FALSE)
+p.q1
+```
+###Burnt Area in October 2020
+
+```{r}
+ba.2020.10 <- burntArea.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+levels(ba.2020.10) <- data.frame(id=c(-2, 0, 1), val=c('-2', '0', '1'))
+my.colors <- c("mediumblue", "mediumseagreen", "firebrick")
+ myPlot(ba.2020.10, "Burnt Area in October 2020") +
+  scale_fill_manual(name = "Burnt Area", values = my.colors, na.translate=FALSE)
+ 
+ 
+ba.2020.10.dt <- as.data.table(ba.2020.10, cell=T, xy=T)
+
+ggplot(ba.2020.10.dt, aes(x=val))+
+  geom_bar(fill="lightpink1") +
+  labs(x="Burnt Area in October 2020") +
+  geom_text(aes(label = ..count..), stat = "count")+
+  theme_bw()
+#---
+ggplot(data = ba.2020.10.dt, aes(x = val, fill = val)) +
+  geom_text(aes(label = ..count..), stat = "count") +
+  scale_fill_manual(values = my.colors) +
+  geom_bar() + 
+  theme_bw()
+
+
+  
+  
+ freq(ba.2020.10) 
+ 
+ 
+```
+
+```{r}
+ggplot(data = ba.2020.10.dt, aes(x = val)) + 
+  geom_bar(stat = "count", 
+           aes(fill = val), position = "dodge") + 
+  labs(title="Burnt Area in October 2020", x="Burnt Area") +
+  coord_flip() + 
+  stat_count(geom = "text", 
+             aes(label = ..count..),
+             position=position_stack(vjust=0.5),
+             colour = "black", size = 3.5) + 
+  theme_bw()
+```
+
+```{r}
+my.colors <- c("mediumblue", "mediumseagreen", "firebrick")
+ggplot(data = ba.2020.10.dt, aes(x = val)) + 
+  geom_bar(stat = "count", 
+           aes(fill = val), position = "dodge") + 
+  labs(title="Burnt Area in October 2020", x="Burnt Area") +
+  coord_flip() + 
+  scale_fill_manual(name = "Burnt Area", values = my.colors) +
+  stat_count(geom = "text", 
+             aes(label = ..count..),
+             position=position_stack(vjust=0.5),
+             colour = "black", size = 3.5) + 
+  theme_bw()
+```
+
+
+## Land Cover
+
+```{r "2.1.Land Cover"}
+lc <- landCover.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)  
+levels(lc) <- data.frame(id=0:10, val=c('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'))
+p.lc <- myPlot(lc, title = "Land Cover", v_unit=c(3, 55, 3, 0)) + 
+  scale_fill_hypso_d(
+    name = NULL, 
+    palette = "colombia_hypso", 
+    na.translate=FALSE)
+p.lc
+```
+
+## Precipitation
+
+```{r "3.1.Precipitation"}
+prec <- precipitation.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+p.prec <- myPlot(prec, title = "Precipitation", v_unit=c(3, 43, 3, 0)) + 
+  scale_fill_scico(
+    # name = TeX(r"(\overset{Precipitation}{$\textit{(mm/hr)}$})"),
+    name = TeX(r"($\textit{(mm/hr)}$)"),
+    palette = "lapaz", 
+    direction = -1,
+    trans = "pseudo_log",
+    breaks = c(0,10,50,200,550),
+    na.value = "transparent")
+p.prec
+```
+
+## Soil Moisture
+
+```{r "4.1.Soil Moisture"}
+soilm <- soilMoisture.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+p.soilm <- myPlot(soilm, title = "Soil Moisture", v_unit=c(3, 50, 3, 0)) + 
+  scale_fill_hypso_c(
+    # name = TeX(r"(\overset{Soil Moisture }{$\textit{(mm)}$})"),
+    name = TeX(r"($\textit{(mm)$})"),
+    palette = "wiki-schwarzwald-cont", 
+    na.value = "transparent")
+p.soilm
+```
+
+```{r}
+myPlot(soilm, max_cell=1e7) + 
+  scale_fill_hypso_c(
+    name = TeX(r"(\overset{Soil Moisture }{$\textit{(mm)}$})"),
+    palette = "wiki-schwarzwald-cont", 
+    na.value = "transparent")
+```
+
+## Elevation
+
+```{r "5.1.Elevation"}
+elev <- elevation.rts[['2020-12-01']] %>% mask(mask = amaz.basin.shp)
+wikicols <- hypsometric_tints_db %>% filter(pal == "wiki-2.0")
+wikicols <- wikicols[wikicols$limit %between% c(-100, 6500),]
+p.elev <- myPlot(elev, title = "Elevation", v_unit=c(3, 45, 3, 0)) + 
+  scale_fill_gradientn(
+    # name = TeX(r"(\overset{Elevation }{$\textit{(m)}$})"),
+    name = TeX(r"($\textit{(m)}$)"),
+    colors = wikicols$hex,
+    values = scales::rescale(wikicols$limit),
+    limit = range(wikicols$limit),
+    na.value = "transparent")
+p.elev
+```
+
+## LandSurfaceTemp
+
+```{r "6.1.LandSurfaceTemp"}
+lst <- landSurfaceTemp.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+p.lst <- myPlot(lst, title = "Land Surface Temperature", v_unit=c(3, 40, 3, 0)) +
+  scale_fill_whitebox_c(
+    # name = TeX(r"(\overset{Land Surface }{Temperature $\textit{(K)}$})"),
+    name = TeX(r"($\textit{(K)}$)"),
+    palette = "muted", 
+    na.value = "transparent")
+p.lst
+```
+
+### Plot missing data sample
+
+```{r "6.1.LandSurfaceTemp"}
+lst2 <- landSurfaceTemp.rts[['2002-02-01']] %>% mask(mask = amaz.basin.shp)
+p.lst2 <- myPlot(lst, na_value = "black", title = "Land Surface Temperature", v_unit=c(3, 40, 3, 0)) +
+  scale_fill_whitebox_c(
+    # name = TeX(r"(\overset{Land Surface }{Temperature $\textit{(K)}$})"),
+    name = TeX(r"($\textit{(K)}$)"),
+    palette = "muted", 
+    na.value = "transparent")
+p.lst2
+```
+
+## Specific Humidity
+
+```{r "7.1.Specific Humidity"}
+hum <- humidity.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+p.hum <- myPlot(hum, title = "Humidity", v_unit=c(3, 17, 3, 0)) +
+  scale_fill_cross_blended_c(
+    # name = TeX(r"(\overset{Humidity }{$\textit{(kg_{water} / kg_{air})}$})"),
+    name = TeX(r"($\textit{(kg_{water} / kg_{air})$})"),
+    palette = "warm_humid", 
+    na.value = "transparent")
+p.hum
+```
+
+## Evapotranspiration
+
+```{r "8.1.Evapotranspiration"}
+evapot <- evapotranspiration.rts[['2020-01-01']] %>% mask(mask = amaz.basin.shp)
+p.evapot <- myPlot(evapot, title = "Evapotranspiration", v_unit=c(3, 40, 3, 0)) +
+  scale_fill_whitebox_c(
+    # name = TeX(r"(\overset{Evapotranspiration}{$\textit{(kg/m^2s)}$})"),
+    name = TeX(r"($\textit{(kg/m^2s)}$)"),
+    palette = "bl_yl_rd", 
+    na.value = "transparent")
+p.evapot
+```
+
+## Wind Speed
+
+```{r "9.1.Wind Speed"}
+wind <- wind.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+p.wind <- myPlot(wind, title = "Wind Speed", v_unit=c(3, 57, 3, 0)) +
+  scale_fill_hypso_c(
+    # name = TeX(r"(\overset{Wind Speed }{$\textit{(m / s)}$})"),
+    name = TeX(r"($\textit{(m / s)}$)"),
+    palette = "gmt_globe_bathy", 
+    trans = "pseudo_log",
+    direction = -1,
+    na.value = "transparent")
+p.wind
+```
+
+## Air Temperature
+
+```{r "10.1.Air Temperature"}
+airtemp <- airtemp.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+p.airtemp <- myPlot(airtemp, title = "Air Temperature", v_unit=c(3, 50, 3, 0)) +
+  scale_fill_whitebox_c(
+    name = TeX(r"($\textit{(K)}$)"),
+    palette = "bl_yl_rd", 
+    na.value = "transparent")
+p.airtemp
+```
+
+# Create and plot zones
+
+```{r, "11.Zones"}
+v <- ext(amaz.basin.shp)
+x.min <- v$xmin[[1]] - 1; x.max <- v$xmax[[1]] + 1; 
+y.min <- v$ymin[[1]] - 1; y.max <- v$ymax[[1]] + 1; 
+
+XY <- list(
+  c(x.min, -0.84e+06, y.min, y.max),                       # z1
+  c(-0.84e+06, +0.55e+06, 3.75e+06, y.max),                # z2
+  c(-0.84e+06, +0.55e+06, 2.6e+06, 3.75e+06),              # z3
+  c(-0.84e+06, -0.05e+06, 2.22e+06, 2.6e+06),              # z4
+  c(-0.84e+06, -0.51e+06, y.min, 2.22e+06),                # z5
+  c(-0.51e+06, -0.05e+06, y.min, 2.22e+06),                # z6
+  c(-0.05e+06, 0.6e+06, y.min, 2.6e+06),                   # z7
+  c(0.6e+06, 0.95e+06, y.min, 2.6e+06),                    # z8
+  c(+0.55e+06, x.max, 3.24e+06, y.max),                    # z9
+  c(+0.55e+06, x.max, 2.86e+06, 3.24e+06),                 # z10
+  c(+0.55e+06, 0.95e+06, x.max, y.min, 2.6e+06, 2.86e+06)  # z11
+)
+
+nz <- length(XY)
+zl <- list()
+for (i in 1:(nz-1)){
+  zl[[i]] <- rbind(
+    c(XY[[i]][1], XY[[i]][3]), 
+    c(XY[[i]][2], XY[[i]][3]), 
+    c(XY[[i]][2], XY[[i]][4]), 
+    c(XY[[i]][1], XY[[i]][4])
+  ) %>% 
+    cbind(object=i, part=1, ., hole=0) %>% 
+    as.data.table()
+}
+
+i <- nz
+zl[[i]] <- rbind(
+  c(XY[[i]][2], XY[[i]][4]), 
+  c(XY[[i]][3], XY[[i]][4]), 
+  c(XY[[i]][3], XY[[i]][6]), 
+  c(XY[[i]][1], XY[[i]][6]), 
+  c(XY[[i]][1], XY[[i]][5]), 
+  c(XY[[i]][2], XY[[i]][5])
+) %>% 
+  cbind(object=i, part=1, ., hole=0) %>% 
+  as.data.table()
+
+z <- rbindlist(zl, use.names=T) %>% as.matrix()
+colnames(z)[3:4] <- c('x', 'y')
+
+zones.shp <- vect(z, "polygons")
+crs(zones.shp) <- crs(amaz.basin.shp)
+#---- Save ----
+writeVector(p, "Amazon_new_data/1. Burnt Area/Zones_shp/Zones.shp", overwrite=F)
+zones.shp <- st_read("Amazon_new_data/1. Burnt Area/Zones_shp/Zones.shp")
+
+#---- Plot ----
+my.labels <-  c(
+  TeX(r"($\textit{Z_1}$)")
+  , TeX(r"($\textit{Z_2}$)")
+  , TeX(r"($\textit{Z_3}$)")
+  , TeX(r"($\textit{Z_4}$)")
+  , TeX(r"($\textit{Z_5}$)")
+  , TeX(r"($\textit{Z_6}$)")
+  , TeX(r"($\textit{Z_7}$)")
+  , TeX(r"($\textit{Z_8}$)")
+  , TeX(r"($\textit{Z_9}$)")
+  , TeX(r"($\textit{Z_{10}}$)")
+  , TeX(r"($\textit{Z_{11}}$)")
+)
+x.coor <- c(-1.50e+06, -0.50e+06, -0.50e+06, -0.5e+06, -0.70e+06, -0.20e+06, 0.30e+06,  0.8e+06, 1.30e+06, 1.60e+06, 1.35e+06)
+y.coor <- c( 3.05e+06,  4.05e+06,  3.05e+06,  2.4e+06,  1.85e+06,  1.85e+06, 1.90e+06, 2.00e+06, 3.75e+06, 3.00e+06, 2.50e+06)
+
+p.zones <- myPlot(Q1, "Maximum value for each cell", theme=1) +
+  geom_spatvector(data = zones.shp, fill = NA, color = "black") +
+  coord_sf(datum = pull_crs(Q1)) + 
+  scale_fill_manual(name = "Burnt Area", values = alpha(my.colors, 0.75), na.translate=FALSE) +
+  annotate("text", label = my.labels, x = x.coor, y = y.coor, size = 6, colour = "black")
+p.zones
+```
+
+# Missing data
+
+```{r}
+load("/Users/ABIDM/Documents/Project/Code_official_data/R_data/amaz_na_df.Rdata")
+amaz.na.df.12lst <- amaz.na.df[order(amaz.na.df$landsurftemp_na, decreasing=TRUE),][1:4,]
+month.na.12lst <- amaz.na.df.12lst$layer %>% paste0(., "_01") %>% gsub("_", "-", .)
+rast <- subset(landSurfaceTemp.rts, month.na.12lst)
+lst.max12na.rast <- rast@raster %>% mask(mask = amaz.basin.shp) 
+# Save / Load raster file
+# writeRaster(lst.max12na.rast, "Amazon_new_data/6. LandSurfaceTemp/landsurftemp_na_max12months.tif", overwrite=F)
+# lst.max12na.rast <- rast("Amazon_new_data/6. LandSurfaceTemp/landsurftemp_na_max12months.tif")
+
+# Plot
+p.lst.max12na <- ggplot() +
+  stat_spatraster(data = lst.max12na.rast) +
+  geom_spatvector(data = amaz.basin.shp$geometry, fill = NA, color = "gray40") +
+  scale_x_continuous(labels = function(x) format(x, scientific = T, digits = 1)) +
+  scale_y_continuous(labels = function(x) format(x, scientific = T, digits = 2)) + 
+  ggtitle(label="Land Surface Temperature", subtitle=NULL) +
+  coord_sf(datum = pull_crs(lst.max12na.rast)) + 
+  theme_bw(base_size=10) +
+  scale_fill_whitebox_c(
+    # name = TeX(r"(\overset{Land Surface }{Temperature $\textit{(K)}$})"),
+    name = TeX(r"($\textit{(K)}$)"),
+    palette = "muted", 
+    na.value = "transparent") + 
+  facet_wrap(~lyr, ncol = 2) +
+  theme(axis.text.x = element_text(angle = 90))
+p.lst.max12na
+```
+
+# Data preparation
+
+```{r}
+Q0 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/Q0_238.tif"))
+Q1 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/Q1_238.tif"))
+
+# Plot
+levels(Q0) <- data.frame(id=c(-2, 0, 1), cover=c('-2', '0', '1'))
+levels(Q1) <- data.frame(id=c(-2, 0, 1), cover=c('-2', '0', '1'))
+my.colors <- c("mediumblue", "mediumseagreen", "firebrick")
+
+myPlot(
+  Q0
+  , "Plot of the minimum value for each cell"
+  # , paste0("Total number of cells = ", length( cells(Q0) )) 
+  , theme = 1
+) +
+  scale_fill_manual(name = "Burnt Area", values = my.colors, na.translate=FALSE)
+
+myPlot(
+  Q1
+  , "Plot of the maximum value for each cell"
+  # , paste0("Total number of cells = ", length( cells(Q1) )) 
+  , theme = 1
+) +
+  scale_fill_manual(name = "Burnt Area", values = my.colors, na.translate=FALSE)
+```
+
+## Split data into 3 parts
+
+```{r, message=FALSE}
+ras0 <- ras1 <- ras2 <- Q1
+
+# Create a pattern for burntArea = 0
+ras0[ras0 %in% c(-2, 1)] <- NA
+ras0[ras0 == 0] <- 1
+
+
+# Create a pattern for burntArea = 1
+ras1[ras1 %in% c(-2, 0)] <- NA
+
+# Create a pattern for burntArea = -2
+ras2[ras2 %in% c(0, 1)] <- NA
+ras2[ras2 == -2] <- 1
+
+# Plot
+levels(ras2) <- data.frame(id=1, cover=c('-2'))
+levels(ras0) <- data.frame(id=1, cover=c('0'))
+levels(ras1) <- data.frame(id=1, cover=c('1'))
+
+myPlot(
+  ras2
+  , "Cells always corresponding to 'water' regions"
+  , paste0("Total number of cells = ", 
+           formatC(length(cells(ras2)), format="f", big.mark=",", digits=0)  )
+  , theme = 1
+) +
+  scale_fill_manual(name = "Burnt Area", values = my.colors[1], na.translate=FALSE)
+
+myPlot(
+  ras0
+  , "Cells with 'no fire' events"
+  , paste0("Total number of cells = ", 
+           formatC(length(cells(ras0)), format="f", big.mark=",", digits=0) )
+  , theme = 1
+) +
+  scale_fill_manual(name = "Burnt Area", values = my.colors[2], na.translate=FALSE)
+
+myPlot(
+  ras1
+  , "Cells with at least a 'fire' event"
+  , paste0("Total number of cells = ", 
+           formatC(length(cells(ras1)), format="f", big.mark=",", digits=0) )
+  , theme = 1
+) +
+  scale_fill_manual(name = "Burnt Area", values = my.colors[3], na.translate=FALSE)
+```
+
+```{r}
+# Load 
+ras1 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras1_fires.tif"))
+ras2 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras2_alwaysWater.tif"))
+ras2.0 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras2_0_ChangeWaterNofire.tif"))
+ras0.0 <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras/ras0_0_alwaysNoFire.tif"))
+
+# Plot
+levels(ras2) <- data.frame(id=1, cover=c('-2'))
+levels(ras2.0) <- data.frame(id=1, cover=c('-2'))
+levels(ras0.0) <- data.frame(id=1, cover=c('0'))
+levels(ras1) <- data.frame(id=1, cover=c('1'))
+
+myPlot(
+  ras2
+  , "Cells always corresponding to 'water' regions"
+  , paste0("Total number of cells = ", 
+           formatC(length(cells(ras2)), format="f", big.mark=",", digits=0) )
+  , theme = 1
+) +
+  scale_fill_manual(name = "Burnt Area", values = my.colors[1], na.translate=FALSE)
+
+myPlot(
+  ras2.0
+  , "Cells may correspond to  'water' or 'no fire' regions"
+  , paste0("Total number of cells = ", 
+           formatC(length(cells(ras2.0)), format="f", big.mark=",", digits=0) )
+  , theme = 1
+) +
+  scale_fill_manual(name = "Burnt Area", values = my.colors[1], na.translate=FALSE)
+
+myPlot(
+  ras0.0
+  , "Cells always corresponding to 'no fire' regions"
+  , paste0("Total number of cells = ", 
+           formatC(length(cells(ras0.0)), format="f", big.mark=",", digits=0) )
+  , theme = 1
+) +
+  scale_fill_manual(name = "Burnt Area", values = my.colors[2], na.translate=FALSE)
+
+myPlot(
+  ras1
+  , "Cells with at least a 'fire' event"
+  , paste0("Total number of cells = ", 
+           formatC(length(cells(ras1)), format="f", big.mark=",", digits=0) )
+  , theme = 1
+) +
+  scale_fill_manual(name = "Burnt Area", values = my.colors[3], na.translate=FALSE)
+```
+
+```{r}
+landSurfaceTemp0.rand <-rast(paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/ras/landSurfaceTemp0_rand.tif"))
+landSurfaceTemp0.rand.NA.mask <-rast(paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/ras/landSurfaceTemp0_rand_NA_mask.tif"))
+
+rand.rast0 <- ras0.0
+values(rand.rast0) <- sample(1:238, ncell(rand.rast0), replace=TRUE)
+rand.rast0 <- selectRange(rand.rast0, ras0.0)
+names(rand.rast0) <- "Month_nbr"
+
+temp <- landSurfaceTemp0.rand
+temp[!is.na(temp)] <- 1
+landSurfaceTemp0.ind.rand <- selectRange(rand.rast0, temp)
+
+myPlot(
+  landSurfaceTemp0.rand
+  , "Random values from Land Surface Temperature"
+  , paste0("Total number of cells = ", 
+           formatC(length(cells(landSurfaceTemp0.rand)), format="f", big.mark=",", digits=0) )
+  , theme = 1
+) +
+scale_fill_hypso_c(
+  name = TeX(r"(Number of month)"),
+  palette = "wiki-schwarzwald-cont", 
+  na.value = "transparent")
+  
+myPlot(
+  landSurfaceTemp0.rand.NA.mask
+  , "Missing data in 'Land Surface Temprature'"
+  , paste0("Total number of cells = ", 
+           formatC(length(cells(landSurfaceTemp0.rand.NA.mask)), format="f", big.mark=",", digits=0) )
+  , theme = 1
+) +
+scale_fill_hypso_c(
+  name = TeX(r"(Number of month)"),
+  palette = "wiki-schwarzwald-cont", 
+  na.value = "transparent")
+
+myPlot(
+  landSurfaceTemp0.ind.rand
+  , "Pattern for cells with 'no fire' and no missing data"
+  , paste0("Total number of cells = ", 
+           formatC(length(cells(landSurfaceTemp0.ind.rand)), format="f", big.mark=",", digits=0) )
+  , theme = 1
+) +
+scale_fill_hypso_c(
+  name = TeX(r"(Number of month)"),
+  palette = "wiki-schwarzwald-cont", 
+  na.value = "transparent")
+```
+
+```{r}
+load(paste0(my.path,"Amazon_new_data/6. LandSurfaceTemp/05. cell_0/landSurfaceTemp0_NA_sample_dt.Rdata"))
+landSurfaceTemp0.rand.NA.mask[is.na(landSurfaceTemp0.rand.NA.mask)] <- -1
+landSurfaceTemp0.allcell.NA.dt <- terra::as.data.frame(landSurfaceTemp0.rand.NA.mask, xy=T, cells=T)
+landSurfaceTemp0.allcell.NA.dt$x <- floor(landSurfaceTemp0.allcell.NA.dt$x)
+landSurfaceTemp0.allcell.NA.dt$y <- floor(landSurfaceTemp0.allcell.NA.dt$y)
+landSurfaceTemp0.allcell.NA.dt <- as.data.table(landSurfaceTemp0.allcell.NA.dt)
+
+landSurfaceTemp0.allcell.NA.sample.dt <- merge(x=landSurfaceTemp0.allcell.NA.dt[, c('cell', 'x', 'y')], y=landSurfaceTemp0.NA.sample.dt[, c('cell', 'x', 'y', 'Month_nbr')], by = c('cell', 'x', 'y'), all = TRUE)
+landSurfaceTemp0.allcell.NA.sample.dt
+
+values(landSurfaceTemp0.rand.NA.mask) <- landSurfaceTemp0.allcell.NA.sample.dt$Month_nbr
+
+myPlot(
+  landSurfaceTemp0.rand.NA.mask
+  , "Pattern for cells with 'no fire' and missing data"
+  , paste0("Total number of cells = ", 
+           formatC(length(cells(landSurfaceTemp0.rand.NA.mask)), format="f", big.mark=",", digits=0) )
+  , theme = 1
+) +
+scale_fill_hypso_c(
+  name = TeX(r"(Number of month)"),
+  palette = "wiki-schwarzwald-cont", 
+  na.value = "transparent")
+```
+
+```{r}
+lst <- landSurfaceTemp.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+myPlot(
+  lst
+  , title = "Land Surface Temperature"
+  , v_unit=c(3, 40, 3, 0)
+  , theme = 1
+) +
+  scale_fill_whitebox_c(
+    # name = TeX(r"(\overset{Land Surface }{Temperature $\textit{(K)}$})"),
+    name = TeX(r"($\textit{(K)}$)"),
+    palette = "muted", 
+    na.value = "transparent")
+```
+
+```{r}
+rand.p2.all.rast <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras_pattern/rand_p2_all_rast.tif"))
+
+myPlot(
+  rand.p2.all.rast
+  , title = "Pattern for cells that may correspond to 'water' or \n'no fire' regions"
+  , paste0("Total number of cells = ", 
+           formatC(length(cells(rand.p2.all.rast)), format="f", big.mark=",", digits=0) )
+  , theme = 1
+) +
+  scale_fill_hypso_c(
+    name = TeX(r"(Number of month)"),
+    palette = "wiki-schwarzwald-cont", 
+    na.value = "transparent")
+```
+
+```{r}
+rand.p0.p2.all.rast <- rast(paste0(my.path,"Amazon_new_data/1. Burnt Area/ras_pattern/rand_p0_p2_all_rast.tif"))
+
+myPlot(
+  rand.p0.p2.all.rast
+  , title = "Pattern for cells that didn't have any fire event"
+  , paste0("Total number of cells = ", 
+           formatC(length(cells(rand.p0.p2.all.rast)), format="f", big.mark=",", digits=0) )
+  , theme = 1
+) +
+  scale_fill_hypso_c(
+    name = TeX(r"(Number of month)"),
+    palette = "wiki-schwarzwald-cont", 
+    na.value = "transparent")
+```
+
+# Ensemble result
+
+```{r}
+#---- Prediction ----
+y_m <- c('2019', '8') 
+load(file = paste0(my.path, "/Models_ens/Ens1_err/ENS1_pred2_2019_08.Rdata"))
+amaz.2019.08.ras <- rast(paste0(burntArea.path, '/burntarea_working_', y_m[1], '_', y_m[2], '.tif'))
+pred.ras <- amaz.2019.08.ras
+values(pred.ras) <- -1
+tmp <- as.data.table(pred.ras, cell=T, xy=T)
+
+# Prepare the value of each cell
+prob.auc.amaz <- merge(x = as.data.table(prob.ens)[, c('cell', 'p1.auc')], y = tmp[, 'cell'], by = "cell", all = TRUE)
+
+values(pred.ras) <- prob.auc.amaz$p1.auc
+# writeRaster(pred.ras, paste0(path0, "/Models_ens/Ens1_err/ENS1_pred_2019_08.tif"), overwrite=F)
+
+# plot
+
+levels(amaz.2019.08.ras) <- data.frame(id=c(-2, 0, 1), val=c('-2', '0', '1'))
+my.colors <- c("mediumblue", "mediumseagreen", "firebrick")
+amaz.2019.08.m.ras <- amaz.2019.08.ras %>% mask(mask = amaz.basin.shp)
+
+#---- Zones ----
+
+v <- ext(amaz.basin.shp)
+x.min <- v$xmin[[1]] - 1; x.max <- v$xmax[[1]] + 1; 
+y.min <- v$ymin[[1]] - 1; y.max <- v$ymax[[1]] + 1; 
+
+XY <- list(
+  c(x.min, -0.84e+06, y.min, y.max),                       # z1
+  c(-0.84e+06, +0.55e+06, 3.75e+06, y.max),                # z2
+  c(-0.84e+06, +0.55e+06, 2.6e+06, 3.75e+06),              # z3
+  c(-0.84e+06, -0.05e+06, 2.22e+06, 2.6e+06),              # z4
+  c(-0.84e+06, -0.51e+06, y.min, 2.22e+06),                # z5
+  c(-0.51e+06, -0.05e+06, y.min, 2.22e+06),                # z6
+  c(-0.05e+06, 0.6e+06, y.min, 2.6e+06),                   # z7
+  c(0.6e+06, 0.95e+06, y.min, 2.6e+06),                    # z8
+  c(+0.55e+06, x.max, 3.24e+06, y.max),                    # z9
+  c(+0.55e+06, x.max, 2.86e+06, 3.24e+06),                 # z10
+  c(+0.55e+06, 0.95e+06, x.max, y.min, 2.6e+06, 2.86e+06)  # z11
+)
+
+nz <- length(XY)
+zl <- list()
+for (i in 1:(nz-1)){
+  zl[[i]] <- rbind(
+    c(XY[[i]][1], XY[[i]][3]), 
+    c(XY[[i]][2], XY[[i]][3]), 
+    c(XY[[i]][2], XY[[i]][4]), 
+    c(XY[[i]][1], XY[[i]][4])
+  ) %>% 
+    cbind(object=i, part=1, ., hole=0) %>% 
+    as.data.table()
+}
+
+i <- nz
+zl[[i]] <- rbind(
+  c(XY[[i]][2], XY[[i]][4]), 
+  c(XY[[i]][3], XY[[i]][4]), 
+  c(XY[[i]][3], XY[[i]][6]), 
+  c(XY[[i]][1], XY[[i]][6]), 
+  c(XY[[i]][1], XY[[i]][5]), 
+  c(XY[[i]][2], XY[[i]][5])
+) %>% 
+  cbind(object=i, part=1, ., hole=0) %>% 
+  as.data.table()
+
+z <- rbindlist(zl, use.names=T) %>% as.matrix()
+colnames(z)[3:4] <- c('x', 'y')
+
+p <- vect(z, "polygons")
+crs(p) <- crs(amaz.basin.shp)
+
+#---- Plot ----
+my.labels <-  c( 'z1',      'z2',      'z3',     'z4',      'z5',      'z6',     'z7',     'z8',     'z9',    'z10',    'z11')
+x.coor <- c(-1.50e+06, -0.50e+06, -0.50e+06, -0.5e+06, -0.70e+06, -0.20e+06, 0.30e+06,  0.8e+06, 1.30e+06, 1.60e+06, 1.35e+06)
+y.coor <- c( 3.05e+06,  4.05e+06,  3.05e+06,  2.4e+06,  1.85e+06,  1.85e+06, 1.90e+06, 2.00e+06, 3.75e+06, 3.05e+06, 2.50e+06)
+
+p.zones <- myPlot(Q1, "Maximum value for each cell", theme=1) +
+  geom_spatvector(data = p, fill = NA, color = "black") +
+  coord_sf(datum = pull_crs(Q1)) + 
+  scale_fill_manual(name = "Burnt Area", values = alpha(my.colors, 0.75), na.translate=FALSE) +
+  annotate("text", label = my.labels, x = x.coor, y = y.coor, size = 6, colour = "black")
+p.zones
+
+#---- Plot ----
+myPlot(
+  pred.ras
+  # , title = "Pattern for cells that may correspond to 'water' or \n'no fire' regions"
+  # , paste0("Total number of cells = ", 
+  #          formatC(length(cells(rand.p2.all.rast)), format="f", big.mark=",", digits=0) )
+  # , theme = 1
+) +
+  geom_spatvector(data = p, fill = NA, color = "black") +
+  scale_fill_whitebox_c(
+    # name = TeX(r"(\overset{Evapotranspiration}{$\textit{(kg/m^2s)}$})"),
+    name = TeX(r"(Probability)"),
+    palette = "bl_yl_rd", 
+    na.value = "transparent")
+
+ myPlot(amaz.2019.08.m.ras, "Burnt Area in August 2019") +
+  scale_fill_manual(name = "Burnt Area", values = my.colors, na.translate=FALSE)
+```
+
+```{r}
+#---- Prepare data ----
+# Burnt Area of the month
+y_m <- c('2019', '8') 
+amaz.2019.08.ras <- rast(paste0(burntArea.path, '/burntarea_working_', y_m[1], '_', y_m[2], '.tif'))
+levels(amaz.2019.08.ras) <- data.frame(id=c(-2, 0, 1), val=c('-2', '0', '1'))
+amaz.2019.08.m.ras <- amaz.2019.08.ras %>% mask(mask = amaz.basin.shp)
+my.colors <- c("mediumblue", "mediumseagreen", "firebrick")
+# The probability of the prediction
+load(file = paste0(my.path, "/Models_ens/Ens1_err/ENS1_pred2_2019_08.Rdata"))
+pred.ras <- amaz.2019.08.ras
+values(pred.ras) <- -1
+tmp <- as.data.table(pred.ras, cell=T, xy=T)
+prob.auc.amaz <- merge(x = as.data.table(prob.ens)[, c('cell', 'p1.auc')], y = tmp[, 'cell'], by = "cell", all = TRUE)
+values(pred.ras) <- prob.auc.amaz$p1.auc
+
+# Zones SpatVector
+zones.shp <- st_read("Amazon_new_data/1. Burnt Area/Zones_shp/Zones.shp")
+
+#---- Plot ----
+my.labels <-  c( 'z1',      'z2',      'z3',     'z4',      'z5',      'z6',     'z7',     'z8',     'z9',    'z10',    'z11')
+x.coor <- c(-1.50e+06, -0.50e+06, -0.50e+06, -0.5e+06, -0.70e+06, -0.20e+06, 0.30e+06,  0.8e+06, 1.30e+06, 1.60e+06, 1.35e+06)
+y.coor <- c( 3.05e+06,  4.05e+06,  3.05e+06,  2.4e+06,  1.85e+06,  1.85e+06, 1.90e+06, 2.00e+06, 3.75e+06, 3.05e+06, 2.50e+06)
+
+myPlot(pred.ras, "Prediction of Burnt Area in August 2019", theme=1) +
+  geom_spatvector(data = zones.shp, fill = NA, color = "gray50", linetype="dashed") + # solid, dashed, longdash, dotted, twodash, dotdash, blank
+  coord_sf(datum = pull_crs(pred.ras)) + 
+  scale_fill_hypso_c(
+    # name = TeX(r"(\overset{Wind Speed }{$\textit{(m / s)}$})"),
+    name = TeX(r"(Probability)"),
+    palette = "gmt_globe_bathy", 
+    trans = "pseudo_log",
+    direction = -1,
+    na.value = "transparent") +
+  annotate("text", label = my.labels, x = x.coor, y = y.coor, size = 6, colour = "black")
+```
+
+```{r}
+myPlot(
+  pred.ras
+  , title = "Prediction of Burnt Area in August 2019"
+  # , paste0("Total number of cells = ", 
+  #          formatC(length(cells(rand.p2.all.rast)), format="f", big.mark=",", digits=0) )
+  # , theme = 1
+) +
+  scale_fill_hypso_c(
+    # name = TeX(r"(\overset{Soil Moisture }{$\textit{(mm)}$})"),
+    name = TeX(r"(Probability)"),
+    palette = "wiki-schwarzwald-cont", 
+    na.value = "transparent")
+```
+
+# Animation
+
+```{r}
+nbr_colors <- colorRampPalette(brewer.pal(9, "YlOrBr"))(1000)
+# nbr_colors <- colorRamps::green2red(1000)
+library(animation)
+library(terra)
+ras <- wind.rast[[1:20]]
+animation::saveGIF(terra::animate(ras, col=nbr_colors),interval = 0.2, ani.width=800)
+
+
+
+saveGIF({
+  brownian.motion(pch = 21, cex = 5, col = "red", bg = "yellow")
+}, movie.name = "brownian_motion.gif", interval = 0.1, nmax = 30, 
+  ani.width = 600)
+```
+
+## gifski
+
+### save rast as png
+
+```{r}
+predct.path <- "/Users/ABIDM/Documents/Project/Code_official_data/Models_ens/Ens2_new/Predictions"
+# import datra
+predct.rast <- 
+  list.files(paste0(predct.path, "/ras"), full.names=TRUE, pattern = ".tif$") %>% 
+  rast()
+# Rename layers
+# precipitation.rast <- renameLayers(precipitation.rast, 'precipitation_working_', '')
+# precipitation.rast <- precipitation.rast[[ordered.names]]
+# Create `rts` object
+# precipitation.rts <- rts(precipitation.rast, seq.dates)
+# plot 
+
+
+plot.name <- paste0(predct.path, "/png/Prediction_", names(ras), ".png")
+png(filename = plot.name)
+
+
+ras <- predct.rast[["2003_01"]]
+
+plot(myPlot(ras, title = "Probability of fire", v_unit=c(3, 40, 3, 0)) +
+  scale_fill_whitebox_c(
+    # name = TeX(r"(\overset{Land Surface }{Temperature $\textit{(K)}$})"),
+    name = TeX(r"($\textit{Probability}$)"),
+    palette = "muted", 
+    breaks = c(0,0.2,0.4,0.6,0.8, 1),
+    na.value = "transparent"))
+
+plot(myPlot(ras, title = "Probability of fire", v_unit=c(3, 40, 3, 0)) +
+  scale_fill_hypso_c(
+    # name = TeX(r"(\overset{Land Surface }{Temperature $\textit{(K)}$})"),
+    name = TeX(r"($\textit{Probability}$)"),
+    palette = "meyers_hypso", 
+    na.value = "transparent"))
+
+plot(myPlot(ras, title = "Probability of fire", v_unit=c(3, 40, 3, 0)) +
+  scale_fill_hypso_c(
+    # name = TeX(r"(\overset{Land Surface }{Temperature $\textit{(K)}$})"),
+    name = TeX(r"($\textit{Probability}$)"),
+    palette = "arctic_hypso", 
+    na.value = "transparent"))
+
+plot(myPlot(ras, title = "Probability of fire", v_unit=c(3, 40, 3, 0)) +
+  scale_fill_hypso_c(
+    # name = TeX(r"(\overset{Land Surface }{Temperature $\textit{(K)}$})"),
+    name = TeX(r"($\textit{Probability}$)"),
+    palette = "nordisk-familjebok_hypso", 
+    na.value = "transparent"))
+
+plot(myPlot(ras, title = "Probability of fire", v_unit=c(3, 40, 3, 0)) +
+  scale_fill_whitebox_c(
+    # name = TeX(r"(\overset{Land Surface }{Temperature $\textit{(K)}$})"),
+    name = TeX(r"($\textit{Probability}$)"),
+    direction = -1,
+    palette = "pi_y_g", 
+    na.value = "transparent"))
+
+plot(myPlot(ras, title = "Probability of fire", v_unit=c(3, 40, 3, 0)) +
+  scale_fill_whitebox_c(
+    # name = TeX(r"(\overset{Land Surface }{Temperature $\textit{(K)}$})"),
+    name = TeX(r"($\textit{Probability}$)"),
+    # direction = -1,
+    palette = "soft", 
+    na.value = "transparent"))
+
+
+dev.off()
+```
+
+### Real data
+
+```{r}
+ title=NULL
+sub_title=NULL
+theme=2
+na_value=NULL
+max_cell=1e6
+x_angle=0
+b_size=16
+v_unit=c(2, 2, 2, 2) # c(t, r, b, l)
+
+seq.m <- names(predct.rast)
+rast <- burntArea.rast[[seq.m[2]]] %>% mask(amaz.basin.shp)
+rast[rast < 0] <- NA
+b_size <- 16
+ggplot() +
+  theme_bw(base_size=b_size) +
+  geom_spatraster_contour(
+    data = rast,
+    aes(color = "red"),
+    binwidth = 1,
+  ) +
+    geom_spatvector(data = amaz.basin.shp$geometry, fill = NA, color = "gray40") +
+    scale_x_continuous(labels = function(x) format(x, scientific = T)) +
+    scale_y_continuous(labels = function(x) format(x, scientific = T)) +
+    ggtitle(label=title, subtitle=sub_title) +
+    coord_sf(datum = pull_crs(rast)) +
+    theme(
+      axis.text.x = element_text(angle = x_angle)
+      , plot.margin = unit(v_unit, "pt")
+    ) 
+```
+
+```{r}
+predct.path <- "/Users/ABIDM/Documents/Project/Code_official_data/Models_ens/Ens2_new/Predictions"
+# import datra
+predct.rast <- 
+  list.files(paste0(predct.path, "/ras"), full.names=TRUE, pattern = ".tif$") %>% 
+  rast()
+#
+max_prb <- minmax(predct.rast) %>% max() %>% round(., digits = 1)
+n.month <- "2007_01"
+p.lst <- list()
+for (n.month in seq.m){
+  ba.rast <- burntArea.rast[[n.month]] %>% mask(amaz.basin.shp); ba.rast[ba.rast < 0] <- NA
+  p.lst[[n.month]] <- myPlot(predct.rast[[n.month]], title = "Probability of fire in Amazon", sub_title = paste0("Month ", n.month), v_unit=c(3, 40, 3, 0)) +
+    scale_fill_hypso_c(
+      # name = TeX(r"(\overset{Land Surface }{Temperature $\textit{(K)}$})"),
+      name = TeX(r"($\textit{Prob}$)"),
+      palette = "arctic_hypso", 
+      limits = c(0, max_prb),
+      na.value = "transparent") +
+    geom_spatraster_contour(
+      data = ba.rast,
+      aes(color = "red"),
+      binwidth = 1,
+      linewidth = 0.3
+    ) +
+    coord_sf(datum = pull_crs(predct.rast[[n.month]]))
+}
+p.lst
+```
+
+### Plot
+
+```{r}
+predct.path <- "/Users/ABIDM/Documents/Project/Code_official_data/Models_ens/Ens2_new/Predictions"
+# import data
+predct.rast <- 
+  list.files(paste0(predct.path, "/ras"), full.names=TRUE, pattern = ".tif$") %>% 
+  rast()
+#
+max_prb <- minmax(predct.rast) %>% max() %>% round(., digits = 1)
+n.month <- "2010_01"
+# Plot
+title = "Fire in Amazon"
+sub_title = paste0("Month ", n.month)
+na_value = NULL
+max_cell = 1e6
+x_angle = 0
+b_size = 16
+v_unit = c(2, 2, 2, 2) # c(t, r, b, l)
+rast <- predct.rast[[n.month]]
+ba.rast <- burntArea.rast[[n.month]] % >% mask(amaz.basin.shp); ba.rast[ba.rast < 0] <- NA
+ggplot() +
+  geom_spatraster(data = rast, maxcell = max_cell) +
+  geom_spatvector(data = amaz.basin.shp$geometry, fill = NA, color = "gray40") +
+  geom_spatraster_contour(data = ba.rast, aes(col = "1"), binwidth = 1, linewidth = 0.3) +
+  labs(col = TeX(r"($\textit{\overset{Fire}{events}})")) +
+  scale_x_continuous(labels = function(x) format(x, scientific = T)) +
+  scale_y_continuous(labels = function(x) format(x, scientific = T)) +
+  ggtitle(label=title, subtitle=sub_title) +
+  theme_bw(base_size=b_size) +
+  theme(
+    axis.text.x = element_text(angle = x_angle)
+    , plot.margin = unit(v_unit, "pt")
+  ) +
+  scale_fill_hypso_c(
+    # name = TeX(r"(\overset{Land Surface }{Temperature $\textit{(K)}$})"),
+    name = TeX(r"($\textit{Probility}$)"),
+    palette = "arctic_hypso", 
+    limits = c(0, max_prb),
+    na.value = "transparent") +
+  coord_sf(datum = pull_crs(predct.rast[[n.month]]))
+```
+
+```{r}
+# Create gif from temporary pngs
+allfiles <- file.path(paste0(predct.path, "/png"), paste0("Prediction_",all_layers, ".png"))
+gifski::gifski(allfiles,
+  loop = TRUE, delay = 1,
+  gif_file = "Amazon.gif",
+  width = 1400, height = 865
+)
+```
+
+
+```{r}
+data("hypsometric_tints_db")
+hypsometric_tints_db
+```
+
+
+```{r}
+allfiles <- file.path(tempdir(), paste0(all_layers, ".png"))
+gifski::gifski(allfiles,
+  loop = TRUE, delay = 1 / 6,
+  gif_file = "winter_2021.gif",
+  width = 1600, height = 1200
+)
+```
+
+
+# Variable Importance
+
+## Initialize and Connect to H2O 
+
+```{r}
+library(h2o)
+h2o.init(ip = 'localhost', port = 50001, nthreads = 6)
+h2o.no_progress()
+```
+
+## Import models
+
+```{r}
+Models <- c('GLM', 'GBM', 'XGB', 'RF')
+Metrics <- c('MSE', 'RMSE', 'LogLoss', 'Mean Per-Class Error', 'AUC', 'AUCPR', 'Gini', 'R^2')
+nbr.metr <- length(Metrics)
+nbr.m <- length(Models)
+nbr.z <- 11
+zone.lst <- c(1:nbr.z)
+models.lst <- list()
+for (zone in zone.lst){ # zone <- 1
+  for (m in Models){ # m <- 'GBM'
+    model.az <- h2o.upload_model(paste0(path0, "/Models/", m, "/", m, "_AZ", zone, "_model")) # 0.855 s
+    models.lst <- append(models.lst, model.az)
+  }
+}
+
+```
+
+
+
+
+
+```{r}
+h2o.removeAll()
+h2o:::.h2o.garbageCollect()
+h2o:::.h2o.garbageCollect()
+h2o:::.h2o.garbageCollect()
+h2o.ls()
+# h2o.shutdown(prompt = FALSE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
