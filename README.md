@@ -1,0 +1,1 @@
+# Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon
