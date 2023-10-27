@@ -36,16 +36,16 @@ For the remaining covariates, missing data is minimal, consistent across months,
 
 [Explore Data Analysis and Missing Data](./1_data_analysis_&_missing_data)
 
-## 2. Data Preparation (Downsampling Approach)
+## 2. Data Preparation (Downsampling strategy)
 
-In this step, we address the class imbalance issue identified in the Data Analysis step. To reduce the data imbalance, we employ a down-sampling approach, which involves the following two key actions:
+In this step, we address the class imbalance issue identified in the Data Analysis step. To reduce the data imbalance, we employ a down-sampling strategy, which involves the following two key actions:
 
 - For cells with at least one fire event over the 20-year period, we retain all available data records, excluding those with missing values.
  
 - For cells without any fire events during this period, we randomly select a single observation from across all the months. It's important to note that this selection ensures that there are no missing values in the _land surface temperature_ covariate or the response variable _burnt area_.
 
 <p align="center">
-  <img src="assets/Downsampling_approach.jpg" alt="Image Description" />
+  <img src="assets/Downsampling_approach.jpg" alt="Downsampling strategy"  width="60%" />
 </p>
 
 [Explore Data Preparation](./3_data_preparation)
