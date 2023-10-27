@@ -28,9 +28,9 @@ The dataset consists of 10 variables that provide valuable information about fir
 
 We focus on addressing the significant challenge of identifying and managing missing data within our dataset. We discovered that missing data is predominantly concentrated in two areas:
 
-1. The _land surface temperature_ variable, which contains over one million missing data points across twenty-six months.
+- The _land surface temperature_ variable, which contains over one million missing data points across twenty-six months.
 
-2. The response variable, _burned area_, in which we treat the value (-2) as missing data, representing water.
+- The response variable, _burnt area_, in which we treat the value (-2) as missing data, representing water.
 
 For the remaining covariates, missing data is minimal, consistent across months, and typically located near the map's edges.
 
@@ -40,9 +40,13 @@ For the remaining covariates, missing data is minimal, consistent across months,
 
 In this step, we address the class imbalance issue identified in the Data Analysis step. To reduce the data imbalance, we employ a down-sampling approach, which involves the following two key actions:
 
-1. For cells with at least one fire event over the 20-year period, we retain all available data records, excluding those with missing values.
+- For cells with at least one fire event over the 20-year period, we retain all available data records, excluding those with missing values.
+ 
+- For cells without any fire events during this period, we randomly select a single observation from across all the months. It's important to note that this selection ensures that there are no missing values in the _land surface temperature_ covariate or the response variable _burnt area_.
 
-2. For cells without any fire events during this period, we randomly select a single observation from across all the months. It's important to note that this selection ensures that there are no missing values in the _land surface temperature_ covariate or the response variable _burned area_.
+<p align="center">
+  <img src="assets/Downsampling_approach.jpg" alt="Image Description" />
+</p>
 
 [Explore Data Preparation](./3_data_preparation)
 
