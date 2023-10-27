@@ -12,19 +12,19 @@ For this project, we utilized the dataset provided by Mateen Mahmood and Prof. P
 To implement this project, we primarily used the R programming language. The following R packages were instrumental in our data analysis, modeling, and visualization: $\texttt{terra}$, $\texttt{raster}$, $\texttt{sf}$, $\texttt{h2o}$, $\texttt{rsample}$, $\texttt{recipes}$, $\texttt{data.table}$, $\texttt{tidyverse}$, $\texttt{pROC}$, $\texttt{doParallel}$, $\texttt{doSNOW}$, $\texttt{ggplot2}$, $\texttt{tidyterra}$. <br />
 These packages facilitated various aspects of our project
 
-# Project Steps
+## Project Steps
 
 This project is structured into distinct steps to facilitate understanding and organization. Each step corresponds to a specific aspect of the analysis and modeling process. You can navigate through the folders corresponding to each step for detailed code and documentation.
 
-## 1. Data Analysis and Missing Data
+### 1. Data Analysis and Missing Data
 
-### 1.1. Data Analysis 
+#### 1.1. Data Analysis 
 
 In Step 1, we perform an initial data analysis to enhance our understanding of the dataset. This involves exploring the dataset's structure, visualizing important variables, and detecting any missing or unusual data points.
 
 The dataset consists of 10 variables that provide valuable information about fires, land use, environmental conditions, and climate factors. With a spatial resolution of 500 meters, it allows for detailed analysis of the Amazon rainforest. These variables are recorded on a monthly basis, spanning from 2001 to 2020.
 
-### 1.2. Missing Data
+#### 1.2. Missing Data
 
 We focus on addressing the significant challenge of identifying and managing missing data within our dataset. We discovered that missing data is predominantly concentrated in two areas:
 
@@ -36,7 +36,7 @@ For the remaining covariates, missing data is minimal, consistent across months,
 
 [Explore Data Analysis and Missing Data](./1_data_analysis_&_missing_data)
 
-## 2. Data Preparation (Downsampling strategy)
+### 2. Data Preparation (Downsampling strategy)
 
 In this step, we address the class imbalance issue identified in the Data Analysis step. To reduce the data imbalance, we employ a down-sampling strategy, which involves the following two key actions:
 
@@ -50,13 +50,13 @@ In this step, we address the class imbalance issue identified in the Data Analys
 
 [Explore Data Preparation](./3_data_preparation)
 
-## 3. Model Assessment, Ensemble Model, and Results
+### 3. Model Assessment, Ensemble Model, and Results
 
 In this step, we dive into model assessment. We build various models using machine learning techniques, assess their performance, and then create an ensemble model to leverage the strengths of each. We present the results and insights gained from our models.
 
 [Explore Model Assessment Folder](./4_model_assessment)
 
-## 4. Maps and Time Trends of Fire Probability
+### 4. Maps and Time Trends of Fire Probability
 
 The final step involves visualizing and analyzing the results spatially and temporally. We create maps and time trends to understand the dynamics of fire probability in the Amazon over the years. This step adds a geographical perspective to our analysis.
 
