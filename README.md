@@ -1,3 +1,5 @@
+<p style="text-align:justify;">
+
 # Mapping the Spatio-Temporal Distribution of Fires in the Amazon from 2001 to 2020: An Ensemble Modeling Approach
 
 ## Overview
@@ -20,7 +22,7 @@ This project is structured into distinct steps to facilitate understanding and o
 
 #### 1.1. Data Analysis 
 
-In Step 1, we perform an initial data analysis to enhance our understanding of the dataset. This involves exploring the dataset's structure, visualizing important variables, and detecting any missing or unusual data points.
+In this step, we perform an initial data analysis to enhance our understanding of the dataset. This involves exploring the dataset's structure, visualizing important variables, and detecting any missing or unusual data points.
 
 The dataset consists of 10 variables that provide valuable information about fires, land use, environmental conditions, and climate factors. With a spatial resolution of 500 meters, it allows for detailed analysis of the Amazon rainforest. These variables are recorded on a monthly basis, spanning from 2001 to 2020.
 
@@ -48,11 +50,19 @@ In this step, we address the class imbalance issue identified in the Data Analys
   <img src="assets/Downsampling_approach.jpg" alt="Downsampling strategy"  width="60%" />
 </p>
 
+As the downsampling process still results in a substantial dataset of approximately 550 million observations, we have opted to partition our data into 11 zones, with each zone containing approximately 50 million observations. This division not only reduces the computational load but also enhances the usability and manageability of the dataset.
+
+<p align="center">
+  <img src="assets/zones.png"  width="70%" />
+</p>
+
 [Explore Data Preparation](./3_data_preparation)
 
 ### 3. Model Assessment, Ensemble Model, and Results
 
-In this step, we dive into model assessment. We build various models using machine learning techniques, assess their performance, and then create an ensemble model to leverage the strengths of each. We present the results and insights gained from our models.
+In the Model Assessment, Ensemble Model, and Results step, we evaluate the performance of various machine learning models, including Distributed Random Forest (DRF), Generalized Linear Models (GLM), Gradient Boosting Machine (GBM), and eXtreme Gradient Boosting (XGB). Performance assessment is based on two key metrics: AUC (Area Under the Receiver Operating Characteristic Curve) and AUCPR (Area Under the Precision-Recall Curve). These metrics are computed using the $\texttt{h2o}$ package.
+
+Additionally, we create ensemble models for each zone, combining the four methods using a linear combination technique. The weights for each method in the ensemble are determined based on the normalized AUCPR metric. This ensemble approach optimizes predictive accuracy for each zone.
 
 [Explore Model Assessment Folder](./4_model_assessment)
 
@@ -62,9 +72,18 @@ The final step involves visualizing and analyzing the results spatially and temp
 
 [Explore Maps and Time Trends Folder](./5_maps_and_time_trends)
 
+</p>
+
 ---
 
 **Note:** Each folder contains detailed documentation, code, and any additional resources relevant to the corresponding step. You can follow the links to explore each aspect of the project in more detail.
+
+
+
+
+
+
+
 
 
 
