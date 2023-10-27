@@ -9,7 +9,7 @@ The primary objective of this project was to develop an ensemble modeling approa
 For this project, we utilized the dataset provided by Mateen Mahmood and Prof. Paula Moraga. The dataset is a raster-based resource for spatio-temporal analysis of forest fires in the Amazon rainforest from 2001 to 2020. You can find the data on Zenodo at the following DOI: [Dataset on Zenodo](https://doi.org/10.5281/zenodo.7215402).
 
 ## Tools and Packages
-To implement this project, we primarily used the R programming language. The following R packages were instrumental in our data analysis, modeling, and visualization: terra, raster, sf, H2O, rsample, recipes, data.table, tidyverse, pROC, doParallel, doSNOW, ggplot2, tidyterra. <br />
+To implement this project, we primarily used the R programming language. The following R packages were instrumental in our data analysis, modeling, and visualization: $\texttt{terra}$, $\texttt{raster}$, $\texttt{sf}$, $\texttt{h2o}$, $\texttt{rsample}$, $\texttt{recipes}$, $\texttt{data.table}$, $\texttt{tidyverse}$, $\texttt{pROC}$, $\texttt{doParallel}$, $\texttt{doSNOW}$, $\texttt{ggplot2}$, $\texttt{tidyterra}$. <br />
 These packages facilitated various aspects of our project
 
 # Project Steps
@@ -37,6 +37,15 @@ For the remaining covariates, missing data is minimal, consistent across months,
 [Explore Data Analysis and Missing Data](./1_data_analysis_&_missing_data)
 
 ## 2. Data Preparation (Downsampling Approach)
+
+In this step, we address the class imbalance issue identified in the Data Analysis step. To reduce the data imbalance, we employ a down-sampling approach, which involves the following two key actions:
+
+1. For cells with at least one fire event over the 20-year period, we retain all available data records, excluding those with missing values.
+
+2. For cells without any fire events during this period, we randomly select a single observation from across all the months. It's important to note that this selection ensures that there are no missing values in the _Land Surface Temperature_ covariate or the response variable _Burnt Area_.
+
+[Explore Data Preparation](./3_data_preparation)
+
 
 To address class imbalance, we employ a down-sampling approach. This step involves carefully selecting and preparing the data for modeling. We detail the process and rationale behind this step, ensuring that the data is well-suited for further analysis.
 
