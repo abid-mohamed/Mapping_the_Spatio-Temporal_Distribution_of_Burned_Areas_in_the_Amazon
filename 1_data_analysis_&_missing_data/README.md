@@ -7,6 +7,8 @@ Before looking for each variable, we look to the Amazon shape file:
 # Import shape file
 amaz.basin.shp <- st_read(paste0(path.data,"/0. Amazon_shapefile/projected/amazon_shp_projected.shp"))
 ```
+
+```
     Simple feature collection with 1 feature and 6 fields
     Geometry type: MULTIPOLYGON
     Dimension:     XY
@@ -14,6 +16,7 @@ amaz.basin.shp <- st_read(paste0(path.data,"/0. Amazon_shapefile/projected/amazo
     Projected CRS: South_America_Albers_Equal_Area_Conic
     ID     AREA PERIMETER FORMA POLYAREA     AREAPROJ                       geometry
     1  0 548.0098   241.442  <NA>  6725344 6.725344e+12 MULTIPOLYGON (((-2028457 35...
+```
 
 Now, let's take a closer look at each variable:
 
