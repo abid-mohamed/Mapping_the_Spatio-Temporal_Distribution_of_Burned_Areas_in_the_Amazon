@@ -6,7 +6,7 @@ This project was conducted during my 6-month internship at King Abdullah Univers
 The primary objective of this project was to develop an ensemble modeling approach to predict forest fires in the Amazon rainforest, leveraging data spanning from 2001 to 2020. By integrating various environmental and climatic factors, we aimed to create a comprehensive model that could provide valuable insights into the occurrence of forest fires in this vital ecosystem.
 
 ## Data Source
-For this project, we utilized the dataset provided by Mateen Mahmood and Prof. Paula Moraga. The dataset is a raster-based resource for spatio-temporal analysis of forest fires in the Amazon rainforest from 2001 to 2020. You can find the data on Zenodo at the following DOI: [Dataset on Zenodo](https://doi.org/10.5281/zenodo.7215402).
+For this project, we utilized the dataset provided by Mateen Mahmood and Prof. Paula Moraga. The dataset is a raster-based resource for spatio-temporal analysis of forest fires in the Amazon rainforest from 2001 to 2020. You can find the data on Zenodo at the following DOI: [Dataset on https://doi.org/10.5281/zenodo.7215402](https://doi.org/10.5281/zenodo.7215402).
 
 ## Tools and Packages
 To implement this project, we primarily used the R programming language. The following R packages were instrumental in our data analysis, modeling, and visualization: $\texttt{terra}$, $\texttt{raster}$, $\texttt{sf}$, $\texttt{h2o}$, $\texttt{rsample}$, $\texttt{recipes}$, $\texttt{data.table}$, $\texttt{tidyverse}$, $\texttt{pROC}$, $\texttt{doParallel}$, $\texttt{doSNOW}$, $\texttt{ggplot2}$, $\texttt{tidyterra}$. <br />
@@ -54,7 +54,7 @@ As the downsampling process still results in a substantial dataset of approximat
   <img src="assets/zones.png"  width="70%" />
 </p>
 
-[Explore Data Preparation](./3_data_preparation)
+[Explore Data Preparation](./2_data_preparation)
 
 ### 3. Model Assessment, Ensemble Model, and Results
 
@@ -62,7 +62,7 @@ In the Model Assessment, Ensemble Model, and Results step, we evaluate the perfo
 
 Additionally, we create ensemble models for each zone, combining the four methods using a linear combination technique. The weights for each method in the ensemble are determined based on the normalized AUCPR metric. This ensemble approach optimizes predictive accuracy for each zone.
 
-[Explore Model Assessment](./4_model_assessment)
+[Explore Model Assessment](./3_model_assessment_&_ensemble_model)
 
 ### 4. Maps and Time Trends of Fire Probability
 
