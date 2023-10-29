@@ -30,7 +30,7 @@ We focus on addressing the significant challenge of identifying and managing mis
 
 - The _land surface temperature_ variable, which contains over one million missing data points across twenty-six months.
 
-- The response variable, _burnt area_, in which we treat the value (-2) as missing data, representing water.
+- The response variable, _burnt area_, in which we treat the value (-2) as missing data, representing water. Additionally, it's important to note that we exclude the two months, September and November 2012, from our analysis, as we do not have any data for the response variable _burnt area_ during these months.
 
 For the remaining covariates, missing data is minimal, consistent across months, and typically located near the map's edges.
 
