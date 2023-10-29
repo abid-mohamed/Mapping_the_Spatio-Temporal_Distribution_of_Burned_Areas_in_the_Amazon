@@ -23,6 +23,30 @@ Now, let's take a closer look at each variable:
 
 _Burnt Area_ Represents the extent of burned areas in the Amazon rainforest, categorized as burnt (1), unburnt (0), missing (-1), or water (-2).
 
+```r
+# list of files
+amaz.burntArea.list <- list.files(paste0(path.data,"/1. Burnt Area/03. Working Data"),
+                                  full.names=TRUE,
+                                  pattern = ".tif$")
+# Import data with `Terra`
+burntArea.rast <- rast(amaz.burntArea.list)
+burntArea.rast
+```
+```
+    class       : SpatRaster 
+    dimensions  : 5860, 7806, 238  (nrow, ncol, nlyr)
+    resolution  : 500, 500  (x, y)
+    extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
+    coord. ref. : South_America_Albers_Equal_Area_Conic 
+    sources     : burntarea_working_2001_1.tif  
+                burntarea_working_2001_10.tif  
+                burntarea_working_2001_11.tif  
+                ... and 235 more source(s)
+    names       : fire_~_proj, fire_~_proj, fire_~_proj, fire_~_proj, fire_~_proj, fire_~_proj, ... 
+    min values  :          -2,          -2,          -2,          -2,          -2,          -2, ... 
+    max values  :           1,           1,           1,           1,           1,           1, ... 
+```
+
 ## Land Cover
 
 _Land Cover_ is a categorical variable with 11 classes, providing information on different land cover types such as water, urban, forest, grassland, and more.
