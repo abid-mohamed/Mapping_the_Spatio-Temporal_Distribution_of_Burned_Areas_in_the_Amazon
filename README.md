@@ -62,13 +62,29 @@ In the Model Assessment, Ensemble Model, and Results step, we evaluate the perfo
 
 Additionally, we create ensemble models for each zone, combining the four methods using a linear combination technique. The weights for each method in the ensemble are determined based on the normalized AUCPR metric. This ensemble approach optimizes predictive accuracy for each zone.
 
-[Explore Model Assessment Folder](./4_model_assessment)
+[Explore Model Assessment](./4_model_assessment)
 
 ### 4. Maps and Time Trends of Fire Probability
 
-The final step involves visualizing and analyzing the results spatially and temporally. We create maps and time trends to understand the dynamics of fire probability in the Amazon over the years. This step adds a geographical perspective to our analysis.
+In the "Maps and Time Trends of Fire Probability" section, we present the results of our ensemble model's predictions for fire probabilities in the Amazon rainforest. This section includes two types of visualizations:
 
-[Explore Maps and Time Trends Folder](./5_maps_and_time_trends)
+**Monthly Fire Probability Maps**
+
+Explore the dynamic monthly fire probability maps through the animated GIF plot below. Each frame in the animation represents a different month across the 20-year study period. This visualization provides valuable insights into the seasonality and the spatial distribution of fire probability in the Amazon.
+
+<p align="center">
+  <img src="assets/pred_fire.gif"  width="70%" />
+</p>
+
+**Time Trend of Fire Probability**
+
+The boxplots presented below depict the time trend of fire probability during the 20-year study period. These visualizations illustrate how fire risk has evolved over time, offering a comprehensive view of long-term patterns and trends in fire probability.
+
+These visualizations are powerful tools for understanding the dynamics and patterns of fires in the Amazon rainforest.
+
+<p align="center">
+  <img src="assets/pred_boxplot.png"  width="70%" />
+</p>
 
 ---
 
