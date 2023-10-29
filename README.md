@@ -80,11 +80,11 @@ Explore the dynamic monthly fire probability maps through the animated GIF plot 
 
 The boxplots presented below depict the time trend of fire probability during the 20-year study period. These visualizations illustrate how fire risk has evolved over time, offering a comprehensive view of long-term patterns and trends in fire probability.
 
-These visualizations are powerful tools for understanding the dynamics and patterns of fires in the Amazon rainforest.
-
 <p align="center">
   <img src="assets/pred_boxplot.png"  width="70%" />
 </p>
+
+These visualizations are powerful tools for understanding the dynamics and patterns of fires in the Amazon rainforest.
 
 ---
 
