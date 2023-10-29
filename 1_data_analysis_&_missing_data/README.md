@@ -7,7 +7,6 @@ Before looking for each variable, we import the Amazon shape file:
 # Import shape file
 amaz.basin.shp <- st_read(paste0(path.data,"/0. Amazon_shapefile/projected/amazon_shp_projected.shp"))
 ```
-
 ```
     Simple feature collection with 1 feature and 6 fields
     Geometry type: MULTIPOLYGON
