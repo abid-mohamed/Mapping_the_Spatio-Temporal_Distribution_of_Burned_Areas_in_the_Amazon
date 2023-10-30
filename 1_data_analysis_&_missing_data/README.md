@@ -23,7 +23,7 @@ Now, let's take a closer look at each variable:
 
 _Burnt Area_ Represents the extent of burned areas in the Amazon rainforest, categorized as burnt (1), unburnt (0), missing (-1), or water (-2).
 
-### Import data
+**Import data**
 
 ```r
 # list of files
@@ -49,7 +49,7 @@ burntArea.rast
     max values  :           1,           1,           1,           1,           1,           1, ... 
 ```
 
-### Rename layers
+**Rename layers**
 
 ```r
 # Rename layers
@@ -71,7 +71,7 @@ min values  :      -2,      -2,      -2,      -2,      -2,      -2, ...
 max values  :       1,       1,       1,       1,       1,       1, ... 
 ```
 
-### Order layers
+**Order layers**
 
 ```r
 # Order layers
@@ -95,7 +95,7 @@ min values  :      -2,      -2,      -2,      -2,      -2,      -2, ...
 max values  :       1,       1,       1,       1,       1,       1, ... 
 ```
 
-## Verification of the values
+**Verification of the values**
 
 ```r
 # Verification of the values
@@ -107,28 +107,14 @@ burntArea.minmax[which((burntArea.minmax[,1] != -2) & (burntArea.minmax[,2] != 1
   <img src="img/1.1.BurntArea-Verification of the values.png"  width="60%" />
 </p>
 
-We can 
+
+**Create Raster Time Series (`rts`) object**
 
 ```r
-burntArea.missingData <- c(
-  paste0(path.data,"/1. Burnt Area/03. Working Data/burntarea_working_2012_7.tif"),
-  paste0(path.data,"/1. Burnt Area/03. Working Data/burntarea_working_2012_9.tif")
-)
-# Import data with "Terra"
-burntArea.missingData.rast <- rast(burntArea.missingData)
-burntArea.missingData.rast
-```
-```
-class       : SpatRaster 
-dimensions  : 5860, 7806, 2  (nrow, ncol, nlyr)
-resolution  : 500, 500  (x, y)
-extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
-coord. ref. : South_America_Albers_Equal_Area_Conic 
-sources     : burntarea_working_2012_7.tif  
-              burntarea_working_2012_9.tif  
-names       : fire_2012_05_06_9_proj, fire_2012_05_06_9_proj 
-min values  :                     -1,                     -1 
-max values  :                     -1,                     -1 
+# Create a sequence date for 'rts' object
+seq.dates <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month")
+burntArea.rts <- rts(burntArea.rast, seq.dates)
+burntArea.rts
 ```
 
 As we have misssing data for all the cells of the month of July and September 2012.
