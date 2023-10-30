@@ -25,7 +25,7 @@ Now, let's take a closer look at each variable:
 
 _Burnt Area_ Represents the extent of burned areas in the Amazon rainforest, categorized as burnt (1), unburnt (0), missing (-1), or water (-2).
 
-**Import data**
+_**Import data**_
 
 ```r
 # list of files
@@ -51,7 +51,7 @@ burntArea.rast
     max values  :           1,           1,           1,           1,           1,           1, ... 
 ```
 
-**Rename layers**
+_**Rename layers**_
 
 ```r
 # Rename layers
@@ -73,7 +73,7 @@ burntArea.rast
     max values  :       1,       1,       1,       1,       1,       1, ... 
 ```
 
-**Order layers**
+_**Order layers**_
 
 ```r
 # Order layers
@@ -96,7 +96,7 @@ burntArea.rast
     max values  :       1,       1,       1,       1,       1,       1, ... 
 ```
 
-**Verification of the values**
+_**Verification of the values**_
 
 ```r
 # Verification of the values
@@ -109,7 +109,7 @@ burntArea.minmax[which((burntArea.minmax[,1] != -2) & (burntArea.minmax[,2] != 1
 </p>
 
 
-**Create Raster Time Series (`rts`) object**
+_**Create Raster Time Series (`rts`) object**_
 
 ```r
 # Create a sequence date
@@ -118,7 +118,7 @@ seq.dates <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month")
 burntArea.rts <- rts(burntArea.rast, seq.dates)
 ```
 
-**Plot of the month of October 2020**
+_**Plot of the month of October 2020**_
 
 ```r
 # Upplaying the mask to plot only the amazon area.
@@ -159,6 +159,30 @@ ggplot(data = ba.dt, aes(x = val)) +
 <p align="center">
   <img src="img/1.3.ba.png"  width="60%" />
 </p>
+
+_**Percentage of fires**_
+
+```r
+freq.dt <- matrix(nrow = 0, ncol = 3) %>% as.data.table()
+colnames(freq.dt) <- c("layer", "0", "1")
+for (ras_id in amaz.burntArea.list){
+  cat("\n", ras_id)
+  ras <- rast(ras_id) %>%
+    renameLayers(., 'burntarea_working_', '') %>%
+    mask(mask = amaz.basin.shp)
+ 
+  # Replace -2 and -1 value by `NA`
+  ras[ras %in% c(-2, -1)] <- NA
+  ras.freq <- freq(ras, digits=0, usenames=T) %>% as.data.table()
+  tmp <- dcast(ras.freq,layer ~ value,value.var = c("count"))
+  freq.dt <- rbind(freq.dt, tmp)
+}
+percentage.fires <- sum(freq.dt[, '1']) / sum(freq.dt[, c('0', '1')])
+percentage.fires
+```
+```
+    [1] 0.00089637
+```
 
 ### Missing Data
 
