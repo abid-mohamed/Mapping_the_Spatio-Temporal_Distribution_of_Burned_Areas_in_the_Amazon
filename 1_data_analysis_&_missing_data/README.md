@@ -58,7 +58,7 @@ burntArea.minmax[which((burntArea.minmax[,1] != -2) & (burntArea.minmax[,2] != 1
 ```
 
 <p align="center">
-  <img src="img/1.1.BurntArea-Verification of the values.png"  width="70%" />
+  <img src="img/1.1.BurntArea-Verification of the values.png"  width="50%" />
 </p>
 
 ## Land Cover
