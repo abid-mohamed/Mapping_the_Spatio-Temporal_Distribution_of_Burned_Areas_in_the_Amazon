@@ -21,6 +21,8 @@ Now, let's take a closer look at each variable:
 
 ## 1.1. Burnt Area
 
+### Data Analysis
+
 _Burnt Area_ Represents the extent of burned areas in the Amazon rainforest, categorized as burnt (1), unburnt (0), missing (-1), or water (-2).
 
 **Import data**
@@ -139,6 +141,7 @@ p.ba
   <img src="img/1.2.ba.png"  width="60%" />
 </p>
 
+### Missing Data
 
 ## Land Cover
 
