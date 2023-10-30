@@ -140,6 +140,26 @@ p.ba
   <img src="img/1.2.ba_2.png"  width="60%" />
 </p>
 
+```r
+# Convert the raster object to a datatable
+ba.dt <- as.data.table(ba, cell=T, xy=T)
+# Plot
+ggplot(data = ba.dt, aes(x = val)) + 
+  geom_bar(stat = "count", aes(fill = val), position = "dodge") + 
+  labs(title="Burnt Area in October 2020", x="Burnt Area") +
+  coord_flip() + 
+  scale_fill_manual(name = "Burnt Area", values = my.colors) +
+  stat_count(geom = "text", 
+             aes(label = ..count..),
+             position=position_stack(vjust=0.5),
+             colour = "black", size = 3.5) + 
+  theme_bw()
+```
+
+<p align="center">
+  <img src="img/1.3.ba.png"  width="60%" />
+</p>
+
 ### Missing Data
 
 ## Land Cover
