@@ -153,7 +153,7 @@ ggplot(data = ba.dt, aes(x = val)) +
              aes(label = ..count..),
              position=position_stack(vjust=0.5),
              colour = "black", size = 3.5) + 
-  theme_bw()
+  theme_bw(base_size=16)
 ```
 
 <p align="center">
