@@ -19,9 +19,11 @@ amaz.basin.shp <- st_read(paste0(path.data,"/0. Amazon_shapefile/projected/amazo
 
 Now, let's take a closer look at each variable:
 
-## Burnt Area
+## 1.1. Burnt Area
 
 _Burnt Area_ Represents the extent of burned areas in the Amazon rainforest, categorized as burnt (1), unburnt (0), missing (-1), or water (-2).
+
+### Import data
 
 ```r
 # list of files
@@ -46,6 +48,18 @@ burntArea.rast
     min values  :          -2,          -2,          -2,          -2,          -2,          -2, ... 
     max values  :           1,           1,           1,           1,           1,           1, ... 
 ```
+
+### Verification of the values
+
+```r
+# Verification of the values
+burntArea.minmax <- minmax(burntArea.rast) %>% t() %>% as.data.frame()
+burntArea.minmax[which((burntArea.minmax[,1] != -2) & (burntArea.minmax[,2] != 1)),]
+```
+
+<p align="center">
+  <img src="img/1.1.BurntArea-Verification of the values.png"  width="100%" />
+</p>
 
 ## Land Cover
 
