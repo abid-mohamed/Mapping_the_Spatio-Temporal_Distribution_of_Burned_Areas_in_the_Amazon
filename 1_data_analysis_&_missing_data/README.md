@@ -49,7 +49,53 @@ burntArea.rast
     max values  :           1,           1,           1,           1,           1,           1, ... 
 ```
 
-### Verification of the values
+### Rename layers
+
+```r
+# Rename layers
+burntArea.rast <- renameLayers(burntArea.rast, 'burntarea_working_', '')
+burntArea.rast
+```
+```
+class       : SpatRaster 
+dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
+resolution  : 500, 500  (x, y)
+extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
+coord. ref. : South_America_Albers_Equal_Area_Conic 
+sources     : burntarea_working_2001_1.tif  
+              burntarea_working_2001_10.tif  
+              burntarea_working_2001_11.tif  
+              ... and 237 more source(s)
+names       : 2001_01, 2001_10, 2001_11, 2001_12, 2001_02, 2001_03, ... 
+min values  :      -2,      -2,      -2,      -2,      -2,      -2, ... 
+max values  :       1,       1,       1,       1,       1,       1, ... 
+```
+
+### Order layers
+
+```r
+# Order layers
+ordered.names <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month") %>% 
+  format(., '%Y_%m')
+burntArea.rast <- burntArea.rast[[ordered.names]]
+burntArea.rast
+```
+```
+class       : SpatRaster 
+dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
+resolution  : 500, 500  (x, y)
+extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
+coord. ref. : South_America_Albers_Equal_Area_Conic 
+sources     : burntarea_working_2001_1.tif  
+              burntarea_working_2001_2.tif  
+              burntarea_working_2001_3.tif  
+              ... and 237 more source(s)
+names       : 2001_01, 2001_02, 2001_03, 2001_04, 2001_05, 2001_06, ... 
+min values  :      -2,      -2,      -2,      -2,      -2,      -2, ... 
+max values  :       1,       1,       1,       1,       1,       1, ... 
+```
+
+## Verification of the values
 
 ```r
 # Verification of the values
@@ -84,6 +130,8 @@ names       : fire_2012_05_06_9_proj, fire_2012_05_06_9_proj
 min values  :                     -1,                     -1 
 max values  :                     -1,                     -1 
 ```
+
+As we have misssing data for all the cells of the month of July and September 2012.
 
 ## Land Cover
 
