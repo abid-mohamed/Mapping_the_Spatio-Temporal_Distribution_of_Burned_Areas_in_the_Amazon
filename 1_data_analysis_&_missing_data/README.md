@@ -61,6 +61,30 @@ burntArea.minmax[which((burntArea.minmax[,1] != -2) & (burntArea.minmax[,2] != 1
   <img src="img/1.1.BurntArea-Verification of the values.png"  width="60%" />
 </p>
 
+We can 
+
+```r
+burntArea.missingData <- c(
+  paste0(path.data,"/1. Burnt Area/03. Working Data/burntarea_working_2012_7.tif"),
+  paste0(path.data,"/1. Burnt Area/03. Working Data/burntarea_working_2012_9.tif")
+)
+# Import data with "Terra"
+burntArea.missingData.rast <- rast(burntArea.missingData)
+burntArea.missingData.rast
+```
+```
+class       : SpatRaster 
+dimensions  : 5860, 7806, 2  (nrow, ncol, nlyr)
+resolution  : 500, 500  (x, y)
+extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
+coord. ref. : South_America_Albers_Equal_Area_Conic 
+sources     : burntarea_working_2012_7.tif  
+              burntarea_working_2012_9.tif  
+names       : fire_2012_05_06_9_proj, fire_2012_05_06_9_proj 
+min values  :                     -1,                     -1 
+max values  :                     -1,                     -1 
+```
+
 ## Land Cover
 
 _Land Cover_ is a categorical variable with 11 classes, providing information on different land cover types such as water, urban, forest, grassland, and more.
