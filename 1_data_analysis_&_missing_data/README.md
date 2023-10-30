@@ -116,7 +116,6 @@ burntArea.minmax[which((burntArea.minmax[,1] != -2) & (burntArea.minmax[,2] != 1
 seq.dates <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month")
 # Create the `rts` object
 burntArea.rts <- rts(burntArea.rast, seq.dates)
-burntArea.rts
 ```
 
 **Plot of the month of October 2020**
@@ -138,7 +137,7 @@ p.ba
 ```
 
 <p align="center">
-  <img src="img/1.2.ba.png"  width="60%" />
+  <img src="img/1.2.ba_2.png"  width="60%" />
 </p>
 
 ### Missing Data
