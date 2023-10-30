@@ -110,13 +110,35 @@ burntArea.minmax[which((burntArea.minmax[,1] != -2) & (burntArea.minmax[,2] != 1
 **Create Raster Time Series (`rts`) object**
 
 ```r
-# Create a sequence date for `rts` object
+# Create a sequence date
 seq.dates <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month")
+# Create the `rts` object
 burntArea.rts <- rts(burntArea.rast, seq.dates)
 burntArea.rts
 ```
 
-As we have misssing data for all the cells of the month of July and September 2012.
+**Plot of the month of October 2020**
+
+```r
+# Upplaying the mask to plot only the amazon area.
+ba <- burntArea.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# Change values as categorical 
+levels(ba) <- data.frame(id=c(-2, 0, 1), val=c('-2', '0', '1'))
+# Plot
+my.colors <- c("mediumblue", "mediumseagreen", "firebrick")
+p.ba <- myPlot(ba, title = "Burnt Area") +
+  scale_fill_manual(
+    name = NULL, 
+    values = my.colors, 
+    na.translate=FALSE
+  ) 
+p.ba
+```
+
+<p align="center">
+  <img src="img/1.2.ba.png"  width="60%" />
+</p>
+
 
 ## Land Cover
 
