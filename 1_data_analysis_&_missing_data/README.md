@@ -75,8 +75,7 @@ burntArea.rast
 
 ```r
 # Order layers
-ordered.names <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month") %>% 
-  format(., '%Y_%m')
+ordered.names <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month") %>% format(., '%Y_%m')
 burntArea.rast <- burntArea.rast[[ordered.names]]
 burntArea.rast
 ```
@@ -111,7 +110,7 @@ burntArea.minmax[which((burntArea.minmax[,1] != -2) & (burntArea.minmax[,2] != 1
 **Create Raster Time Series (`rts`) object**
 
 ```r
-# Create a sequence date for 'rts' object
+# Create a sequence date for `rts` object
 seq.dates <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month")
 burntArea.rts <- rts(burntArea.rast, seq.dates)
 burntArea.rts
