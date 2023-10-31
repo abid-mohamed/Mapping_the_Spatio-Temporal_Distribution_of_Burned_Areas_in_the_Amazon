@@ -5,7 +5,8 @@ The dataset includes 10 variables that capture various factors related to fires,
 Before looking for each variable, we import the Amazon shape file:
 ```r
 # Import shape file
-amaz.basin.shp <- st_read(paste0(path.data,"/0. Amazon_shapefile/projected/amazon_shp_projected.shp"))
+amaz.basin.shp <- st_read(
+  paste0(path.data,"/0. Amazon_shapefile/projected/amazon_shp_projected.shp"))
 ```
 ```
     Simple feature collection with 1 feature and 6 fields
