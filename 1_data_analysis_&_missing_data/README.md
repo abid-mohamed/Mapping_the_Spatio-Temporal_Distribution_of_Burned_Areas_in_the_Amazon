@@ -215,7 +215,8 @@ burntArea.freq.na <- burntArea.freq.na[order(burntArea.freq.na$layer)]
 burntArea.freq.na
 ```
 <p align="center">
-  <img src="img/1.4.ba.na1.png"  width="60%" />
+  <img src="img/1.4.ba.na2.png"  width="49%" />
+  <img src="img/1.4.ba.na3.png"  width="49%" />
 </p>
 
 ## Land Cover
