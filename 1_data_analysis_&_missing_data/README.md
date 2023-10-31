@@ -190,24 +190,24 @@ percentage.fires
 cl <- makeCluster(detectCores() - 1)
 registerDoParallel(cl, cores=detectCores() - 1)
 
-#Raster to datatable in parallel: one raster per thread
+# Raster to datatable in parallel: one raster per thread
 rasList <- foreach (ras_id=amaz.burntArea.list, .packages=c('terra', 'sf'), .combine='c') %dopar% {
-  #Read all rasters into one big stack
-  ras <- rast(paste0(my.path,ras_id))
-  # Rename layers
-  ras <- renameLayers(ras, 'burntarea_working_', '')
-  # Replace negative value by `NA`
-  if (names(ras) %in% c("2012_07", "2012_09")) {ras[ras == -1] <- NA}
-  #
-  ras.nonNA <- not.na(ras)
-  ras.nonNA.mask <- mask(ras.nonNA, amaz.basin.shp)
-  ras.freq.na <- freq(ras.nonNA.mask, digits=0, value=0, usenames=T)
-
-  list(ras.freq.na)
-}
+    # Read all rasters into one big stack
+    ras <- rast(ras_id)
+    # Rename layers
+    ras <- renameLayers(ras, 'burntarea_working_', '')
+    # Replace negative value by `NA`
+    if (names(ras) %in% c("2012_07", "2012_09")) {ras[ras == -1] <- NA}
+    # Count the missing data
+    ras.nonNA <- not.na(ras)
+    ras.nonNA.mask <- mask(ras.nonNA, amaz.basin.shp)
+    ras.freq.na <- freq(ras.nonNA.mask, digits=0, value=0, usenames=T)
+  
+    list(ras.freq.na)
+  }
 stopCluster(cl)
 
-#Bind all per-raster into one dataframe
+# Bind all per-raster into one dataframe
 burntArea.freq.na <- rbindlist(rasList, fill=T, use.names=T)
 #
 colnames(burntArea.freq.na)[3] <- "burntArea_na"
