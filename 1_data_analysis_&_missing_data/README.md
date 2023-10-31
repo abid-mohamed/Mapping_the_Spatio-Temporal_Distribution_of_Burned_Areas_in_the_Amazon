@@ -283,11 +283,32 @@ landCover.minmax <- minmax(landCover.rast) %>% t() %>% as.data.frame()
 landCover.minmax[
   which((!landCover.minmax[,1] %in% c(0:10)) & (!landCover.minmax[,2] %in% c(0:10))), ]
 ```
+
 <p align="center">
   <img src="img/2.1.lc.png"  width="60%" />
 </p>
 
 _**Plot of the month of October 2020**_
+
+```r
+# Create the `rts` object
+landCover.rts <- rts(landCover.rast, seq.dates)
+# Applying the mask to plot only the amazon area.
+lc <- landCover.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)  
+# Change values as categorical 
+levels(lc) <- data.frame(id=0:10, val=as.character(c(0:10)))
+# Plot
+p.lc <- myPlot(lc, title = "Land Cover") + 
+  scale_fill_hypso_d(
+    name = NULL,
+    palette = "colombia_hypso", 
+    na.translate=FALSE)
+p.lc
+```
+
+<p align="center">
+  <img src="img/2.2.lc.png"  width="60%" />
+</p>
 
 ### Missing Data
 
