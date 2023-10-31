@@ -137,7 +137,7 @@ p.ba
 ```
 
 <p align="center">
-  <img src="img/1.2.ba_2.png"  width="60%" />
+  <img src="img/1.2.ba.png"  width="60%" />
 </p>
 
 ```r
@@ -221,38 +221,181 @@ burntArea.freq.na
 
 ## Land Cover
 
+### Data Analysis
+
 _Land Cover_ is a categorical variable with 11 classes, providing information on different land cover types such as water, urban, forest, grassland, and more.
 
+_**Import data**_
+
+```r
+# list of files
+amaz.landCover.list <- list.files(paste0(path.data,"/2. Land Cover/03. Working Data"),
+                                  full.names=TRUE,
+                                  pattern = ".tif$")
+# Import data with "Terra"
+landCover.rast <- rast(amaz.landCover.list)
+landCover.rast
+```
+```
+    class       : SpatRaster 
+    dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
+    resolution  : 500, 500  (x, y)
+    extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
+    coord. ref. : South_America_Albers_Equal_Area_Conic 
+    sources     : landcover_working_2001_1.tif  
+                landcover_working_2001_10.tif  
+                landcover_working_2001_11.tif  
+                ... and 237 more source(s)
+    names       : lulc_~_proj, lulc_~_proj, lulc_~_proj, lulc_~_proj, lulc_~_proj, lulc_~_proj, ... 
+    min values  :           0,           0,           0,           0,           0,           0, ... 
+    max values  :          10,          10,          10,          10,          10,          10, ...
+```
+
+_**Rename and order layers**_
+
+```r
+# Rename layers
+landCover.rast <- renameLayers(landCover.rast, 'landcover_working_', '')
+# Order layers
+landCover.rast <- landCover.rast[[ordered.names]]
+landCover.rast
+```
+```
+    class       : SpatRaster 
+    dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
+    resolution  : 500, 500  (x, y)
+    extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
+    coord. ref. : South_America_Albers_Equal_Area_Conic 
+    sources     : landcover_working_2001_1.tif  
+                landcover_working_2001_2.tif  
+                landcover_working_2001_3.tif  
+                ... and 237 more source(s)
+    names       : 2001_01, 2001_02, 2001_03, 2001_04, 2001_05, 2001_06, ... 
+    min values  :       0,       0,       0,       0,       0,       0, ... 
+    max values  :      10,      10,      10,      10,      10,      10, ... 
+```
+
+_**Verification of the values**_
+
+```r
+# Verification of the values
+landCover.minmax <- minmax(landCover.rast) %>% t() %>% as.data.frame()
+landCover.minmax[
+  which((!landCover.minmax[,1] %in% c(0:10)) & (!landCover.minmax[,2] %in% c(0:10))), ]
+```
+<p align="center">
+  <img src="img/2.1.lc.png"  width="60%" />
+</p>
+
+_**Plot of the month of October 2020**_
+
+### Missing Data
 
 ## Precipitation
+
+### Data Analysis
 
 _Precipitation_ is measured in millimeters per hour, with a range between 0 and 3300.
 
 ## Soil Moisture
 
+### Data Analysis
+
 _Soil Moisture_ is measured in millimeters, with missing values marked as -9.99e+08, and a range between 0 and 4291.
+
+_**Import data**_
+
+_**Rename and order layers**_
+
+_**Verification of the values**_
+
+_**Plot of the month of October 2020**_
+
+### Missing Data
 
 ## Elevation
 
+### Data Analysis
+
 _Elevation_ is measured in meters, with a range between -85 and 6471.
+
+_**Import data**_
+
+_**Rename and order layers**_
+
+_**Verification of the values**_
+
+_**Plot of the month of October 2020**_
+
+### Missing Data
 
 ## Land Surface Temperature
 
+### Data Analysis
+
 _Land Surface Temperature_ is represented in Kelvin, with values adjusted by a scale factor of 0.02. Different months have varying missing data.
+
+_**Import data**_
+
+_**Rename and order layers**_
+
+_**Verification of the values**_
+
+_**Plot of the month of October 2020**_
+
+### Missing Data
 
 ## Specific Humidity
 
+### Data Analysis
+
 _Specific Humidity_ is represented as kg/kg, indicating the ratio of kilograms of water (moisture) per kilogram of air. It ranges from 9.59e-04 to 2.15e-02.
+
+_**Import data**_
+
+_**Rename and order layers**_
+
+_**Verification of the values**_
+
+_**Plot of the month of October 2020**_
+
+### Missing Data
 
 ## Evapotranspiration
 
+### Data Analysis
+
 _Evapotranspiration_ is measured in kg/m2s, with values ranging between -2.02e-07 and 9.69e-05.
+
+_**Import data**_
+
+_**Rename and order layers**_
+
+_**Verification of the values**_
+
+_**Plot of the month of October 2020**_
+
+### Missing Data
 
 ## Wind Speed
 
+### Data Analysis
+
 _Wind Speed_ is measured in m/s, with values between 0.86 and 9.85.
 
+_**Import data**_
+
+_**Rename and order layers**_
+
+_**Verification of the values**_
+
+_**Plot of the month of October 2020**_
+
+### Missing Data
+
 ## Air Temperature
+
+### Data Analysis
 
 _Air Temperature_ is represented in Kelvin, with values ranging from 268 to 307.
 
