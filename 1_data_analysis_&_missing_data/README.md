@@ -26,7 +26,7 @@ Now, let's take a closer look at each variable:
 
 _Burnt Area_ Represents the extent of burned areas in the Amazon rainforest, categorized as burnt (1), unburnt (0), missing (-1), or water (-2).
 
-_**Import data**_
+#### *Import data*
 
 ```r
 # list of files
@@ -52,7 +52,7 @@ burntArea.rast
     max values  :           1,           1,           1,           1,           1,           1, ... 
 ```
 
-_**Rename layers**_
+#### *Rename layers*
 
 ```r
 # Rename layers
@@ -74,7 +74,7 @@ burntArea.rast
     max values  :       1,       1,       1,       1,       1,       1, ... 
 ```
 
-_**Order layers**_
+#### *Order layers*
 
 ```r
 # Order layers
@@ -98,7 +98,7 @@ burntArea.rast
     max values  :       1,       1,       1,       1,       1,       1, ... 
 ```
 
-_**Verification of the values**_
+#### *Verification of the values*
 
 ```r
 # Verification of the values
@@ -111,7 +111,7 @@ burntArea.minmax[which((burntArea.minmax[,1] != -2) & (burntArea.minmax[,2] != 1
 </p>
 
 
-_**Create Raster Time Series (`rts`) object**_
+#### *Create Raster Time Series (`rts`) object*
 
 ```r
 # Create a sequence date
@@ -120,7 +120,7 @@ seq.dates <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month")
 burntArea.rts <- rts(burntArea.rast, seq.dates)
 ```
 
-_**Plot of the month of October 2020**_
+#### *Plot of the month of October 2020*
 
 ```r
 # Upplaying the mask to plot only the amazon area.
@@ -162,7 +162,7 @@ ggplot(data = ba.dt, aes(x = val)) +
   <img src="img/1.3.ba.png"  width="60%" />
 </p>
 
-_**Percentage of fires**_
+#### *Percentage of fires*
 
 ```r
 freq.dt <- matrix(nrow = 0, ncol = 3) %>% as.data.table()
@@ -230,7 +230,7 @@ burntArea.freq.na
 
 _Land Cover_ is a categorical variable with 11 classes, providing information on different land cover types such as water, urban, forest, grassland, and more.
 
-_**Import data**_
+#### *Import data*
 
 ```r
 # list of files
@@ -256,7 +256,7 @@ landCover.rast
     max values  :          10,          10,          10,          10,          10,          10, ...
 ```
 
-_**Rename and order layers**_
+#### *Rename and order layers*
 
 ```r
 # Rename layers
@@ -280,7 +280,7 @@ landCover.rast
     max values  :      10,      10,      10,      10,      10,      10, ... 
 ```
 
-_**Verification of the values**_
+#### *Verification of the values*
 
 ```r
 # Verification of the values
@@ -293,7 +293,7 @@ landCover.minmax[
   <img src="img/2.1.lc.png"  width="60%" />
 </p>
 
-_**Plot of the month of October 2020**_
+#### *Plot of the month of October 2020*
 
 ```r
 # Create the `rts` object
@@ -329,13 +329,13 @@ _Precipitation_ is measured in millimeters per hour, with a range between 0 and 
 
 _Soil Moisture_ is measured in millimeters, with missing values marked as -9.99e+08, and a range between 0 and 4291.
 
-_**Import data**_
+#### *Import data*
 
-_**Rename and order layers**_
+#### *Rename and order layers*
 
-_**Verification of the values**_
+#### *Verification of the values*
 
-_**Plot of the month of October 2020**_
+#### *Plot of the month of October 2020*
 
 ### Missing Data
 
@@ -345,13 +345,13 @@ _**Plot of the month of October 2020**_
 
 _Elevation_ is measured in meters, with a range between -85 and 6471.
 
-_**Import data**_
+#### *Import data*
 
-_**Rename and order layers**_
+#### *Rename and order layers*
 
-_**Verification of the values**_
+#### *Verification of the values*
 
-_**Plot of the month of October 2020**_
+#### *Plot of the month of October 2020*
 
 ### Missing Data
 
@@ -361,13 +361,13 @@ _**Plot of the month of October 2020**_
 
 _Land Surface Temperature_ is represented in Kelvin, with values adjusted by a scale factor of 0.02. Different months have varying missing data.
 
-_**Import data**_
+#### *Import data*
 
-_**Rename and order layers**_
+#### *Rename and order layers*
 
-_**Verification of the values**_
+#### *Verification of the values*
 
-_**Plot of the month of October 2020**_
+#### *Plot of the month of October 2020*
 
 ### Missing Data
 
@@ -377,13 +377,13 @@ _**Plot of the month of October 2020**_
 
 _Specific Humidity_ is represented as kg/kg, indicating the ratio of kilograms of water (moisture) per kilogram of air. It ranges from 9.59e-04 to 2.15e-02.
 
-_**Import data**_
+#### *Import data*
 
-_**Rename and order layers**_
+#### *Rename and order layers*
 
-_**Verification of the values**_
+#### *Verification of the values*
 
-_**Plot of the month of October 2020**_
+#### *Plot of the month of October 2020*
 
 ### Missing Data
 
@@ -393,13 +393,13 @@ _**Plot of the month of October 2020**_
 
 _Evapotranspiration_ is measured in kg/m2s, with values ranging between -2.02e-07 and 9.69e-05.
 
-_**Import data**_
+#### *Import data*
 
-_**Rename and order layers**_
+#### *Rename and order layers*
 
-_**Verification of the values**_
+#### *Verification of the values*
 
-_**Plot of the month of October 2020**_
+#### *Plot of the month of October 2020*
 
 ### Missing Data
 
@@ -409,13 +409,13 @@ _**Plot of the month of October 2020**_
 
 _Wind Speed_ is measured in m/s, with values between 0.86 and 9.85.
 
-_**Import data**_
+#### *Import data*
 
-_**Rename and order layers**_
+#### *Rename and order layers*
 
-_**Verification of the values**_
+#### *Verification of the values*
 
-_**Plot of the month of October 2020**_
+#### *Plot of the month of October 2020*
 
 ### Missing Data
 
