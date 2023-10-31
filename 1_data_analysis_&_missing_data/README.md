@@ -281,7 +281,7 @@ _**Verification of the values**_
 # Verification of the values
 landCover.minmax <- minmax(landCover.rast) %>% t() %>% as.data.frame()
 landCover.minmax[
-  which((!landCover.minmax[,1] %in% c(0:10)) & (!landCover.minmax[,2] %in% c(0:10))), ]
+  which((!landCover.minmax[,1] %in% c(0:10)) & (!landCover.minmax[,2] %in% c(0:10))),]
 ```
 
 <p align="center">
