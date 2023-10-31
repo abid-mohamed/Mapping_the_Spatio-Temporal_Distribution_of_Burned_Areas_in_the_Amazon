@@ -78,7 +78,8 @@ _**Order layers**_
 
 ```r
 # Order layers
-ordered.names <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month") %>% format(., '%Y_%m')
+ordered.names <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month") %>%
+  format(., '%Y_%m')
 burntArea.rast <- burntArea.rast[[ordered.names]]
 burntArea.rast
 ```
@@ -192,7 +193,10 @@ cl <- makeCluster(detectCores() - 1)
 registerDoParallel(cl, cores=detectCores() - 1)
 
 # Raster to datatable in parallel: one raster per thread
-rasList <- foreach (ras_id=amaz.burntArea.list, .packages=c('terra', 'sf'), .combine='c') %dopar% {
+rasList <- foreach (
+  ras_id=amaz.burntArea.list, 
+  .packages=c('terra', 'sf'), 
+  .combine='c') %dopar% {
     # Read all rasters into one big stack
     ras <- rast(ras_id)
     # Rename layers
