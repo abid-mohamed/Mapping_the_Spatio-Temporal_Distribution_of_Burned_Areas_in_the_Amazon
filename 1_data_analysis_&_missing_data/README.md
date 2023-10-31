@@ -201,7 +201,7 @@ rasList <- foreach (ras_id=amaz.burntArea.list, .packages=c('terra', 'sf'), .com
     # Count the missing data
     ras.nonNA <- not.na(ras)
     ras.nonNA.mask <- mask(ras.nonNA, amaz.basin.shp)
-    ras.freq.na <- freq(ras.nonNA.mask, digits=0, value=0, usenames=T)
+    ras.freq.na <- terra::freq(ras.nonNA.mask, digits=0, value=0, usenames=T)
   
     list(ras.freq.na)
   }
@@ -214,6 +214,9 @@ colnames(burntArea.freq.na)[3] <- "burntArea_na"
 burntArea.freq.na <- burntArea.freq.na[order(burntArea.freq.na$layer)]
 burntArea.freq.na
 ```
+<p align="center">
+  <img src="img/1.4.ba.na1.png"  width="50%" />
+</p>
 
 ## Land Cover
 
