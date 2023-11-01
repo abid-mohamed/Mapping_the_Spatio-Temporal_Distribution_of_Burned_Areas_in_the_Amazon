@@ -323,18 +323,21 @@ registerDoParallel(cl, cores=detectCores() - 1)
 
 tic("landCover")
 #Raster to datatable in parallel: one raster per thread
-rasList <- foreach (ras_id=amaz.landCover.list, .packages=c('terra', 'sf'), .combine='c') %dopar% {
-  #Read all rasters into one big stack
-  ras <- rast(ras_id)
-  # Rename layers
-  ras <- renameLayers(ras, 'landcover_working_', '')
-  # Count the missing data
-  ras.nonNA <- not.na(ras)
-  ras.nonNA.mask <- mask(ras.nonNA, amaz.basin.shp)
-  ras.freq.na <- terra::freq(ras.nonNA.mask, digits=0, value=0, usenames=T)
-
-  list(ras.freq.na)
-}
+rasList <- foreach(
+    ras_id=amaz.landCover.list, 
+    .packages=c('terra', 'sf'), 
+    .combine='c') %dopar% {
+        #Read all rasters into one big stack
+        ras <- rast(ras_id)
+        # Rename layers
+        ras <- renameLayers(ras, 'landcover_working_', '')
+        # Count the missing data
+        ras.nonNA <- not.na(ras)
+        ras.nonNA.mask <- mask(ras.nonNA, amaz.basin.shp)
+        ras.freq.na <- terra::freq(ras.nonNA.mask, digits=0, value=0, usenames=T)
+        #
+        list(ras.freq.na)
+    }
 stopCluster(cl)
 toc()
 
@@ -351,6 +354,93 @@ landCover.freq.na
 ### Data Analysis
 
 _Precipitation_ is measured in millimeters per hour, with a range between 0 and 3300.
+
+#### *Import data*
+
+```r
+# list of files
+amaz.precipitation.list <- list.files(paste0(path.data,"/3. Precipitation/03. Working Data"),
+                                      full.names=TRUE,
+                                      pattern = ".tif$")
+# Import data with "Terra"
+precipitation.rast <- rast(amaz.precipitation.list)
+precipitation.rast
+```
+```
+    class       : SpatRaster 
+    dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
+    resolution  : 500, 500  (x, y)
+    extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
+    coord. ref. : South_America_Albers_Equal_Area_Conic 
+    sources     : precipitation_working_2001_1.tif  
+                precipitation_working_2001_10.tif  
+                precipitation_working_2001_11.tif  
+                ... and 237 more source(s)
+    names       : prec_~_proj, prec_~_proj, prec_~_proj, prec_~_proj, prec_~_proj, prec_~_proj, ... 
+    min values  :           0,           0,           0,           0,           0,           0, ... 
+    max values  :        1461,        1735,        1828,        1934,        1433,        1390, ...
+```
+
+#### *Rename and order layers*
+
+```r
+# Rename layers
+precipitation.rast <- renameLayers(precipitation.rast, 'precipitation_working_', '')
+# Order layers
+precipitation.rast <- precipitation.rast[[ordered.names]]
+precipitation.rast
+```
+```
+    class       : SpatRaster 
+    dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
+    resolution  : 500, 500  (x, y)
+    extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
+    coord. ref. : South_America_Albers_Equal_Area_Conic 
+    sources     : precipitation_working_2001_1.tif  
+                precipitation_working_2001_2.tif  
+                precipitation_working_2001_3.tif  
+                ... and 237 more source(s)
+    names       : 2001_01, 2001_02, 2001_03, 2001_04, 2001_05, 2001_06, ... 
+    min values  :       0,       0,       0,       0,       0,       0, ... 
+    max values  :    1461,    1433,    1390,    1096,    1678,    1706, ... 
+```
+
+#### *Verification of the values*
+
+```r
+# Verification of the values
+precipitation.minmax <- minmax(precipitation.rast) %>% t() %>% as.data.frame()
+precipitation.minmax
+```
+
+<p align="center">
+  <img src="img/3.1.prec.png"  width="60%" />
+</p>
+
+#### *Plot of the month of October 2020*
+
+```r
+# Create a sequence date for 'rts' object
+precipitation.rts <- rts(precipitation.rast, seq.dates)
+# Applying the mask to plot only the amazon area.
+prec <- precipitation.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# Plot
+p.prec <- myPlot(prec, title = "Precipitation") + 
+  scale_fill_scico(
+    name = TeX(r"($\textit{(mm/hr)}$)"),
+    palette = "lapaz", 
+    direction = -1,
+    trans = "pseudo_log",
+    breaks = c(0,10,50,200,550),
+    na.value = "transparent")
+p.prec
+```
+
+<p align="center">
+  <img src="img/3.2.prec.png"  width="60%" />
+</p>
+
+### Missing Data
 
 ## 1.4. Soil Moisture
 
