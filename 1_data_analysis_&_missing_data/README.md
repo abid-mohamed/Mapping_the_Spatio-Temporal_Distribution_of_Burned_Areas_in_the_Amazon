@@ -224,7 +224,7 @@ burntArea.freq.na
   <img src="img/1.4.ba.na3.png"  width="49.5%" />
 </p>
 
-## Land Cover
+## 1.2. Land Cover
 
 ### Data Analysis
 
@@ -317,13 +317,42 @@ p.lc
 
 ### Missing Data
 
-## Precipitation
+```r
+cl <- makeCluster(detectCores() - 1)
+registerDoParallel(cl, cores=detectCores() - 1)
+
+tic("landCover")
+#Raster to datatable in parallel: one raster per thread
+rasList <- foreach (ras_id=amaz.landCover.list, .packages=c('terra', 'sf'), .combine='c') %dopar% {
+  #Read all rasters into one big stack
+  ras <- rast(ras_id)
+  # Rename layers
+  ras <- renameLayers(ras, 'landcover_working_', '')
+  # Count the missing data
+  ras.nonNA <- not.na(ras)
+  ras.nonNA.mask <- mask(ras.nonNA, amaz.basin.shp)
+  ras.freq.na <- terra::freq(ras.nonNA.mask, digits=0, value=0, usenames=T)
+
+  list(ras.freq.na)
+}
+stopCluster(cl)
+toc()
+
+#Bind all per-raster into one dataframe
+landCover.freq.na <- rbindlist(rasList, fill=T, use.names=T)
+#
+colnames(landCover.freq.na)[3] <- "landCover_na"
+landCover.freq.na <- landCover.freq.na[order(landCover.freq.na$layer)]
+landCover.freq.na
+```
+
+## 1.3. Precipitation
 
 ### Data Analysis
 
 _Precipitation_ is measured in millimeters per hour, with a range between 0 and 3300.
 
-## Soil Moisture
+## 1.4. Soil Moisture
 
 ### Data Analysis
 
@@ -339,7 +368,7 @@ _Soil Moisture_ is measured in millimeters, with missing values marked as -9.99e
 
 ### Missing Data
 
-## Elevation
+## 1.5. Elevation
 
 ### Data Analysis
 
@@ -355,7 +384,7 @@ _Elevation_ is measured in meters, with a range between -85 and 6471.
 
 ### Missing Data
 
-## Land Surface Temperature
+## 1.6. Land Surface Temperature
 
 ### Data Analysis
 
@@ -371,7 +400,7 @@ _Land Surface Temperature_ is represented in Kelvin, with values adjusted by a s
 
 ### Missing Data
 
-## Specific Humidity
+## 1.7. Specific Humidity
 
 ### Data Analysis
 
@@ -387,7 +416,7 @@ _Specific Humidity_ is represented as kg/kg, indicating the ratio of kilograms o
 
 ### Missing Data
 
-## Evapotranspiration
+## 1.8. Evapotranspiration
 
 ### Data Analysis
 
@@ -403,7 +432,7 @@ _Evapotranspiration_ is measured in kg/m2s, with values ranging between -2.02e-0
 
 ### Missing Data
 
-## Wind Speed
+## 1.9. Wind Speed
 
 ### Data Analysis
 
@@ -419,7 +448,7 @@ _Wind Speed_ is measured in m/s, with values between 0.86 and 9.85.
 
 ### Missing Data
 
-## Air Temperature
+## 1.10. Air Temperature
 
 ### Data Analysis
 
