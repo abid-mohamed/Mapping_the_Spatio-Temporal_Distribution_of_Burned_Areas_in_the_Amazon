@@ -50,17 +50,17 @@ burntArea.rast
 
 ```
     class       : SpatRaster 
-    dimensions  : 5860, 7806, 238  (nrow, ncol, nlyr)
+    dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
     resolution  : 500, 500  (x, y)
     extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
     coord. ref. : South_America_Albers_Equal_Area_Conic 
     sources     : burntarea_working_2001_1.tif  
                 burntarea_working_2001_10.tif  
                 burntarea_working_2001_11.tif  
-                ... and 235 more source(s)
+                ... and 237 more source(s)
     names       : fire_~_proj, fire_~_proj, fire_~_proj, fire_~_proj, fire_~_proj, fire_~_proj, ... 
     min values  :          -2,          -2,          -2,          -2,          -2,          -2, ... 
-    max values  :           1,           1,           1,           1,           1,           1, ... 
+    max values  :           1,           1,           1,           1,           1,           1, ...
 ```
 
 #### *Rename layers*
