@@ -3,11 +3,17 @@
 The dataset includes 10 variables that capture various factors related to fires, land use, environmental conditions, and climate. It provides a spatial resolution of 500 meters, allowing a detailed analysis of the Amazon rainforest. These variables are measured on a monthly basis, covering the entire period from 2001 to 2020, and each variable contains a substantial monthly dataset, with around 26.8 million observations per month.
 
 Before looking for each variable, we import the Amazon shape file:
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
 ```r
 # Import shape file
 amaz.basin.shp <- st_read(
   paste0(path.data,"/0. Amazon_shapefile/projected/amazon_shp_projected.shp"))
 ```
+</details>
+
 ```
     Simple feature collection with 1 feature and 6 fields
     Geometry type: MULTIPOLYGON
@@ -28,6 +34,9 @@ _Burnt Area_ Represents the extent of burned areas in the Amazon rainforest, cat
 
 #### *Import data*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
 ```r
 # list of files
 amaz.burntArea.list <- list.files(paste0(path.data,"/1. Burnt Area/03. Working Data"),
@@ -37,6 +46,8 @@ amaz.burntArea.list <- list.files(paste0(path.data,"/1. Burnt Area/03. Working D
 burntArea.rast <- rast(amaz.burntArea.list)
 burntArea.rast
 ```
+</details>
+
 ```
     class       : SpatRaster 
     dimensions  : 5860, 7806, 238  (nrow, ncol, nlyr)
@@ -54,11 +65,16 @@ burntArea.rast
 
 #### *Rename layers*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
 ```r
 # Rename layers
 burntArea.rast <- renameLayers(burntArea.rast, 'burntarea_working_', '')
 burntArea.rast
 ```
+</details>
+
 ```
     class       : SpatRaster 
     dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
@@ -76,6 +92,9 @@ burntArea.rast
 
 #### *Order layers*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
 ```r
 # Order layers
 ordered.names <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month") %>%
@@ -83,6 +102,8 @@ ordered.names <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month") %>
 burntArea.rast <- burntArea.rast[[ordered.names]]
 burntArea.rast
 ```
+</details>
+
 ```
     class       : SpatRaster 
     dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
@@ -100,11 +121,16 @@ burntArea.rast
 
 #### *Verification of the values*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
 ```r
 # Verification of the values
 burntArea.minmax <- minmax(burntArea.rast) %>% t() %>% as.data.frame()
 burntArea.minmax[which((burntArea.minmax[,1] != -2) & (burntArea.minmax[,2] != 1)),]
 ```
+</details>
+
 
 <p align="center">
   <img src="img/1.1.BurntArea-Verification of the values.png"  width="60%" />
@@ -113,14 +139,22 @@ burntArea.minmax[which((burntArea.minmax[,1] != -2) & (burntArea.minmax[,2] != 1
 
 #### *Create Raster Time Series (`rts`) object*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
 ```r
 # Create a sequence date
 seq.dates <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month")
 # Create the `rts` object
 burntArea.rts <- rts(burntArea.rast, seq.dates)
 ```
+</details>
+
 
 #### *Plot of the month of October 2020*
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
 
 ```r
 # Upplaying the mask to plot only the amazon area.
@@ -137,10 +171,15 @@ p.ba <- myPlot(ba, title = "Burnt Area") +
   ) 
 p.ba
 ```
+</details>
+
 
 <p align="center">
   <img src="img/1.2.ba.png"  width="60%" />
 </p>
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
 
 ```r
 # Convert the raster object to a datatable
@@ -157,12 +196,16 @@ ggplot(data = ba.dt, aes(x = val)) +
              colour = "black", size = 3.5) + 
   theme_bw(base_size=16)
 ```
+</details>
 
 <p align="center">
   <img src="img/1.3.ba.png"  width="60%" />
 </p>
 
 #### *Percentage of fires*
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
 
 ```r
 freq.dt <- matrix(nrow = 0, ncol = 3) %>% as.data.table()
@@ -185,8 +228,13 @@ percentage.fires
 ```
     [1] 0.00089637
 ```
+</details>
+
 
 ### Missing Data
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
 
 ```r
 cl <- makeCluster(detectCores() - 1)
@@ -219,6 +267,8 @@ colnames(burntArea.freq.na)[3] <- "burntArea_na"
 burntArea.freq.na <- burntArea.freq.na[order(burntArea.freq.na$layer)]
 burntArea.freq.na
 ```
+</details>
+
 <p align="center">
   <img src="img/1.4.ba.na2.png"  width="49.5%" />
   <img src="img/1.4.ba.na3.png"  width="49.5%" />
@@ -232,6 +282,9 @@ _Land Cover_ is a categorical variable with 11 classes, providing information on
 
 #### *Import data*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
 ```r
 # list of files
 amaz.landCover.list <- list.files(paste0(path.data,"/2. Land Cover/03. Working Data"),
@@ -241,6 +294,8 @@ amaz.landCover.list <- list.files(paste0(path.data,"/2. Land Cover/03. Working D
 landCover.rast <- rast(amaz.landCover.list)
 landCover.rast
 ```
+</details>
+
 ```
     class       : SpatRaster 
     dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
@@ -258,6 +313,9 @@ landCover.rast
 
 #### *Rename and order layers*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
 ```r
 # Rename layers
 landCover.rast <- renameLayers(landCover.rast, 'landcover_working_', '')
@@ -265,6 +323,8 @@ landCover.rast <- renameLayers(landCover.rast, 'landcover_working_', '')
 landCover.rast <- landCover.rast[[ordered.names]]
 landCover.rast
 ```
+</details>
+
 ```
     class       : SpatRaster 
     dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
@@ -282,18 +342,25 @@ landCover.rast
 
 #### *Verification of the values*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
 ```r
 # Verification of the values
 landCover.minmax <- minmax(landCover.rast) %>% t() %>% as.data.frame()
 landCover.minmax[
   which((!landCover.minmax[,1] %in% c(0:10)) & (!landCover.minmax[,2] %in% c(0:10))),]
 ```
+</details>
 
 <p align="center">
   <img src="img/2.1.lc.png"  width="60%" />
 </p>
 
 #### *Plot of the month of October 2020*
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
 
 ```r
 # Create the `rts` object
@@ -310,12 +377,16 @@ p.lc <- myPlot(lc, title = "Land Cover") +
     na.translate=FALSE)
 p.lc
 ```
+</details>
 
 <p align="center">
   <img src="img/2.2.lc.png"  width="60%" />
 </p>
 
 ### Missing Data
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
 
 ```r
 cl <- makeCluster(detectCores() - 1)
@@ -348,6 +419,7 @@ colnames(landCover.freq.na)[3] <- "landCover_na"
 landCover.freq.na <- landCover.freq.na[order(landCover.freq.na$layer)]
 landCover.freq.na
 ```
+</details>
 
 ## 1.3. Precipitation
 
@@ -356,6 +428,9 @@ landCover.freq.na
 _Precipitation_ is measured in millimeters per hour, with a range between 0 and 3300.
 
 #### *Import data*
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
 
 ```r
 # list of files
@@ -366,6 +441,8 @@ amaz.precipitation.list <- list.files(paste0(path.data,"/3. Precipitation/03. Wo
 precipitation.rast <- rast(amaz.precipitation.list)
 precipitation.rast
 ```
+</details>
+
 ```
     class       : SpatRaster 
     dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
@@ -383,6 +460,9 @@ precipitation.rast
 
 #### *Rename and order layers*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
 ```r
 # Rename layers
 precipitation.rast <- renameLayers(precipitation.rast, 'precipitation_working_', '')
@@ -390,6 +470,8 @@ precipitation.rast <- renameLayers(precipitation.rast, 'precipitation_working_',
 precipitation.rast <- precipitation.rast[[ordered.names]]
 precipitation.rast
 ```
+</details>
+
 ```
     class       : SpatRaster 
     dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
@@ -407,20 +489,24 @@ precipitation.rast
 
 #### *Verification of the values*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
 ```r
 # Verification of the values
 precipitation.minmax <- minmax(precipitation.rast) %>% t() %>% as.data.frame()
 precipitation.minmax
 ```
+</details>
 
 <p align="center">
   <img src="img/3.1.prec.png"  width="60%" />
 </p>
 
 #### *Plot of the month of October 2020*
+
 <details>
-    <summary>
-    <em>Show/Hide code</em></summary>
+    <summary><em>Show/Hide code</em></summary>
 
 ```r
 # Create a sequence date for 'rts' object
@@ -445,6 +531,9 @@ p.prec
 </p>
 
 ### Missing Data
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
 
 ```r
 cl <- makeCluster(detectCores() - 1)
@@ -477,6 +566,7 @@ colnames(precipitation.freq.na)[3] <- "precipitation_na"
 precipitation.freq.na <- precipitation.freq.na[order(precipitation.freq.na$layer)]
 precipitation.freq.na
 ```
+</details>
 
 ## 1.4. Soil Moisture
 
