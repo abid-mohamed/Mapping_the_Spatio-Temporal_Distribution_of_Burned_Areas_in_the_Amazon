@@ -323,21 +323,21 @@ registerDoParallel(cl, cores=detectCores() - 1)
 
 tic("landCover")
 #Raster to datatable in parallel: one raster per thread
-rasList <- foreach(
-    ras_id=amaz.landCover.list, 
-    .packages=c('terra', 'sf'), 
-    .combine='c') %dopar% {
-        #Read all rasters into one big stack
-        ras <- rast(ras_id)
-        # Rename layers
-        ras <- renameLayers(ras, 'landcover_working_', '')
-        # Count the missing data
-        ras.nonNA <- not.na(ras)
-        ras.nonNA.mask <- mask(ras.nonNA, amaz.basin.shp)
-        ras.freq.na <- terra::freq(ras.nonNA.mask, digits=0, value=0, usenames=T)
-        #
-        list(ras.freq.na)
-    }
+rasList <- foreach (
+  ras_id=amaz.landCover.list, 
+  .packages=c('terra', 'sf'), 
+  .combine='c') %dopar% {
+    #Read all rasters into one big stack
+    ras <- rast(ras_id)
+    # Rename layers
+    ras <- renameLayers(ras, 'landcover_working_', '')
+    # Count the missing data
+    ras.nonNA <- not.na(ras)
+    ras.nonNA.mask <- mask(ras.nonNA, amaz.basin.shp)
+    ras.freq.na <- terra::freq(ras.nonNA.mask, digits=0, value=0, usenames=T)
+  
+    list(ras.freq.na)
+  }
 stopCluster(cl)
 toc()
 
@@ -418,6 +418,9 @@ precipitation.minmax
 </p>
 
 #### *Plot of the month of October 2020*
+<details>
+    <summary>
+    <em>Show/Hide code</em></summary>
 
 ```r
 # Create a sequence date for 'rts' object
@@ -426,7 +429,7 @@ precipitation.rts <- rts(precipitation.rast, seq.dates)
 prec <- precipitation.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
 # Plot
 p.prec <- myPlot(prec, title = "Precipitation") + 
-  scale_fill_scico(
+scale_fill_scico(
     name = TeX(r"($\textit{(mm/hr)}$)"),
     palette = "lapaz", 
     direction = -1,
@@ -435,12 +438,45 @@ p.prec <- myPlot(prec, title = "Precipitation") +
     na.value = "transparent")
 p.prec
 ```
+</details>
 
 <p align="center">
   <img src="img/3.2.prec.png"  width="60%" />
 </p>
 
 ### Missing Data
+
+```r
+cl <- makeCluster(detectCores() - 1)
+registerDoParallel(cl, cores=detectCores() - 1)
+
+tic("precipitation")
+#Raster to datatable in parallel: one raster per thread
+rasList <- foreach (
+  ras_id=amaz.precipitation.list, 
+  .packages=c('terra', 'sf'), 
+  .combine='c') %dopar% {
+    #Read all rasters into one big stack
+    ras <- rast(ras_id)
+    # Rename layers
+    ras <- renameLayers(ras, 'precipitation_working_', '')
+    #
+    ras.nonNA <- not.na(ras)
+    ras.nonNA.mask <- mask(ras.nonNA, amaz.basin.shp)
+    ras.freq.na <- freq(ras.nonNA.mask, digits=0, value=0, usenames=T)
+  
+    list(ras.freq.na)
+  }
+stopCluster(cl)
+toc()
+
+#Bind all per-raster into one dataframe
+precipitation.freq.na <- rbindlist(rasList, fill=T, use.names=T)
+#
+colnames(precipitation.freq.na)[3] <- "precipitation_na"
+precipitation.freq.na <- precipitation.freq.na[order(precipitation.freq.na$layer)]
+precipitation.freq.na
+```
 
 ## 1.4. Soil Moisture
 
