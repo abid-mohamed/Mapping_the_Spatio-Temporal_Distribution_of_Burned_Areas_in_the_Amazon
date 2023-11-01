@@ -490,6 +490,14 @@ _Soil Moisture_ is measured in millimeters, with missing values marked as -9.99e
 
 #### *Verification of the values*
 
+<p align="center">
+  <img src="img/4.1.soilm.png"  width="60%" />
+</p>
+
+<p align="center">
+  <img src="img/4.2.soilm.png"  width="60%" />
+</p>
+
 #### *Plot of the month of October 2020*
 
 ### Missing Data
