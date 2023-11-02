@@ -576,13 +576,89 @@ _Soil Moisture_ is measured in millimeters, with missing values marked as -9.99e
 
 #### *Import data*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
+
+```r
+# list of files
+amaz.soilMoisture.list <- list.files(paste0(path.data,"/4. Soil Moisture/03. Working Data"),
+                                     full.names=TRUE,
+                                     pattern = ".tif$")
+# Import data with "Terra"
+soilMoisture.rast <- rast(amaz.soilMoisture.list)
+soilMoisture.rast
+```
+```
+  class       : SpatRaster 
+  dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
+  resolution  : 500, 500  (x, y)
+  extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
+  coord. ref. : South_America_Albers_Equal_Area_Conic 
+  sources     : soilmoisture_working_2001_1.tif  
+                soilmoisture_working_2001_10.tif  
+                soilmoisture_working_2001_11.tif  
+                ... and 237 more source(s)
+  names       :   soilm~_proj,   soilm~_proj,   soilm~_proj,   soilm~_proj,   soilm~_proj,   soilm~_proj, ... 
+  min values  : -9.990000e+08, -9.990000e+08, -9.990000e+08, -9.990000e+08, -9.990000e+08, -9.990000e+08, ... 
+  max values  :  1.076058e+03,  4.290171e+03,  7.905507e+02,  5.636223e+02,  7.509722e+02,  6.363759e+02, ... 
+```
+
 #### *Rename and order layers*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+```r
+# Rename layers
+soilMoisture.rast <- renameLayers(soilMoisture.rast, 'soilmoisture_working_', '')
+# Order layers
+soilMoisture.rast <- soilMoisture.rast[[ordered.names]]
+soilMoisture.rast
+```
+</details>
+
+```
+  class       : SpatRaster 
+  dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
+  resolution  : 500, 500  (x, y)
+  extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
+  coord. ref. : South_America_Albers_Equal_Area_Conic 
+  sources     : soilmoisture_working_2001_1.tif  
+                soilmoisture_working_2001_2.tif  
+                soilmoisture_working_2001_3.tif  
+                ... and 237 more source(s)
+  names       :       2001_01,       2001_02,       2001_03,       2001_04,       2001_05,       2001_06, ... 
+  min values  : -9.990000e+08, -9.990000e+08, -9.990000e+08, -9.990000e+08, -9.990000e+08, -9.990000e+08, ... 
+  max values  :  1.076058e+03,  7.509722e+02,  6.363759e+02,  7.215025e+02,  6.892701e+02,  5.409775e+02, ... 
+```
+
 #### *Verification of the values*
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+```r
+# Verification of the values
+soilMoisture.minmax <- minmax(soilMoisture.rast) %>% t() %>% as.data.frame()
+soilMoisture.minmax
+```
+</details>
 
 <p align="center">
   <img src="img/4.1.soilm.png"  width="60%" />
 </p>
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+```r
+soilMoisture.freq <- freq(soilMoisture.rast, digits=3, usenames=T)
+soilMoisture.freq[soilMoisture.freq$value < 0,]
+```
+</details>
 
 <p align="center">
   <img src="img/4.2.soilm.png"  width="60%" />
@@ -590,7 +666,19 @@ _Soil Moisture_ is measured in millimeters, with missing values marked as -9.99e
 
 #### *Plot of the month of October 2020*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
+
 ### Missing Data
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
 
 ## 1.5. Elevation
 
@@ -600,13 +688,43 @@ _Elevation_ is measured in meters, with a range between -85 and 6471.
 
 #### *Import data*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
+
 #### *Rename and order layers*
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
 
 #### *Verification of the values*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
+
 #### *Plot of the month of October 2020*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
+
 ### Missing Data
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
 
 ## 1.6. Land Surface Temperature
 
@@ -616,13 +734,43 @@ _Land Surface Temperature_ is represented in Kelvin, with values adjusted by a s
 
 #### *Import data*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
+
 #### *Rename and order layers*
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
 
 #### *Verification of the values*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
+
 #### *Plot of the month of October 2020*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
+
 ### Missing Data
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
 
 ## 1.7. Specific Humidity
 
@@ -632,13 +780,43 @@ _Specific Humidity_ is represented as kg/kg, indicating the ratio of kilograms o
 
 #### *Import data*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
+
 #### *Rename and order layers*
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
 
 #### *Verification of the values*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
+
 #### *Plot of the month of October 2020*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
+
 ### Missing Data
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
 
 ## 1.8. Evapotranspiration
 
@@ -648,13 +826,43 @@ _Evapotranspiration_ is measured in kg/m2s, with values ranging between -2.02e-0
 
 #### *Import data*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
+
 #### *Rename and order layers*
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
 
 #### *Verification of the values*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
+
 #### *Plot of the month of October 2020*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
+
 ### Missing Data
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
 
 ## 1.9. Wind Speed
 
@@ -664,19 +872,89 @@ _Wind Speed_ is measured in m/s, with values between 0.86 and 9.85.
 
 #### *Import data*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
+
 #### *Rename and order layers*
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
 
 #### *Verification of the values*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
+
 #### *Plot of the month of October 2020*
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
+
 ### Missing Data
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
 
 ## 1.10. Air Temperature
 
 ### Data Analysis
 
 _Air Temperature_ is represented in Kelvin, with values ranging from 268 to 307.
+
+#### *Import data*
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
+
+#### *Rename and order layers*
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
+
+#### *Verification of the values*
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
+
+#### *Plot of the month of October 2020*
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
+
+### Missing Data
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+
+</details>
 
 
 
