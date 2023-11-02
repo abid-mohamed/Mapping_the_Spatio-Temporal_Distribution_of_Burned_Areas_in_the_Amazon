@@ -664,13 +664,57 @@ soilMoisture.freq[soilMoisture.freq$value < 0,]
   <img src="img/4.2.soilm.png"  width="60%" />
 </p>
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+```r
+# Create the `rts` object
+soilMoisture.rts <- rts(soilMoisture.rast, seq.dates)
+# Applying the mask to plot only the amazon area.
+soilm <- soilMoisture.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# define the zoom area
+xy.zoom.soilm <- list(xmin=0.15e+06, xmax=0.2e+06, ymin=4.35e+06, ymax=4.5e+06, zoom=0.4)
+# Plot
+p.soilm.na <- myPlot(
+  soilm, title = "Soil Moisture", 
+  max_cell=1e7,
+  x_angle=90,
+  b_size=12,
+  xy.zoom = xy.zoom.soilm
+) + 
+  scale_fill_hypso_c(
+    name = TeX(r"($\textit{(mm)$})"),
+    palette = "wiki-schwarzwald-cont", 
+    na.value = "transparent")
+p.soilm.na
+```
+</details>
+
+<p align="center">
+  <img src="img/4.3.soilm.png"  width="60%" />
+</p>
+
 #### *Plot of the month of October 2020*
 
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# Remove negative values.
+soilm[soilm < 0] <- NA
+# Plot
+p.soilm <- myPlot(soilm, title = "Soil Moisture") + 
+  scale_fill_hypso_c(
+    name = TeX(r"($\textit{(mm)$})"),
+    palette = "wiki-schwarzwald-cont", 
+    na.value = "transparent")
+p.soilm
+```
 </details>
+
+<p align="center">
+  <img src="img/4.4.soilm.png"  width="60%" />
+</p>
 
 ### Missing Data
 
