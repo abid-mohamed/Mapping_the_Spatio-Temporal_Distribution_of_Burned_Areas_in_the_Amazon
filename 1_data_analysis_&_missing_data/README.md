@@ -8,6 +8,10 @@ Before looking for each variable, we import the Amazon shape file:
     <summary><em>Show/Hide code</em></summary>
 
 ```r
+# Create a sequence date
+seq.dates <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month")
+# Create name of layers
+ordered.names <- format(seq.dates, '%Y_%m')
 # Import shape file
 amaz.basin.shp <- st_read(
   paste0(path.data,"/0. Amazon_shapefile/projected/amazon_shp_projected.shp"))
@@ -97,8 +101,6 @@ burntArea.rast
 
 ```r
 # Order layers
-ordered.names <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month") %>%
-  format(., '%Y_%m')
 burntArea.rast <- burntArea.rast[[ordered.names]]
 burntArea.rast
 ```
@@ -136,27 +138,14 @@ burntArea.minmax[which((burntArea.minmax[,1] != -2) & (burntArea.minmax[,2] != 1
   <img src="img/1.1.BurntArea-Verification of the values.png"  width="60%" />
 </p>
 
-
-#### *Create Raster Time Series (`rts`) object*
-
-<details>
-    <summary><em>Show/Hide code</em></summary>
-
-```r
-# Create a sequence date
-seq.dates <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month")
-# Create the `rts` object
-burntArea.rts <- rts(burntArea.rast, seq.dates)
-```
-</details>
-
-
 #### *Plot of the month of October 2020*
 
 <details>
     <summary><em>Show/Hide code</em></summary>
 
 ```r
+# Create the `rts` object
+burntArea.rts <- rts(burntArea.rast, seq.dates)
 # Upplaying the mask to plot only the amazon area.
 ba <- burntArea.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
 # Change values as categorical 
@@ -245,7 +234,7 @@ rasList <- foreach (
   ras_id=amaz.burntArea.list, 
   .packages=c('terra', 'sf'), 
   .combine='c') %dopar% {
-    # Read all rasters into one big stack
+    # Read raster
     ras <- rast(ras_id)
     # Rename layers
     ras <- renameLayers(ras, 'burntarea_working_', '')
@@ -392,13 +381,12 @@ p.lc
 cl <- makeCluster(detectCores() - 1)
 registerDoParallel(cl, cores=detectCores() - 1)
 
-tic("landCover")
-#Raster to datatable in parallel: one raster per thread
+# Raster to datatable in parallel: one raster per thread
 rasList <- foreach (
   ras_id=amaz.landCover.list, 
   .packages=c('terra', 'sf'), 
   .combine='c') %dopar% {
-    #Read all rasters into one big stack
+    # Read raster
     ras <- rast(ras_id)
     # Rename layers
     ras <- renameLayers(ras, 'landcover_working_', '')
@@ -410,9 +398,8 @@ rasList <- foreach (
     list(ras.freq.na)
   }
 stopCluster(cl)
-toc()
 
-#Bind all per-raster into one dataframe
+# Bind all per-raster into one dataframe
 landCover.freq.na <- rbindlist(rasList, fill=T, use.names=T)
 #
 colnames(landCover.freq.na)[3] <- "landCover_na"
@@ -539,17 +526,16 @@ p.prec
 cl <- makeCluster(detectCores() - 1)
 registerDoParallel(cl, cores=detectCores() - 1)
 
-tic("precipitation")
-#Raster to datatable in parallel: one raster per thread
+# Raster to datatable in parallel: one raster per thread
 rasList <- foreach (
   ras_id=amaz.precipitation.list, 
   .packages=c('terra', 'sf'), 
   .combine='c') %dopar% {
-    #Read all rasters into one big stack
+    # Read raster
     ras <- rast(ras_id)
     # Rename layers
     ras <- renameLayers(ras, 'precipitation_working_', '')
-    #
+    # Count the missing data
     ras.nonNA <- not.na(ras)
     ras.nonNA.mask <- mask(ras.nonNA, amaz.basin.shp)
     ras.freq.na <- freq(ras.nonNA.mask, digits=0, value=0, usenames=T)
@@ -557,9 +543,8 @@ rasList <- foreach (
     list(ras.freq.na)
   }
 stopCluster(cl)
-toc()
 
-#Bind all per-raster into one dataframe
+# Bind all per-raster into one dataframe
 precipitation.freq.na <- rbindlist(rasList, fill=T, use.names=T)
 #
 colnames(precipitation.freq.na)[3] <- "precipitation_na"
@@ -673,14 +658,14 @@ soilMoisture.rts <- rts(soilMoisture.rast, seq.dates)
 # Applying the mask to plot only the amazon area.
 soilm <- soilMoisture.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
 # define the zoom area
-xy.zoom.soilm <- list(xmin=0.15e+06, xmax=0.2e+06, ymin=4.35e+06, ymax=4.5e+06, zoom=0.4)
+soilm.xy.zoom <- list(xmin=0.15e+06, xmax=0.2e+06, ymin=4.35e+06, ymax=4.5e+06, zoom=0.4)
 # Plot
 p.soilm.na <- myPlot(
   soilm, title = "Soil Moisture", 
   max_cell=1e7,
   x_angle=90,
   b_size=12,
-  xy.zoom = xy.zoom.soilm
+  xy.zoom = soilm.xy.zoom
 ) + 
   scale_fill_hypso_c(
     name = TeX(r"($\textit{(mm)$})"),
