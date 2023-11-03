@@ -971,7 +971,7 @@ p.lst.4na <- ggplot() +
   scale_y_continuous(labels = function(x) format(x, scientific = T, digits = 2)) + 
   ggtitle(label="Land Surface Temperature", subtitle=NULL) +
   coord_sf(datum = pull_crs(lst.4na.rast)) + 
-  theme_bw(base_size=10) +
+  theme_bw(base_size=12) +
   scale_fill_whitebox_c(
     name = TeX(r"($\textit{(K)}$)"),
     palette = "muted", 
