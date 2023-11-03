@@ -1061,7 +1061,6 @@ p.lst.4na
   <img src="img/6.4.lst.png"  width="70%" />
 </p>
 
-
 ## 1.7. Specific Humidity
 
 ### Data Analysis
@@ -1073,40 +1072,139 @@ _Specific Humidity_ is represented as kg/kg, indicating the ratio of kilograms o
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# list of files
+amaz.humidity.list <- list.files(paste0(path.data,"/7. Specific Humidity/03. Working Data"),
+                                        full.names=TRUE,
+                                        pattern = ".tif$")
+# Import data with "Terra"
+humidity.rast <- rast(amaz.humidity.list)
+humidity.rast
+```
 </details>
+
+```
+    class       : SpatRaster 
+    dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
+    resolution  : 500, 500  (x, y)
+    extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
+    coord. ref. : South_America_Albers_Equal_Area_Conic 
+    sources     : humidity_working_2001_1.tif  
+                humidity_working_2001_10.tif  
+                humidity_working_2001_11.tif  
+                ... and 237 more source(s)
+    names       : humid~_proj, humid~_proj, humid~_proj, humid~_proj, humid~_proj, humid~_proj, ... 
+    min values  : 0.003805317, 0.002230128, 0.002613974,  0.00270508, 0.004156957, 0.004153194, ... 
+    max values  : 0.018998224, 0.019306520, 0.019978305,  0.02033914, 0.018878255, 0.019174447, ...
+```
 
 #### *Rename and order layers*
 
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# Rename layers
+humidity.rast <- renameLayers(humidity.rast, 'humidity_working_', '')
+# Order layers
+humidity.rast <- humidity.rast[[ordered.names]]
+humidity.rast
+```
 </details>
+
+```
+    class       : SpatRaster 
+    dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
+    resolution  : 500, 500  (x, y)
+    extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
+    coord. ref. : South_America_Albers_Equal_Area_Conic 
+    sources     : humidity_working_2001_1.tif  
+                humidity_working_2001_2.tif  
+                humidity_working_2001_3.tif  
+                ... and 237 more source(s)
+    names       :     2001_01,     2001_02,     2001_03,     2001_04,     2001_05,     2001_06, ... 
+    min values  : 0.003805317, 0.004156957, 0.004153194, 0.003362617, 0.002170095, 0.001819314, ... 
+    max values  : 0.018998224, 0.018878255, 0.019174447, 0.020020029, 0.019958658, 0.019542987, ...
+```
 
 #### *Verification of the values*
 
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# Verification of the values
+humidity.minmax <- minmax(humidity.rast) %>% t() %>% as.data.frame()
+humidity.minmax
+```
 </details>
+
+<p align="center">
+  <img src="img/7.1.hum.png"  width="70%" />
+</p>
 
 #### *Plot of the month of October 2020*
 
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# Create a sequence date for 'rts' object
+humidity.rts <- rts(humidity.rast, seq.dates)
+# Applying the mask to plot only the amazon area.
+hum <- humidity.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# Plot
+p.hum <- myPlot(hum, title = "Humidity") +
+  scale_fill_cross_blended_c(
+    name = TeX(r"($\textit{(kg_{water} / kg_{air})$})"),
+    palette = "warm_humid", 
+    na.value = "transparent")
+p.hum
+```
 </details>
+
+<p align="center">
+  <img src="img/7.2.hum.png"  width="70%" />
+</p>
 
 ### Missing Data
 
 <details>
     <summary><em>Show/Hide code</em></summary>
 
+```r
+cl <- makeCluster(detectCores() - 1)
+registerDoParallel(cl, cores=detectCores() - 1)
 
+# Raster to datatable in parallel: one raster per thread
+rasList <- foreach (
+  ras_id=amaz.humidity.list, 
+  .packages=c('terra', 'sf'), 
+  .combine='c') %dopar% {
+    # Read raster
+    ras <- rast(ras_id)
+    # Rename layers
+    ras <- renameLayers(ras, 'humidity_working_', '')
+    # Count the missing data
+    ras.nonNA <- not.na(ras)
+    ras.nonNA.mask <- mask(ras.nonNA, amaz.basin.shp)
+    ras.freq.na <- freq(ras.nonNA.mask, digits=0, value=0, usenames=T)
+  
+    list(ras.freq.na)
+  }
+stopCluster(cl)
+
+# Bind all per-raster into one dataframe
+humidity.freq.na <- rbindlist(rasList, fill=T, use.names=T)
+#
+colnames(humidity.freq.na)[3] <- "humidity_na"
+humidity.freq.na <- humidity.freq.na[order(humidity.freq.na$layer)]
+hum
 </details>
+
+<p align="center">
+  <img src="img/lst.png"  width="70%" />
+</p>
 
 ## 1.8. Evapotranspiration
 
