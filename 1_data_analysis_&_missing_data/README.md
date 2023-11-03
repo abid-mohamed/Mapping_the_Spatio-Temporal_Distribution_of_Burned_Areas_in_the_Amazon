@@ -408,6 +408,10 @@ landCover.freq.na
 ```
 </details>
 
+<p align="center">
+  <img src="img/2.3.lc.png"  width="60%" />
+</p>
+
 ## 1.3. Precipitation
 
 ### Data Analysis
@@ -552,6 +556,10 @@ precipitation.freq.na <- precipitation.freq.na[order(precipitation.freq.na$layer
 precipitation.freq.na
 ```
 </details>
+
+<p align="center">
+  <img src="img/3.3.prec.png"  width="60%" />
+</p>
 
 ## 1.4. Soil Moisture
 
@@ -706,8 +714,42 @@ p.soilm
 <details>
     <summary><em>Show/Hide code</em></summary>
 
+```r
+cl <- makeCluster(detectCores() - 1)
+registerDoParallel(cl, cores=detectCores() - 1)
 
+# Raster to datatable in parallel: one raster per thread
+rasList <- foreach (
+  ras_id=amaz.soilMoisture.list, 
+  .packages=c('terra', 'sf'), 
+  .combine='c') %dopar% {
+    # Read raster
+    ras <- rast(ras_id)
+    # Rename layers
+    ras <- renameLayers(ras, 'soilmoisture_working_', '')
+    # Replace negative value by `NA`
+    ras[ras < 0] <- NA
+    # Count the missing data
+    ras.nonNA <- not.na(ras)
+    ras.nonNA.mask <- mask(ras.nonNA, amaz.basin.shp)
+    ras.freq.na <- freq(ras.nonNA.mask, digits=0, value=0, usenames=T)
+  
+    list(ras.freq.na)
+  }
+stopCluster(cl)
+
+# Bind all per-raster into one dataframe
+soilmoisture.freq.na <- rbindlist(rasList, fill=T, use.names=T)
+#
+colnames(soilmoisture.freq.na)[3] <- "soilmoisture_na"
+soilmoisture.freq.na <- soilmoisture.freq.na[order(soilmoisture.freq.na$layer)]
+soilmoisture.freq.na
+```
 </details>
+
+<p align="center">
+  <img src="img/4.5.soilm.png"  width="60%" />
+</p>
 
 ## 1.5. Elevation
 
