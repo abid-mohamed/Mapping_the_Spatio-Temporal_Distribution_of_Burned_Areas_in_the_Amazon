@@ -564,13 +564,14 @@ precipitation.freq.na
 # Applying the mask to plot only the amazon area.
 prec <- precipitation.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
 # define the zoom area
-prec.xy.zoom <- list(xmin=-0.385e+06, xmax=-0.37e+06, ymin=ymin(prec), ymax=1.66e+06, zoom=0.4)
+prec.xy.zoom <- list(xmin=-0.385e+06, xmax=-0.37e+06, ymin=ymin(prec), ymax=1.64e+06, zoom=0.4)
 # Plot
 p.prec.na <- myPlot(
   prec, title = "Precipitation", 
   max_cell=1e7,
   x_angle=90,
   b_size=12,
+  na.color="red",
   xy.zoom = prec.xy.zoom
 ) + 
   scale_fill_scico(
@@ -1192,6 +1193,37 @@ humidity.freq.na
 
 <p align="center">
   <img src="img/7.3.hum.png"  width="70%" />
+</p>
+
+#### Plot Missing Data
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+```r
+# Applying the mask to plot only the amazon area.
+hum <- humidity.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# define the zoom area
+hum.xy.zoom <- list(xmin=1.e+06, xmax=1.4e+06, ymin=3.4e+06, ymax=4e+06, zoom=0.4)
+# Plot
+p.hum.na <- myPlot(
+  hum, title = "Humidity", 
+  max_cell=1e7,
+  x_angle=90,
+  b_size=12,
+  na.color="red",
+  xy.zoom = hum.xy.zoom
+) +
+  scale_fill_cross_blended_c(
+    name = TeX(r"($\textit{(kg_{water} / kg_{air})$})"),
+    palette = "warm_humid", 
+    na.value = "transparent")
+p.hum.na
+```
+</details>
+
+<p align="center">
+  <img src="img/7.4.hum.png"  width="70%" />
 </p>
 
 ## 1.8. Evapotranspiration
