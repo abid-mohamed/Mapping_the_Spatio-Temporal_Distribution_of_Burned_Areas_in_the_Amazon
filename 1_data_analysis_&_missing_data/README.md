@@ -720,40 +720,88 @@ _Elevation_ is measured in meters, with a range between -85 and 6471.
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# list of files
+amaz.elevation.list <- list.files(paste0(path.data,"/5. Elevation/03. Working Data"),
+                                  full.names=TRUE,
+                                  pattern = ".tif$")
+# Import data with "Terra"
+elevation.rast <- rast(amaz.elevation.list)
+elevation.rast
+```
 </details>
 
-#### *Rename and order layers*
-
-<details>
-    <summary><em>Show/Hide code</em></summary>
-
-
-</details>
+```
+    class       : SpatRaster 
+    dimensions  : 5860, 7806, 1  (nrow, ncol, nlyr)
+    resolution  : 500, 500  (x, y)
+    extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
+    coord. ref. : South_America_Albers_Equal_Area_Conic 
+    source      : elevation_working.tif 
+    name        : elevation_proj 
+    min value   :          -85.5 
+    max value   :         6470.5 
+```
 
 #### *Verification of the values*
 
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# Verification of the values
+elevation.minmax <- minmax(elevation.rast) %>% t() %>% as.data.frame()
+elevation.minmax
+```
 </details>
 
-#### *Plot of the month of October 2020*
+<p align="center">
+  <img src="img/5.1.elev.png"  width="60%" />
+</p>
+
+#### *Plot of the Elevation*
 
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# Applying the mask to plot only the amazon area.
+elev <- elevation.rast %>% mask(mask = amaz.basin.shp)
+# Plot
+wikicols <- hypsometric_tints_db %>% filter(pal == "wiki-2.0")
+wikicols <- wikicols[wikicols$limit %between% c(-100, 6500),]
+p.elev <- myPlot(elev, title = "Elevation") + 
+  scale_fill_gradientn(
+    name = TeX(r"($\textit{(m)}$)"),
+    colors = wikicols$hex,
+    values = scales::rescale(wikicols$limit),
+    limit = range(wikicols$limit),
+    na.value = "transparent")
+p.elev
+```
 </details>
+
+<p align="center">
+  <img src="img/5.2.elev.png"  width="60%" />
+</p>
 
 ### Missing Data
 
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# Count the missing data
+elevation.nonNA <- not.na(elevation.rast)
+elevation.nonNA.mask <- mask(elevation.nonNA, amaz.basin.shp)
+elevation.freq.na <- freq(elevation.nonNA.mask, digits=0, value=0, usenames=T)
+elevation.freq.na
+```
 </details>
+
+<p align="center">
+  <img src="img/5.3.elev.png"  width="60%" />
+</p>
 
 ## 1.6. Land Surface Temperature
 
@@ -766,32 +814,99 @@ _Land Surface Temperature_ is represented in Kelvin, with values adjusted by a s
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# list of files
+amaz.landSurfaceTemp.list <- list.files(paste0(path.data,"/6. LandSurfaceTemp/03. Working Data"),
+                                        full.names=TRUE,
+                                        pattern = ".tif$")
+# Import data with "Terra"
+landSurfaceTemp.rast <- rast(amaz.landSurfaceTemp.list)
+landSurfaceTemp.rast
+```
 </details>
+
+```
+    class       : SpatRaster 
+    dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
+    resolution  : 500, 500  (x, y)
+    extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
+    coord. ref. : South_America_Albers_Equal_Area_Conic 
+    sources     : landsurftemp_working_2001_1.tif  
+                landsurftemp_working_2001_10.tif  
+                landsurftemp_working_2001_11.tif  
+                ... and 237 more source(s)
+    names       : Month~ature, Month~ature, Month~ature, Month~ature, Month~ature, Month~ature, ... 
+    min values  :       13255,       13746,       13376,       13395,       12869,       13508, ... 
+    max values  :       16387,       16415,       16356,       16434,       16432,       16455, ... 
+```
 
 #### *Rename and order layers*
 
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# Rename layers
+landSurfaceTemp.rast <- renameLayers(landSurfaceTemp.rast, 'landsurftemp_working_', '')
+# Order layers
+landSurfaceTemp.rast <- landSurfaceTemp.rast[[ordered.names]]
+landSurfaceTemp.rast
+```
 </details>
 
+```
+    class       : SpatRaster 
+    dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
+    resolution  : 500, 500  (x, y)
+    extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
+    coord. ref. : South_America_Albers_Equal_Area_Conic 
+    sources     : landsurftemp_working_2001_1.tif  
+                landsurftemp_working_2001_2.tif  
+                landsurftemp_working_2001_3.tif  
+                ... and 237 more source(s)
+    names       : 2001_01, 2001_02, 2001_03, 2001_04, 2001_05, 2001_06, ... 
+    min values  :   13255,   12869,   13508,   13464,   13727,   13364, ... 
+    max values  :   16387,   16432,   16455,   16223,   15990,   15897, ... 
+```
 #### *Verification of the values*
 
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# Verification of the values
+landSurfaceTemp.minmax <- minmax(landSurfaceTemp.rast) %>% t() %>% as.data.frame()
+landSurfaceTemp.minmax
+```
 </details>
+
+<p align="center">
+  <img src="img/6.1.lst.png"  width="60%" />
+</p>
 
 #### *Plot of the month of October 2020*
 
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# Create a sequence date for 'rts' object
+landSurfaceTemp.rts <- rts(landSurfaceTemp.rast, seq.dates)
+# Applying the mask to plot only the amazon area.
+lst <- landSurfaceTemp.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# Plot
+p.lst <- myPlot(lst, title = "Land Surface Temperature") +
+  scale_fill_whitebox_c(
+    name = TeX(r"($\textit{(K)}$)"),
+    palette = "muted", 
+    na.value = "transparent")
+p.lst
+```
 </details>
+
+<p align="center">
+  <img src="img/6.2.lst.png"  width="60%" />
+</p>
 
 ### Missing Data
 
@@ -800,6 +915,12 @@ _Land Surface Temperature_ is represented in Kelvin, with values adjusted by a s
 
 
 </details>
+
+</details>
+
+<p align="center">
+  <img src="img/elev.png"  width="60%" />
+</p>
 
 ## 1.7. Specific Humidity
 
