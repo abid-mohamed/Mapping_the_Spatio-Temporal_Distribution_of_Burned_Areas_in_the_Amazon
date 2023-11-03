@@ -913,14 +913,79 @@ p.lst
 <details>
     <summary><em>Show/Hide code</em></summary>
 
+```r
+cl <- makeCluster(detectCores() - 1)
+registerDoParallel(cl, cores=detectCores() - 1)
 
+# Raster to datatable in parallel: one raster per thread
+rasList <- foreach (
+  ras_id=amaz.landSurfaceTemp.list, 
+  .packages=c('terra', 'sf'), 
+  .combine='c') %dopar% {
+    # Read raster
+    ras <- rast(ras_id)
+    # Rename layers
+    ras <- renameLayers(ras, 'landsurftemp_working_', '')
+    # # Count the missing data
+    ras.nonNA <- not.na(ras)
+    ras.nonNA.mask <- mask(ras.nonNA, amaz.basin.shp)
+    ras.freq.na <- freq(ras.nonNA.mask, digits=0, value=0, usenames=T)
+  
+    list(ras.freq.na)
+  }
+stopCluster(cl)
+
+# Bind all per-raster into one dataframe
+landsurftemp.freq.na <- rbindlist(rasList, fill=T, use.names=T)
+#
+colnames(landsurftemp.freq.na)[3] <- "landsurftemp_na"
+landsurftemp.freq.na <- landsurftemp.freq.na[order(landsurftemp.freq.na$layer)]
+landsurftemp.na.order <- landsurftemp.freq.na[
+  order(landsurftemp.freq.na$landsurftemp_na, decreasing=TRUE),]
+landsurftemp.na.order
+```
 </details>
 
 </details>
 
 <p align="center">
-  <img src="img/elev.png"  width="60%" />
+  <img src="img/6.3.lst.png"  width="60%" />
 </p>
+
+#### Plot Missing Data
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+```r
+# Select the 4 months they have the most missing data
+lst.4na <- landsurftemp.na.order[1:4,]
+lst.4na.month <- lst.4na$layer %>% paste0(., "_01") %>% gsub("_", "-", .)
+lst.4na.rts <- subset(landSurfaceTemp.rts, lst.4na.month)
+lst.4na.rast <- lst.4na.rts@raster %>% mask(mask = amaz.basin.shp) 
+# Plot
+p.lst.4na <- ggplot() +
+  stat_spatraster(data = lst.4na.rast) +
+  geom_spatvector(data = amaz.basin.shp$geometry, fill = NA, color = "gray40") +
+  scale_x_continuous(labels = function(x) format(x, scientific = T, digits = 1)) +
+  scale_y_continuous(labels = function(x) format(x, scientific = T, digits = 2)) + 
+  ggtitle(label="Land Surface Temperature", subtitle=NULL) +
+  coord_sf(datum = pull_crs(lst.4na.rast)) + 
+  theme_bw(base_size=10) +
+  scale_fill_whitebox_c(
+    name = TeX(r"($\textit{(K)}$)"),
+    palette = "muted", 
+    na.value = "transparent") + 
+  facet_wrap(~lyr, ncol = 2) +
+  theme(axis.text.x = element_text(angle = 90))
+p.lst.4na
+```
+</details>
+
+<p align="center">
+  <img src="img/6.4.lst.png"  width="60%" />
+</p>
+
 
 ## 1.7. Specific Humidity
 
