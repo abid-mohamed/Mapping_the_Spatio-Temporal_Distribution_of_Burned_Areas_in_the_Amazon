@@ -983,7 +983,7 @@ p.lst.4na
 </details>
 
 <p align="center">
-  <img src="img/6.4.lst.png"  width="70%" />
+  <img src="img/6.4.lst.png"  width="60%" />
 </p>
 
 
