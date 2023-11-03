@@ -561,6 +561,39 @@ precipitation.freq.na
   <img src="img/3.3.prec.png"  width="60%" />
 </p>
 
+### Zoom plot of missing data
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+```r
+# Applying the mask to plot only the amazon area.
+prec <- precipitation.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# define the zoom area
+prec.xy.zoom <- list(xmin=-0.385e+06, xmax=-0.37e+06, ymin=ymin(prec), ymax=1.66e+06, zoom=0.4)
+# Plot
+p.prec.na <- myPlot(
+  prec, title = "Precipitation", 
+  max_cell=1e7,
+  x_angle=90,
+  b_size=12,
+  xy.zoom = prec.xy.zoom
+) + 
+  scale_fill_scico(
+    name = TeX(r"($\textit{(mm/hr)}$)"),
+    palette = "lapaz", 
+    direction = -1,
+    trans = "pseudo_log",
+    breaks = c(0,10,50,200,550),
+    na.value = "transparent")
+p.prec.na
+```
+</details>
+
+<p align="center">
+  <img src="img/3.4.prec.png"  width="60%" />
+</p>
+
 ## 1.4. Soil Moisture
 
 ### Data Analysis
