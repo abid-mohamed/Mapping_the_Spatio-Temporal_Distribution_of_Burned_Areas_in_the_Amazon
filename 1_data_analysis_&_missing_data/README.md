@@ -232,18 +232,16 @@ registerDoParallel(cl, cores=detectCores() - 1)
 # Raster to datatable in parallel: one raster per thread
 rasList <- foreach (
   ras_id=amaz.burntArea.list, 
-  .packages=c('terra', 'sf'), 
+  .packages=c('terra', 'sf', 'dplyr'), 
   .combine='c') %dopar% {
-    # Read raster
-    ras <- rast(ras_id)
-    # Rename layers
-    ras <- renameLayers(ras, 'burntarea_working_', '')
+    # Read and rename raster
+    ras <- rast(ras_id) %>% renameLayers(., 'burntarea_working_', '')
     # Replace negative value by `NA`
     if (names(ras) %in% c("2012_07", "2012_09")) {ras[ras == -1] <- NA}
     # Count the missing data
-    ras.nonNA <- not.na(ras)
-    ras.nonNA.mask <- mask(ras.nonNA, amaz.basin.shp)
-    ras.freq.na <- terra::freq(ras.nonNA.mask, digits=0, value=0, usenames=T)
+    ras.freq.na <- not.na(ras) %>%
+      mask(amaz.basin.shp) %>%
+      terra::freq(., digits=0, value=0, usenames=T)
   
     list(ras.freq.na)
   }
@@ -251,7 +249,7 @@ stopCluster(cl)
 
 # Bind all per-raster into one dataframe
 burntArea.freq.na <- rbindlist(rasList, fill=T, use.names=T)
-#
+# Order
 colnames(burntArea.freq.na)[3] <- "burntArea_na"
 burntArea.freq.na <- burntArea.freq.na[order(burntArea.freq.na$layer)]
 burntArea.freq.na
@@ -384,16 +382,14 @@ registerDoParallel(cl, cores=detectCores() - 1)
 # Raster to datatable in parallel: one raster per thread
 rasList <- foreach (
   ras_id=amaz.landCover.list, 
-  .packages=c('terra', 'sf'), 
+  .packages=c('terra', 'sf', 'dplyr'), 
   .combine='c') %dopar% {
-    # Read raster
-    ras <- rast(ras_id)
-    # Rename layers
-    ras <- renameLayers(ras, 'landcover_working_', '')
+    # Read and rename raster
+    ras <- rast(ras_id) %>% renameLayers(., 'landcover_working_', '')
     # Count the missing data
-    ras.nonNA <- not.na(ras)
-    ras.nonNA.mask <- mask(ras.nonNA, amaz.basin.shp)
-    ras.freq.na <- terra::freq(ras.nonNA.mask, digits=0, value=0, usenames=T)
+    ras.freq.na <- not.na(ras) %>%
+      mask(amaz.basin.shp) %>%
+      terra::freq(., digits=0, value=0, usenames=T)
   
     list(ras.freq.na)
   }
@@ -401,7 +397,7 @@ stopCluster(cl)
 
 # Bind all per-raster into one dataframe
 landCover.freq.na <- rbindlist(rasList, fill=T, use.names=T)
-#
+# Order
 colnames(landCover.freq.na)[3] <- "landCover_na"
 landCover.freq.na <- landCover.freq.na[order(landCover.freq.na$layer)]
 landCover.freq.na
@@ -533,16 +529,14 @@ registerDoParallel(cl, cores=detectCores() - 1)
 # Raster to datatable in parallel: one raster per thread
 rasList <- foreach (
   ras_id=amaz.precipitation.list, 
-  .packages=c('terra', 'sf'), 
+  .packages=c('terra', 'sf', 'dplyr'), 
   .combine='c') %dopar% {
-    # Read raster
-    ras <- rast(ras_id)
-    # Rename layers
-    ras <- renameLayers(ras, 'precipitation_working_', '')
+    # Read and rename raster
+    ras <- rast(ras_id) %>% renameLayers(., 'precipitation_working_', '')
     # Count the missing data
-    ras.nonNA <- not.na(ras)
-    ras.nonNA.mask <- mask(ras.nonNA, amaz.basin.shp)
-    ras.freq.na <- freq(ras.nonNA.mask, digits=0, value=0, usenames=T)
+    ras.freq.na <- not.na(ras) %>%
+      mask(amaz.basin.shp) %>%
+      terra::freq(., digits=0, value=0, usenames=T)
   
     list(ras.freq.na)
   }
@@ -550,7 +544,7 @@ stopCluster(cl)
 
 # Bind all per-raster into one dataframe
 precipitation.freq.na <- rbindlist(rasList, fill=T, use.names=T)
-#
+# Order
 colnames(precipitation.freq.na)[3] <- "precipitation_na"
 precipitation.freq.na <- precipitation.freq.na[order(precipitation.freq.na$layer)]
 precipitation.freq.na
@@ -754,18 +748,16 @@ registerDoParallel(cl, cores=detectCores() - 1)
 # Raster to datatable in parallel: one raster per thread
 rasList <- foreach (
   ras_id=amaz.soilMoisture.list, 
-  .packages=c('terra', 'sf'), 
+  .packages=c('terra', 'sf', 'dplyr'), 
   .combine='c') %dopar% {
-    # Read raster
-    ras <- rast(ras_id)
-    # Rename layers
-    ras <- renameLayers(ras, 'soilmoisture_working_', '')
+    # Read and rename raster
+    ras <- rast(ras_id) %>% renameLayers(., 'soilmoisture_working_', '')
     # Replace negative value by `NA`
     ras[ras < 0] <- NA
     # Count the missing data
-    ras.nonNA <- not.na(ras)
-    ras.nonNA.mask <- mask(ras.nonNA, amaz.basin.shp)
-    ras.freq.na <- freq(ras.nonNA.mask, digits=0, value=0, usenames=T)
+    ras.freq.na <- not.na(ras) %>%
+      mask(amaz.basin.shp) %>%
+      terra::freq(., digits=0, value=0, usenames=T)
   
     list(ras.freq.na)
   }
@@ -773,7 +765,7 @@ stopCluster(cl)
 
 # Bind all per-raster into one dataframe
 soilmoisture.freq.na <- rbindlist(rasList, fill=T, use.names=T)
-#
+# Order
 colnames(soilmoisture.freq.na)[3] <- "soilmoisture_na"
 soilmoisture.freq.na <- soilmoisture.freq.na[order(soilmoisture.freq.na$layer)]
 soilmoisture.freq.na
@@ -995,16 +987,14 @@ registerDoParallel(cl, cores=detectCores() - 1)
 # Raster to datatable in parallel: one raster per thread
 rasList <- foreach (
   ras_id=amaz.landSurfaceTemp.list, 
-  .packages=c('terra', 'sf'), 
+  .packages=c('terra', 'sf', 'dplyr'), 
   .combine='c') %dopar% {
-    # Read raster
-    ras <- rast(ras_id)
-    # Rename layers
-    ras <- renameLayers(ras, 'landsurftemp_working_', '')
-    # # Count the missing data
-    ras.nonNA <- not.na(ras)
-    ras.nonNA.mask <- mask(ras.nonNA, amaz.basin.shp)
-    ras.freq.na <- freq(ras.nonNA.mask, digits=0, value=0, usenames=T)
+    # Read and rename raster
+    ras <- rast(ras_id) %>% renameLayers(., 'landsurftemp_working_', '')
+    # Count the missing data
+    ras.freq.na <- not.na(ras) %>%
+      mask(amaz.basin.shp) %>%
+      terra::freq(., digits=0, value=0, usenames=T)
   
     list(ras.freq.na)
   }
@@ -1012,12 +1002,11 @@ stopCluster(cl)
 
 # Bind all per-raster into one dataframe
 landsurftemp.freq.na <- rbindlist(rasList, fill=T, use.names=T)
-#
+# Order
 colnames(landsurftemp.freq.na)[3] <- "landsurftemp_na"
-landsurftemp.freq.na <- landsurftemp.freq.na[order(landsurftemp.freq.na$layer)]
-landsurftemp.na.order <- landsurftemp.freq.na[
-  order(landsurftemp.freq.na$landsurftemp_na, decreasing=TRUE),]
-landsurftemp.na.order
+landsurftemp.freq.na <- landsurftemp.freq.na[
+  order(landsurftemp.freq.na$landsurftemp_na, decreasing=TRUE)]
+landsurftemp.freq.na
 ```
 </details>
 
@@ -1179,16 +1168,14 @@ registerDoParallel(cl, cores=detectCores() - 1)
 # Raster to datatable in parallel: one raster per thread
 rasList <- foreach (
   ras_id=amaz.humidity.list, 
-  .packages=c('terra', 'sf'), 
+  .packages=c('terra', 'sf', 'dplyr'), 
   .combine='c') %dopar% {
-    # Read raster
-    ras <- rast(ras_id)
-    # Rename layers
-    ras <- renameLayers(ras, 'humidity_working_', '')
+    # Read and rename raster
+    ras <- rast(ras_id) %>% renameLayers(., 'humidity_working_', '')
     # Count the missing data
-    ras.nonNA <- not.na(ras)
-    ras.nonNA.mask <- mask(ras.nonNA, amaz.basin.shp)
-    ras.freq.na <- freq(ras.nonNA.mask, digits=0, value=0, usenames=T)
+    ras.freq.na <- not.na(ras) %>%
+      mask(amaz.basin.shp) %>%
+      terra::freq(., digits=0, value=0, usenames=T)
   
     list(ras.freq.na)
   }
@@ -1196,14 +1183,15 @@ stopCluster(cl)
 
 # Bind all per-raster into one dataframe
 humidity.freq.na <- rbindlist(rasList, fill=T, use.names=T)
-#
+# Order
 colnames(humidity.freq.na)[3] <- "humidity_na"
 humidity.freq.na <- humidity.freq.na[order(humidity.freq.na$layer)]
-hum
+humidity.freq.na
+```
 </details>
 
 <p align="center">
-  <img src="img/lst.png"  width="70%" />
+  <img src="img/7.3.hum.png"  width="70%" />
 </p>
 
 ## 1.8. Evapotranspiration
@@ -1249,7 +1237,34 @@ _Evapotranspiration_ is measured in kg/m2s, with values ranging between -2.02e-0
 <details>
     <summary><em>Show/Hide code</em></summary>
 
+```r
+cl <- makeCluster(detectCores() - 1)
+registerDoParallel(cl, cores=detectCores() - 1)
 
+# Raster to datatable in parallel: one raster per thread
+rasList <- foreach (
+  ras_id=amaz.evapotranspiration.list, 
+  .packages=c('terra', 'sf', 'dplyr'), 
+  .combine='c') %dopar% {
+    # Read and rename raster
+    ras <- rast(ras_id) %>% renameLayers(., 'evapotranspiration_working_', '')
+    # Count the missing data
+    ras.freq.na <- not.na(ras) %>%
+      mask(amaz.basin.shp) %>%
+      terra::freq(., digits=0, value=0, usenames=T)
+  
+    list(ras.freq.na)
+  }
+stopCluster(cl)
+
+# Bind all per-raster into one dataframe
+evapotranspiration.freq.na <- rbindlist(rasList, fill=T, use.names=T)
+#
+colnames(evapotranspiration.freq.na)[3] <- "evapotranspiration_na"
+evapotranspiration.freq.na <- 
+  evapotranspiration.freq.na[order(evapotranspiration.freq.na$layer)]
+evapotranspiration.freq.na
+```
 </details>
 
 ## 1.9. Wind Speed
@@ -1295,7 +1310,33 @@ _Wind Speed_ is measured in m/s, with values between 0.86 and 9.85.
 <details>
     <summary><em>Show/Hide code</em></summary>
 
+```r
+cl <- makeCluster(detectCores() - 1)
+registerDoParallel(cl, cores=detectCores() - 1)
 
+# Raster to datatable in parallel: one raster per thread
+rasList <- foreach (
+  ras_id=amaz.wind.list, 
+  .packages=c('terra', 'sf', 'dplyr'), 
+  .combine='c') %dopar% {
+    # Read and rename raster
+    ras <- rast(ras_id) %>% renameLayers(., 'wind_working_', '')
+    # Count the missing data
+    ras.freq.na <- not.na(ras) %>%
+      mask(amaz.basin.shp) %>%
+      terra::freq(., digits=0, value=0, usenames=T)
+  
+    list(ras.freq.na)
+  }
+stopCluster(cl)
+
+# Bind all per-raster into one dataframe
+wind.freq.na <- rbindlist(rasList, fill=T, use.names=T)
+# Order
+colnames(wind.freq.na)[3] <- "wind_na"
+wind.freq.na <- wind.freq.na[order(wind.freq.na$layer)]
+wind.freq.na
+```
 </details>
 
 ## 1.10. Air Temperature
@@ -1341,7 +1382,33 @@ _Air Temperature_ is represented in Kelvin, with values ranging from 268 to 307.
 <details>
     <summary><em>Show/Hide code</em></summary>
 
+```r
+cl <- makeCluster(detectCores() - 1)
+registerDoParallel(cl, cores=detectCores() - 1)
 
+# Raster to datatable in parallel: one raster per thread
+rasList <- foreach (
+  ras_id=amaz.airtemp.list, 
+  .packages=c('terra', 'sf', 'dplyr'), 
+  .combine='c') %dopar% {
+    # Read and rename raster
+    ras <- rast(ras_id) %>% renameLayers(., 'airtemp_working_', '')
+    # Count the missing data
+    ras.freq.na <- not.na(ras) %>%
+      mask(amaz.basin.shp) %>%
+      terra::freq(., digits=0, value=0, usenames=T)
+  
+    list(ras.freq.na)
+  }
+stopCluster(cl)
+
+# Bind all per-raster into one dataframe
+airtemp.freq.na <- rbindlist(rasList, fill=T, use.names=T)
+# Order
+colnames(airtemp.freq.na)[3] <- "airtemp_na"
+airtemp.freq.na <- airtemp.freq.na[order(airtemp.freq.na$layer)]
+airtemp.freq.na
+```
 </details>
 
 
