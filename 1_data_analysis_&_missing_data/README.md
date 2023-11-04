@@ -1424,8 +1424,32 @@ _Wind Speed_ is measured in m/s, with values between 0.86 and 9.85.
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# list of files
+amaz.wind.list <- list.files(
+  paste0(path.data,"/9. Wind Speed/03. Working Data"),
+  full.names=TRUE,
+  pattern = ".tif$")
+# Import data with "Terra"
+wind.rast <- rast(amaz.wind.list)
+wind.rast
+```
 </details>
+
+```
+  class       : SpatRaster 
+  dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
+  resolution  : 500, 500  (x, y)
+  extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
+  coord. ref. : South_America_Albers_Equal_Area_Conic 
+  sources     : wind_working_2001_1.tif  
+                wind_working_2001_10.tif  
+                wind_working_2001_11.tif  
+                ... and 237 more source(s)
+  names       : wind_~_proj, wind_~_proj, wind_~_proj, wind_~_proj, wind_~_proj, wind_~_proj, ... 
+  min values  :    1.069407,    1.048391,    1.137132,    1.105208,    1.024364,    1.063414, ... 
+  max values  :    8.202874,    7.747525,    7.947669,    8.901711,    9.390056,    8.901502, ... 
+```
 
 #### *Rename and order layers*
 
@@ -1433,23 +1457,72 @@ _Wind Speed_ is measured in m/s, with values between 0.86 and 9.85.
     <summary><em>Show/Hide code</em></summary>
 
 
+```r
+# Rename layers
+wind.rast <- renameLayers(wind.rast, 'wind_working_', '')
+# Order layers
+wind.rast <- wind.rast[[ordered.names]]
+wind.rast
+```
 </details>
+
+```
+  class       : SpatRaster 
+  dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
+  resolution  : 500, 500  (x, y)
+  extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
+  coord. ref. : South_America_Albers_Equal_Area_Conic 
+  sources     : wind_working_2001_1.tif  
+                wind_working_2001_2.tif  
+                wind_working_2001_3.tif  
+                ... and 237 more source(s)
+  names       :  2001_01,  2001_02,  2001_03,  2001_04,  2001_05,   2001_06, ... 
+  min values  : 1.069407, 1.024364, 1.063414, 1.128978, 1.000217, 0.9819801, ... 
+  max values  : 8.202874, 9.390056, 8.901502, 8.614891, 7.900918, 7.8636937, ... 
+```
 
 #### *Verification of the values*
 
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# Verification of the values
+wind.minmax <- minmax(wind.rast) %>% t() %>% as.data.frame()
+wind.minmax
+```
 </details>
+
+<p align="center">
+  <img src="img/9.1.wind.png"  width="70%" />
+</p>
+
 
 #### *Plot of the month of October 2020*
 
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# Create a sequence date for 'rts' object
+wind.rts <- rts(wind.rast, seq.dates)
+# Applying the mask to plot only the amazon area.
+wind <- wind.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# Plot
+p.wind <- myPlot(wind, title = "Wind Speed") +
+  scale_fill_hypso_c(
+    name = TeX(r"($\textit{(m / s)}$)"),
+    palette = "gmt_globe_bathy", 
+    trans = "pseudo_log",
+    direction = -1,
+    na.value = "transparent")
+p.wind
+```
 </details>
+
+<p align="center">
+  <img src="img/9.2.wind.png"  width="70%" />
+</p>
 
 ### Missing Data
 
@@ -1485,6 +1558,43 @@ wind.freq.na
 ```
 </details>
 
+<p align="center">
+  <img src="img/9.3.wind.png"  width="70%" />
+</p>
+
+#### Plot Missing Data
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+```r
+# Applying the mask to plot only the amazon area.
+wind <- wind.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# define the zoom area
+wind.xy.zoom <- list(xmin=0.9e+06, xmax=1.4e+06, ymin=3.4e+06, ymax=4e+06, zoom=0.4)
+# Plot
+p.wind.na <- myPlot(
+  wind, title = "Wind Speed", 
+  max_cell=1e7,
+  x_angle=90,
+  b_size=12,
+  na.color="black",
+  xy.zoom = wind.xy.zoom
+) +
+  scale_fill_hypso_c(
+    name = TeX(r"($\textit{(m / s)}$)"),
+    palette = "gmt_globe_bathy", 
+    trans = "pseudo_log",
+    direction = -1,
+    na.value = "transparent")
+p.wind.na
+```
+</details>
+
+<p align="center">
+  <img src="img/9.4.wind.png"  width="70%" />
+</p>
+
 ## 1.10. Air Temperature
 
 ### Data Analysis
@@ -1496,24 +1606,77 @@ _Air Temperature_ is represented in Kelvin, with values ranging from 268 to 307.
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# list of files
+amaz.airtemp.list <- list.files(
+  paste0(path.data,"/10. Air Temperature/03. Working Data"),
+  full.names=TRUE,
+  pattern = ".tif$")
+# Import data with "Terra"
+airtemp.rast <- rast(amaz.airtemp.list)
+airtemp.rast
+```
 </details>
+
+```
+  class       : SpatRaster 
+  dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
+  resolution  : 500, 500  (x, y)
+  extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
+  coord. ref. : South_America_Albers_Equal_Area_Conic 
+  sources     : airtemp_working_2001_1.tif  
+                airtemp_working_2001_10.tif  
+                airtemp_working_2001_11.tif  
+                ... and 237 more source(s)
+  names       : airte~_proj, airte~_proj, airte~_proj, airte~_proj, airte~_proj, airte~_proj, ... 
+  min values  :    268.7742,    270.8836,    270.5267,    270.5608,    269.2101,    269.1326, ... 
+  max values  :    303.1154,    304.1908,    304.2381,    303.4955,    304.7826,    304.7043, ... 
+```
 
 #### *Rename and order layers*
 
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# Rename layers
+airtemp.rast <- renameLayers(airtemp.rast, 'airtemp_working_', '')
+# Order layers
+airtemp.rast <- airtemp.rast[[ordered.names]]
+airtemp.rast
+```
 </details>
+
+```
+  class       : SpatRaster 
+  dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
+  resolution  : 500, 500  (x, y)
+  extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
+  coord. ref. : South_America_Albers_Equal_Area_Conic 
+  sources     : airtemp_working_2001_1.tif  
+                airtemp_working_2001_2.tif  
+                airtemp_working_2001_3.tif  
+                ... and 237 more source(s)
+  names       :  2001_01,  2001_02,  2001_03,  2001_04,  2001_05,  2001_06, ... 
+  min values  : 268.7742, 269.2101, 269.1326, 270.1584, 269.9435, 269.3073, ... 
+  max values  : 303.1154, 304.7826, 304.7043, 304.4511, 303.5922, 304.0975, ... 
+```
 
 #### *Verification of the values*
 
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# Verification of the values
+airtemp.minmax <- minmax(airtemp.rast) %>% t() %>% as.data.frame()
+airtemp.minmax
+```
 </details>
+
+<p align="center">
+  <img src="img/10.1.airtemp.png"  width="70%" />
+</p>
 
 #### *Plot of the month of October 2020*
 
@@ -1522,6 +1685,10 @@ _Air Temperature_ is represented in Kelvin, with values ranging from 268 to 307.
 
 
 </details>
+
+<p align="center">
+  <img src="img/10.2.airtemp.png"  width="70%" />
+</p>
 
 ### Missing Data
 
@@ -1556,6 +1723,41 @@ airtemp.freq.na <- airtemp.freq.na[order(airtemp.freq.na$layer)]
 airtemp.freq.na
 ```
 </details>
+
+<p align="center">
+  <img src="img/10.3.airtemp.png"  width="70%" />
+</p>
+
+#### Plot Missing Data
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+```r
+# Applying the mask to plot only the amazon area.
+airtemp <- airtemp.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# define the zoom area
+airtemp.xy.zoom <- list(xmin=0.9e+06, xmax=1.4e+06, ymin=3.4e+06, ymax=4e+06, zoom=0.4)
+# Plot
+p.airtemp.na <- myPlot(
+  airtemp, title = "Air Temperature", 
+  max_cell=1e7,
+  x_angle=90,
+  b_size=12,
+  na.color="black",
+  xy.zoom = airtemp.xy.zoom
+) +
+  scale_fill_whitebox_c(
+    name = TeX(r"($\textit{(K)}$)"),
+    palette = "bl_yl_rd", 
+    na.value = "transparent")
+p.airtemp.na
+```
+</details>
+
+<p align="center">
+  <img src="img/10.4.airtemp.png"  width="70%" />
+</p>
 
 
 
