@@ -1719,7 +1719,19 @@ airtemp.minmax
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# Create a sequence date for 'rts' object
+airtemp.rts <- rts(airtemp.rast, seq.dates)
+# Applying the mask to plot only the amazon area.
+airtemp <- airtemp.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# Plot
+p.airtemp <- myPlot(airtemp, title = "Air Temperature") +
+  scale_fill_whitebox_c(
+    name = TeX(r"($\textit{(K)}$)"),
+    palette = "bl_yl_rd", 
+    na.value = "transparent")
+p.airtemp
+```
 </details>
 
 <p align="center">
