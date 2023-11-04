@@ -1797,6 +1797,9 @@ p.airtemp.na
 
 ## 1.11. Merge all dataframes of missing values.
 
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
 ```r
 # create the dataframe
 amaz.na.df <- as.data.frame(ordered.names)
@@ -1817,6 +1820,7 @@ amaz.na.df <- list(amaz.na.df,
 
 amaz.na.df
 ```
+</details>
 
 <p align="center">
   <img src="img/MissingData1.png"  width="49.5%" />
