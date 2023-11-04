@@ -1278,7 +1278,8 @@ evapotranspiration.rast
 
 ```r
 # Rename layers
-evapotranspiration.rast <- renameLayers(evapotranspiration.rast, 'evapotranspiration_working_', '')
+evapotranspiration.rast <- renameLayers(
+  evapotranspiration.rast, 'evapotranspiration_working_', '')
 # Order layers
 evapotranspiration.rast <- evapotranspiration.rast[[ordered.names]]
 evapotranspiration.rast
@@ -1376,6 +1377,10 @@ evapotranspiration.freq.na <-
 evapotranspiration.freq.na
 ```
 </details>
+
+<p align="center">
+  <img src="img/8.3.evapot.png"  width="70%" />
+</p>
 
 ## 1.9. Wind Speed
 
