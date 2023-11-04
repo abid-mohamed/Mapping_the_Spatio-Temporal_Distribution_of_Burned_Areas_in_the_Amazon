@@ -99,6 +99,7 @@ myPlot <- function(
   return(p1)
 }
 
+#---- Initialization ----
 # Create a sequence date
 seq.dates <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month")
 # Create name of layers
