@@ -574,7 +574,7 @@ p.prec.na <- myPlot(
   max_cell=1e7,
   x_angle=90,
   b_size=12,
-  na.color="red",
+  na.color="black",
   xy.zoom = prec.xy.zoom
 ) + 
   scale_fill_scico(
@@ -1030,14 +1030,14 @@ landsurftemp.freq.na
 
 ```r
 # Select the 4 months they have the most missing data
-lst.4na <- landsurftemp.na.order[1:4,]
+lst.4na <- landsurftemp.freq.na[1:4,]
 lst.4na.month <- lst.4na$layer %>% paste0(., "_01") %>% gsub("_", "-", .)
 lst.4na.rts <- subset(landSurfaceTemp.rts, lst.4na.month)
 lst.4na.rast <- lst.4na.rts@raster %>% mask(mask = amaz.basin.shp) 
 # Plot
 p.lst.4na <- ggplot() +
+  geom_spatvector(data = amaz.basin.shp$geometry, fill = "black", color = "gray40") +
   stat_spatraster(data = lst.4na.rast) +
-  geom_spatvector(data = amaz.basin.shp$geometry, fill = NA, color = "gray40") +
   scale_x_continuous(labels = function(x) format(x, scientific = T, digits = 1)) +
   scale_y_continuous(labels = function(x) format(x, scientific = T, digits = 2)) + 
   ggtitle(label="Land Surface Temperature", subtitle=NULL) +
@@ -1054,7 +1054,7 @@ p.lst.4na
 </details>
 
 <p align="center">
-  <img src="img/6.4.lst.png"  width="70%" />
+  <img src="img/6.4-1.lst.png"  width="70%" />
 </p>
 
 ## 1.7. Specific Humidity
@@ -1218,7 +1218,7 @@ p.hum.na <- myPlot(
   max_cell=1e7,
   x_angle=90,
   b_size=12,
-  na.color="red",
+  na.color="black",
   xy.zoom = hum.xy.zoom
 ) +
   scale_fill_cross_blended_c(
@@ -1380,6 +1380,37 @@ evapotranspiration.freq.na
 
 <p align="center">
   <img src="img/8.3.evapot.png"  width="70%" />
+</p>
+
+#### Plot Missing Data
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+```r
+# Applying the mask to plot only the amazon area.
+evapot <- evapotranspiration.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# define the zoom area
+evapot.xy.zoom <- list(xmin=0.9e+06, xmax=1.4e+06, ymin=3e+06, ymax=3.6e+06, zoom=0.4)
+# Plot
+p.evapot.na <- myPlot(
+  evapot, title = "Evapotranspiration", 
+  max_cell=1e7,
+  x_angle=90,
+  b_size=12,
+  na.color="black",
+  xy.zoom = evapot.xy.zoom
+) +
+  scale_fill_whitebox_c(
+    name = TeX(r"($\textit{(kg/m^2s)}$)"),
+    palette = "bl_yl_rd", 
+    na.value = "transparent")
+p.evapot.na
+```
+</details>
+
+<p align="center">
+  <img src="img/8.4.evapot.png"  width="70%" />
 </p>
 
 ## 1.9. Wind Speed
