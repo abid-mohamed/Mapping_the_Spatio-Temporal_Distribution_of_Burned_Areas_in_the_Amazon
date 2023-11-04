@@ -1794,3 +1794,31 @@ p.airtemp.na
 <p align="center">
   <img src="img/10.4.airtemp.png"  width="70%" />
 </p>
+
+## Merge all dataframes of missing values.
+
+```r
+# create the dataframe
+amaz.na.df <- as.data.frame(ordered.names)
+colnames(amaz.na.df) <- "layer"
+# Merge the dataframes
+amaz.na.df <- list(amaz.na.df, 
+                   burntArea.freq.na[,-2], 
+                   landCover.freq.na[,-2], 
+                   precipitation.freq.na[,-2],
+                   soilmoisture.freq.na[,-2],
+                   elevation.freq.na[,-2],
+                   landsurftemp.freq.na[,-2], 
+                   humidity.freq.na[,-2], 
+                   evapotranspiration.freq.na[,-2],
+                   wind.freq.na[,-2], 
+                   airtemp.freq.na[,-2]) %>% 
+  reduce(full_join, by="layer")
+
+amaz.na.df
+```
+
+<p align="center">
+  <img src="img/MissingData1.png"  width="49.5%" />
+  <img src="img/MissingData2.png"  width="49.5%" />
+</p>
