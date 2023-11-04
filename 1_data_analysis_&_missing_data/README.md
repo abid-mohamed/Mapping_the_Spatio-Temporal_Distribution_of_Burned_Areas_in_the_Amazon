@@ -1237,24 +1237,78 @@ _Evapotranspiration_ is measured in kg/m2s, with values ranging between -2.02e-0
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# list of files
+amaz.evapotranspiration.list <- list.files(paste0(path.data,"/8. Evapotranspiration/03. Working Data"),
+                                           full.names=TRUE,
+                                           pattern = ".tif$")
+# Import data with "Terra"
+evapotranspiration.rast <- rast(amaz.evapotranspiration.list)
+evapotranspiration.rast
+```
 </details>
+
+```
+  class       : SpatRaster 
+  dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
+  resolution  : 500, 500  (x, y)
+  extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
+  coord. ref. : South_America_Albers_Equal_Area_Conic 
+  sources     : evapotranspiration_working_2001_1.tif  
+                evapotranspiration_working_2001_10.tif  
+                evapotranspiration_working_2001_11.tif  
+                ... and 237 more source(s)
+  names       :  evapo~_proj,   evapo~_proj,   evapo~_proj,   evapo~_proj,   evapo~_proj,   evapo~_proj, ... 
+  min values  : 0.000000e+00, -3.037881e-09, -1.953269e-08, -1.696159e-08, -3.509835e-08, -3.830653e-08, ... 
+  max values  : 8.157189e-05,  8.477412e-05,  9.205872e-05,  7.918844e-05,  9.691325e-05,  8.340040e-05, ... 
+```
 
 #### *Rename and order layers*
 
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# Rename layers
+evapotranspiration.rast <- renameLayers(evapotranspiration.rast, 'evapotranspiration_working_', '')
+# Order layers
+evapotranspiration.rast <- evapotranspiration.rast[[ordered.names]]
+evapotranspiration.rast
+```
 </details>
+
+```
+  class       : SpatRaster 
+  dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
+  resolution  : 500, 500  (x, y)
+  extent      : -2156811, 1746189, 1625314, 4555314  (xmin, xmax, ymin, ymax)
+  coord. ref. : South_America_Albers_Equal_Area_Conic 
+  sources     : evapotranspiration_working_2001_1.tif  
+                evapotranspiration_working_2001_2.tif  
+                evapotranspiration_working_2001_3.tif  
+                ... and 237 more source(s)
+  names       :      2001_01,       2001_02,       2001_03,       2001_04,       2001_05,       2001_06, ... 
+  min values  : 0.000000e+00, -3.509835e-08, -3.830653e-08, -2.597946e-09, -1.043295e-08, -1.211072e-08, ... 
+  max values  : 8.157189e-05,  9.691325e-05,  8.340040e-05,  7.563404e-05,  7.022559e-05,  8.013412e-05, ... 
+```
 
 #### *Verification of the values*
 
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# Verification of the values
+evapotranspiration.minmax <- minmax(evapotranspiration.rast) %>% 
+  t() %>% 
+  as.data.frame()
+evapotranspiration.minmax
+```
 </details>
+
+<p align="center">
+  <img src="img/8.1.evapot.png"  width="70%" />
+</p>
 
 #### *Plot of the month of October 2020*
 
