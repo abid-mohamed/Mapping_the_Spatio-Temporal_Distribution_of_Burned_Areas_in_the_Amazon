@@ -43,10 +43,11 @@ _Burnt Area_ Represents the extent of burned areas in the Amazon rainforest, cat
 
 ```r
 # list of files
-amaz.burntArea.list <- list.files(paste0(path.data,"/1. Burnt Area/03. Working Data"),
-                                  full.names=TRUE,
-                                  pattern = ".tif$")
-# Import data with `Terra`
+amaz.burntArea.list <- list.files(
+  paste0(path.data,"/1. Burnt Area/03. Working Data"),
+  full.names=TRUE,
+  pattern = ".tif$")
+# Import data with "Terra"
 burntArea.rast <- rast(amaz.burntArea.list)
 burntArea.rast
 ```
@@ -274,9 +275,10 @@ _Land Cover_ is a categorical variable with 11 classes, providing information on
 
 ```r
 # list of files
-amaz.landCover.list <- list.files(paste0(path.data,"/2. Land Cover/03. Working Data"),
-                                  full.names=TRUE,
-                                  pattern = ".tif$")
+amaz.landCover.list <- list.files(
+  paste0(path.data,"/2. Land Cover/03. Working Data"),
+  full.names=TRUE,
+  pattern = ".tif$")
 # Import data with "Terra"
 landCover.rast <- rast(amaz.landCover.list)
 landCover.rast
@@ -421,9 +423,10 @@ _Precipitation_ is measured in millimeters per hour, with a range between 0 and 
 
 ```r
 # list of files
-amaz.precipitation.list <- list.files(paste0(path.data,"/3. Precipitation/03. Working Data"),
-                                      full.names=TRUE,
-                                      pattern = ".tif$")
+amaz.precipitation.list <- list.files(
+  paste0(path.data,"/3. Precipitation/03. Working Data"),
+  full.names=TRUE,
+  pattern = ".tif$")
 # Import data with "Terra"
 precipitation.rast <- rast(amaz.precipitation.list)
 precipitation.rast
@@ -600,18 +603,19 @@ _Soil Moisture_ is measured in millimeters, with missing values marked as -9.99e
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
-</details>
-
 ```r
 # list of files
-amaz.soilMoisture.list <- list.files(paste0(path.data,"/4. Soil Moisture/03. Working Data"),
-                                     full.names=TRUE,
-                                     pattern = ".tif$")
+amaz.soilMoisture.list <- list.files(
+  paste0(path.data,"/4. Soil Moisture/03. Working Data"),
+  full.names=TRUE,
+  pattern = ".tif$")
 # Import data with "Terra"
 soilMoisture.rast <- rast(amaz.soilMoisture.list)
 soilMoisture.rast
 ```
+</details>
+
+
 ```
   class       : SpatRaster 
   dimensions  : 5860, 7806, 240  (nrow, ncol, nlyr)
@@ -790,9 +794,10 @@ _Elevation_ is measured in meters, with a range between -85 and 6471.
 
 ```r
 # list of files
-amaz.elevation.list <- list.files(paste0(path.data,"/5. Elevation/03. Working Data"),
-                                  full.names=TRUE,
-                                  pattern = ".tif$")
+amaz.elevation.list <- list.files(
+  paste0(path.data,"/5. Elevation/03. Working Data"),
+  full.names=TRUE,
+  pattern = ".tif$")
 # Import data with "Terra"
 elevation.rast <- rast(amaz.elevation.list)
 elevation.rast
@@ -884,9 +889,10 @@ _Land Surface Temperature_ is represented in Kelvin, with values adjusted by a s
 
 ```r
 # list of files
-amaz.landSurfaceTemp.list <- list.files(paste0(path.data,"/6. LandSurfaceTemp/03. Working Data"),
-                                        full.names=TRUE,
-                                        pattern = ".tif$")
+amaz.landSurfaceTemp.list <- list.files(
+  paste0(path.data,"/6. LandSurfaceTemp/03. Working Data"),
+  full.names=TRUE,
+  pattern = ".tif$")
 # Import data with "Terra"
 landSurfaceTemp.rast <- rast(amaz.landSurfaceTemp.list)
 landSurfaceTemp.rast
@@ -1064,9 +1070,10 @@ _Specific Humidity_ is represented as kg/kg, indicating the ratio of kilograms o
 
 ```r
 # list of files
-amaz.humidity.list <- list.files(paste0(path.data,"/7. Specific Humidity/03. Working Data"),
-                                        full.names=TRUE,
-                                        pattern = ".tif$")
+amaz.humidity.list <- list.files(
+  paste0(path.data,"/7. Specific Humidity/03. Working Data"),
+  full.names=TRUE,
+  pattern = ".tif$")
 # Import data with "Terra"
 humidity.rast <- rast(amaz.humidity.list)
 humidity.rast
@@ -1239,9 +1246,10 @@ _Evapotranspiration_ is measured in kg/m2s, with values ranging between -2.02e-0
 
 ```r
 # list of files
-amaz.evapotranspiration.list <- list.files(paste0(path.data,"/8. Evapotranspiration/03. Working Data"),
-                                           full.names=TRUE,
-                                           pattern = ".tif$")
+amaz.evapotranspiration.list <- list.files(
+  paste0(path.data,"/8. Evapotranspiration/03. Working Data"),
+  full.names=TRUE,
+  pattern = ".tif$")
 # Import data with "Terra"
 evapotranspiration.rast <- rast(amaz.evapotranspiration.list)
 evapotranspiration.rast
@@ -1315,8 +1323,24 @@ evapotranspiration.minmax
 <details>
     <summary><em>Show/Hide code</em></summary>
 
-
+```r
+# Create a sequence date for 'rts' object
+evapotranspiration.rts <- rts(evapotranspiration.rast, seq.dates)
+# Applying the mask to plot only the amazon area.
+evapot <- evapotranspiration.rts[['2020-01-01']] %>% mask(mask = amaz.basin.shp)
+# Plot
+p.evapot <- myPlot(evapot, title = "Evapotranspiration") +
+  scale_fill_whitebox_c(
+    name = TeX(r"($\textit{(kg/m^2s)}$)"),
+    palette = "bl_yl_rd", 
+    na.value = "transparent")
+p.evapot
+```
 </details>
+
+<p align="center">
+  <img src="img/8.2.evapot.png"  width="70%" />
+</p>
 
 ### Missing Data
 
