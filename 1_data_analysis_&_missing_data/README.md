@@ -781,6 +781,35 @@ soilmoisture.freq.na
   <img src="img/4.5.soilm.png"  width="60%" />
 </p>
 
+#### Plot Missing Data
+
+<details>
+    <summary><em>Show/Hide code</em></summary>
+
+```r
+# define the zoom area
+soilm.xy.zoom <- list(xmin=0.15e+06, xmax=0.2e+06, ymin=4.35e+06, ymax=4.5e+06, zoom=0.4)
+# Plot
+p.soilm.na <- myPlot(
+  soilm, title = "Soil Moisture", 
+  max_cell=1e7,
+  x_angle=90,
+  b_size=12,
+  na.color="black",
+  xy.zoom = soilm.xy.zoom
+) + 
+  scale_fill_hypso_c(
+    name = TeX(r"($\textit{(mm)$})"),
+    palette = "wiki-schwarzwald-cont", 
+    na.value = "transparent")
+p.soilm.na
+```
+</details>
+
+<p align="center">
+  <img src="img/4.6.soilm.png"  width="70%" />
+</p>
+
 ## 1.5. Elevation
 
 ### Data Analysis
