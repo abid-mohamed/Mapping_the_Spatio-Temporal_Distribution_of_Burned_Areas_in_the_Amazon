@@ -9,12 +9,96 @@ For the covariate "Land Surface Temperature," missing data varies across months.
 
 In contrast, other covariates like "Precipitation," "Soil Moisture," "Specific Humidity," "Evapotranspiration," "Wind Speed," and "Air Temperature" have consistent missing data patterns across all months. These covariates have missing data values mostly at the boundary of the map, and each month's missing data count is below 133,000. We decided to exclude cells with missing data in these covariates as they consistently lacked data throughout the entire study period.
 
-Before looking for each variable, we import the Amazon shape file:
+Before looking for each variable, we import the Amazon shape file and initialize variables and function to use them after for each variable:
 
 <details>
     <summary><em>Show/Hide code</em></summary>
 
 ```r
+#---- load libraries ----
+library(tictoc)
+library(tidyverse)
+library(dplyr)
+library(terra)
+library(raster)
+library(sf)
+library(RColorBrewer)
+library(scico)
+library(tidyterra)
+library(ggforce)
+library(latex2exp)
+library(rts)
+library(doParallel)
+library(parallel)
+library(foreach)
+library(data.table)
+
+#---- Function to rename layers ----
+renameLayers <- function(dataRast, fileStart, prefix){
+  # index of file name in the path
+  id.date <- unlist(gregexpr(fileStart, sources(dataRast)[[1]])) + nchar(fileStart)
+  # rename layers
+  names(dataRast) <- 
+    substr(sources(dataRast), id.date, (id.date+50)) %>%
+    gsub(".tif", "_1", .) %>%
+    as.Date("%Y_%m_%d") %>%
+    format(., '%Y_%m') %>%
+    paste0(prefix, .)
+  
+  return(dataRast)
+}
+
+#---- Function to plot ----
+myPlot <- function(
+  rast, 
+  title=NULL, 
+  sub_title=NULL, 
+  theme=2, 
+  xy.limit = list(xmin=NULL, xmax=NULL, ymin=NULL, ymax=NULL),
+  xy.zoom = list(xmin=NULL, xmax=NULL, ymin=NULL, ymax=NULL, zoom.size=NULL),
+  max_cell=1e8,
+  x_angle=0,
+  b_size=16,
+  na.color=NA,
+  v_unit=c(2, 2, 2, 2) # c(t, r, b, l)
+){
+  p1 <- ggplot()
+  p1 <- switch(
+    theme,
+    p1,
+    p1 + theme_bw(base_size=b_size),
+    p1 + theme_linedraw(base_size=b_size),
+    p1 + theme_light(base_size=b_size),
+    p1 + theme_minimal(base_size=b_size),
+    p1 + theme_classic(base_size=b_size),
+    p1 + theme_gray(base_size=b_size),
+    p1 + theme_dark(base_size=b_size)
+  )
+  p1 <- p1  +
+    geom_spatvector(data = amaz.basin.shp$geometry, fill = na.color, color = "gray40") +
+    geom_spatraster(data = rast, maxcell = max_cell) +
+    scale_x_continuous(limits = c(xy.limit$xmin, xy.limit$xmax), 
+                       labels = function(x) format(x, scientific = T)) +
+    scale_y_continuous(limits = c(xy.limit$ymin, xy.limit$ymax), 
+                       labels = function(x) format(x, scientific = T)) +
+    ggtitle(label=title, subtitle=sub_title) +
+    coord_sf(datum = pull_crs(rast)) +
+    theme(
+      axis.text.x = element_text(angle = x_angle)
+      , plot.margin = unit(v_unit, "pt")
+    )
+  
+  if (!all(sapply(xy.zoom, is.null))) {
+    p1 <- p1 + facet_zoom(xlim = c(xy.zoom$xmin, xy.zoom$xmax),
+                          ylim = c(xy.zoom$ymin, xy.zoom$ymax), 
+                          zoom.size=xy.zoom$zoom) 
+  }
+  
+  if (theme == 1) {p1 <- p1 + theme_void(base_size=b_size)}
+
+  return(p1)
+}
+
 # Create a sequence date
 seq.dates <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month")
 # Create name of layers
