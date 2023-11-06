@@ -35,7 +35,7 @@ We focus on addressing the significant challenge of identifying and managing mis
 For the remaining covariates, missing data is minimal, consistent across months, and typically located near the map's edges.
 
 > [!NOTE]
-> Additional information :point_right: [*Data Analysis and Missing Data*](./1_data_analysis_&_missing_data)
+> Additional information :point_right: [*Data Analysis & Missing Data*](./1_data_analysis_&_missing_data)
 
 ### 2. Data Preparation (Downsampling strategy)
 
