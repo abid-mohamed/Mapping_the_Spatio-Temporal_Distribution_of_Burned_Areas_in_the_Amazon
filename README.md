@@ -34,7 +34,11 @@ We focus on addressing the significant challenge of identifying and managing mis
 
 For the remaining covariates, missing data is minimal, consistent across months, and typically located near the map's edges.
 
-[$\color{blue}{Explore\ Data\ Analysis\ and\ Missing\ Data}$](./1_data_analysis_&_missing_data)
+[$\color{blue}{Explore Data Analysis and Missing Data}$](./1_data_analysis_&_missing_data)
+
+> **Note** [*Explore Data Analysis and Missing Data*](./1_data_analysis_&_missing_data)
+
+
 
 ### 2. Data Preparation (Downsampling strategy)
 
@@ -89,5 +93,5 @@ These visualizations are powerful tools for understanding the dynamics and patte
 
 ---
 
-> **Note**
+> **Note** 
 >  Each folder contains detailed documentation, code, and any additional resources relevant to the corresponding step. You can follow the links to explore each aspect of the project in more detail.
