@@ -16,9 +16,9 @@ Before looking for each variable, we import the Amazon shape file and initialize
 
 <details>
     <summary>
-      <em><font color="brown">
-      Show/Hide code
-      </font></em>
+      <em>
+        <code style="color : name_color">Show/Hide code</code>
+      </em>
     </summary>
 
 ```r
