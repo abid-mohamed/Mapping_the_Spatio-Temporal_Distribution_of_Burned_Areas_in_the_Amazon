@@ -42,7 +42,7 @@ For the remaining covariates, missing data is minimal, consistent across months,
 > **Explore Data Analysis and Missing Data**
 > [*Explore Data Analysis and Missing Data*](./1_data_analysis_&_missing_data)
 
-> [!NOTE] (Explore Data Analysis and Missing Data)  
+> [!NOTE]
 > Highlights information that users should take into account, even when skimming.
 
 ### 2. Data Preparation (Downsampling strategy)
