@@ -14,11 +14,12 @@ Before looking for each variable, we import the Amazon shape file and initialize
 
 ${{\color{brown}\textsf{  Hi\ there\ \}}}\$
 
+`rgb(9, 105, 218)`
 
 <details>
     <summary>
       <em>
-        <code style="color : brown">${{\color{brown}\textsf{  Show/Hide\ code\ \}}}\$</code>
+        <code style="color : brown">Show/Hide code</code> `rgb(9, 105, 218)`
       </em>
     </summary>
 
