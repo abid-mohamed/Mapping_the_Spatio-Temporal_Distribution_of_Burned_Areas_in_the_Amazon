@@ -19,3 +19,8 @@ This downsampling strategy not only addresses the class imbalance but also allow
 # text in gray
 @@ text in purple (and bold)@@
 ```
+
+$\color{green}{test}$
+
+> **Note**
+> This is a note
