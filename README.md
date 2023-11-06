@@ -70,6 +70,8 @@ Additionally, we create ensemble models for each zone, combining the four method
 > **Information**
 > [*Explore Model Assessment*](./3_model_assessment_&_ensemble_model)
 
+>[!WARNING]
+>This is a warning
 
 ### 4. Maps and Time Trends of Fire Probability
 
