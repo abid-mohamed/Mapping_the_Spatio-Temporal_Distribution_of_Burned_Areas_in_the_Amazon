@@ -17,7 +17,7 @@ Before looking for each variable, we import the Amazon shape file and initialize
 <details>
     <summary>
       <em>
-        <code style="color : name_color">Show/Hide code</code>
+        <code style="color : brown">Show/Hide code</code>
       </em>
     </summary>
 
