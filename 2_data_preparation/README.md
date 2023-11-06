@@ -25,10 +25,10 @@ $\color{green}{test}$
 > **Note**
 > This is a note
 
-> **IMPORTANT**  
+> *IMPORTANT*
 > Crucial information necessary for users to succeed.
 
-> **Warning**
+> ***WARNING***
 > This is a warning
 
 > [!NOTE]  
