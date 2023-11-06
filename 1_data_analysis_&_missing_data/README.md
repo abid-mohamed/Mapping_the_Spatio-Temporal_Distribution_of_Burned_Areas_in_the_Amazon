@@ -11,13 +11,15 @@ In contrast, other covariates like "Precipitation," "Soil Moisture," "Specific H
 
 Before looking for each variable, we import the Amazon shape file and initialize variables and function to use them after for each variable:
 
+#0f0[This is green text]
 
+${{\color{Goldenrod}\Huge{\textsf{  Hi\ there\ \}}}}\$
 
 
 <details>
     <summary>
       <em>
-        <code style="color:red">Show/Hide code</code>
+        <code style="color : brown">Show/Hide code</code>
       </em>
     </summary>
 
