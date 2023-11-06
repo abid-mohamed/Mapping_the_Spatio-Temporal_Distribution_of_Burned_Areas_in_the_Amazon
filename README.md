@@ -67,12 +67,6 @@ Additionally, we create ensemble models for each zone, combining the four method
 > [!NOTE]
 > [*Explore Model Assessment*](./3_model_assessment_&_ensemble_model)
 
-> **Information**
-> [*Explore Model Assessment*](./3_model_assessment_&_ensemble_model)
-
->[!WARNING]
->This is a warning
-
 ### 4. Maps and Time Trends of Fire Probability
 
 In the "Maps and Time Trends of Fire Probability" section, we present the results of our ensemble model's predictions for fire probabilities in the Amazon rainforest. This section includes two types of visualizations:
