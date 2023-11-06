@@ -11,8 +11,15 @@ In contrast, other covariates like "Precipitation," "Soil Moisture," "Specific H
 
 Before looking for each variable, we import the Amazon shape file and initialize variables and function to use them after for each variable:
 
+
+
+
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 #---- load libraries ----
@@ -131,7 +138,11 @@ _Burnt Area_ Represents the extent of burned areas in the Amazon rainforest, cat
 #### *Import data*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # list of files
@@ -163,7 +174,11 @@ burntArea.rast
 #### *Rename layers*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Rename layers
@@ -190,7 +205,11 @@ burntArea.rast
 #### *Order layers*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Order layers
@@ -217,7 +236,11 @@ burntArea.rast
 #### *Verification of the values*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Verification of the values
@@ -234,7 +257,11 @@ burntArea.minmax[which((burntArea.minmax[,1] != -2) & (burntArea.minmax[,2] != 1
 #### *Plot of the month of October 2020*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Create the `rts` object
@@ -261,7 +288,11 @@ p.ba
 </p>
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Convert the raster object to a datatable
@@ -287,7 +318,11 @@ ggplot(data = ba.dt, aes(x = val)) +
 #### *Percentage of fires*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 freq.dt <- matrix(nrow = 0, ncol = 3) %>% as.data.table()
@@ -316,7 +351,11 @@ percentage.fires
 ### Missing Data
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 cl <- makeCluster(detectCores() - 1)
@@ -363,7 +402,11 @@ _Land Cover_ is a categorical variable with 11 classes, providing information on
 #### *Import data*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # list of files
@@ -395,7 +438,11 @@ landCover.rast
 #### *Rename and order layers*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Rename layers
@@ -424,7 +471,11 @@ landCover.rast
 #### *Verification of the values*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Verification of the values
@@ -441,7 +492,11 @@ landCover.minmax[
 #### *Plot of the month of October 2020*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Create the `rts` object
@@ -467,7 +522,11 @@ p.lc
 ### Missing Data
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 cl <- makeCluster(detectCores() - 1)
@@ -511,7 +570,11 @@ _Precipitation_ is measured in millimeters per hour, with a range between 0 and 
 #### *Import data*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # list of files
@@ -543,7 +606,11 @@ precipitation.rast
 #### *Rename and order layers*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Rename layers
@@ -572,7 +639,11 @@ precipitation.rast
 #### *Verification of the values*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Verification of the values
@@ -588,7 +659,11 @@ precipitation.minmax
 #### *Plot of the month of October 2020*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Create a sequence date for 'rts' object
@@ -615,7 +690,11 @@ p.prec
 ### Missing Data
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 cl <- makeCluster(detectCores() - 1)
@@ -653,7 +732,11 @@ precipitation.freq.na
 ### Zoom plot of missing data
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Applying the mask to plot only the amazon area.
@@ -693,7 +776,11 @@ _Soil Moisture_ is measured in millimeters, with missing values marked as -9.99e
 #### *Import data*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # list of files
@@ -726,7 +813,11 @@ soilMoisture.rast
 #### *Rename and order layers*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Rename layers
@@ -755,7 +846,11 @@ soilMoisture.rast
 #### *Verification of the values*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Verification of the values
@@ -769,7 +864,11 @@ soilMoisture.minmax
 </p>
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 soilMoisture.freq <- freq(soilMoisture.rast, digits=3, usenames=T)
@@ -782,7 +881,11 @@ soilMoisture.freq[soilMoisture.freq$value < 0,]
 </p>
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Create the `rts` object
@@ -814,7 +917,11 @@ p.soilm.na
 #### *Plot of the month of October 2020*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Remove negative values.
@@ -836,7 +943,11 @@ p.soilm
 ### Missing Data
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 cl <- makeCluster(detectCores() - 1)
@@ -876,7 +987,11 @@ soilmoisture.freq.na
 #### Plot Missing Data
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # define the zoom area
@@ -911,7 +1026,11 @@ _Elevation_ is measured in meters, with a range between -85 and 6471.
 #### *Import data*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # list of files
@@ -940,7 +1059,11 @@ elevation.rast
 #### *Verification of the values*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Verification of the values
@@ -956,7 +1079,11 @@ elevation.minmax
 #### *Plot of the Elevation*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Applying the mask to plot only the amazon area.
@@ -982,7 +1109,11 @@ p.elev
 ### Missing Data
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Count the missing data
@@ -1006,7 +1137,11 @@ _Land Surface Temperature_ is represented in Kelvin, with values adjusted by a s
 #### *Import data*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # list of files
@@ -1038,7 +1173,11 @@ landSurfaceTemp.rast
 #### *Rename and order layers*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Rename layers
@@ -1066,7 +1205,11 @@ landSurfaceTemp.rast
 #### *Verification of the values*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Verification of the values
@@ -1082,7 +1225,11 @@ landSurfaceTemp.minmax
 #### *Plot of the month of October 2020*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Create a sequence date for 'rts' object
@@ -1106,7 +1253,11 @@ p.lst
 ### Missing Data
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 cl <- makeCluster(detectCores() - 1)
@@ -1147,7 +1298,11 @@ landsurftemp.freq.na
 #### Plot Missing Data
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Select the 4 months they have the most missing data
@@ -1187,7 +1342,11 @@ _Specific Humidity_ is represented as kg/kg, indicating the ratio of kilograms o
 #### *Import data*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # list of files
@@ -1219,7 +1378,11 @@ humidity.rast
 #### *Rename and order layers*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Rename layers
@@ -1248,7 +1411,11 @@ humidity.rast
 #### *Verification of the values*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Verification of the values
@@ -1264,7 +1431,11 @@ humidity.minmax
 #### *Plot of the month of October 2020*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Create a sequence date for 'rts' object
@@ -1288,7 +1459,11 @@ p.hum
 ### Missing Data
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 cl <- makeCluster(detectCores() - 1)
@@ -1326,7 +1501,11 @@ humidity.freq.na
 #### Plot Missing Data
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Applying the mask to plot only the amazon area.
@@ -1363,7 +1542,11 @@ _Evapotranspiration_ is measured in kg/m2s, with values ranging between -2.02e-0
 #### *Import data*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # list of files
@@ -1395,7 +1578,11 @@ evapotranspiration.rast
 #### *Rename and order layers*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Rename layers
@@ -1425,7 +1612,11 @@ evapotranspiration.rast
 #### *Verification of the values*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Verification of the values
@@ -1443,7 +1634,11 @@ evapotranspiration.minmax
 #### *Plot of the month of October 2020*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Create a sequence date for 'rts' object
@@ -1467,7 +1662,11 @@ p.evapot
 ### Missing Data
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 cl <- makeCluster(detectCores() - 1)
@@ -1506,7 +1705,11 @@ evapotranspiration.freq.na
 #### Plot Missing Data
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Applying the mask to plot only the amazon area.
@@ -1543,7 +1746,11 @@ _Wind Speed_ is measured in m/s, with values between 0.86 and 9.85.
 #### *Import data*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # list of files
@@ -1575,7 +1782,11 @@ wind.rast
 #### *Rename and order layers*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 
 ```r
@@ -1605,7 +1816,11 @@ wind.rast
 #### *Verification of the values*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Verification of the values
@@ -1622,7 +1837,11 @@ wind.minmax
 #### *Plot of the month of October 2020*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Create a sequence date for 'rts' object
@@ -1648,7 +1867,11 @@ p.wind
 ### Missing Data
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 cl <- makeCluster(detectCores() - 1)
@@ -1686,7 +1909,11 @@ wind.freq.na
 #### Plot Missing Data
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Applying the mask to plot only the amazon area.
@@ -1725,7 +1952,11 @@ _Air Temperature_ is represented in Kelvin, with values ranging from 268 to 307.
 #### *Import data*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # list of files
@@ -1757,7 +1988,11 @@ airtemp.rast
 #### *Rename and order layers*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Rename layers
@@ -1786,7 +2021,11 @@ airtemp.rast
 #### *Verification of the values*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Verification of the values
@@ -1802,7 +2041,11 @@ airtemp.minmax
 #### *Plot of the month of October 2020*
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Create a sequence date for 'rts' object
@@ -1826,7 +2069,11 @@ p.airtemp
 ### Missing Data
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 cl <- makeCluster(detectCores() - 1)
@@ -1864,7 +2111,11 @@ airtemp.freq.na
 #### Plot Missing Data
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # Applying the mask to plot only the amazon area.
@@ -1895,7 +2146,11 @@ p.airtemp.na
 ## 1.11. Merge all dataframes of missing values.
 
 <details>
-    <summary><em>Show/Hide code</em></summary>
+    <summary>
+      <em><font color="brown">
+        <span style = "background-color:cornsilk">Show/Hide code</span>
+      </font></em>
+    </summary>
 
 ```r
 # create the dataframe
