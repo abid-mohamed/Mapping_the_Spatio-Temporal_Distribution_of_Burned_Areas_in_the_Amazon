@@ -19,11 +19,9 @@ ${{\color{brown}\textsf{  Hi\ there\ \}}}\$
 <details>
     <summary>
       <em>
-      <span style="color:brown;">
         <code>
           Show/Hide code
         </code>
-      </span>
       </em>
     </summary>
 
