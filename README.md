@@ -34,18 +34,8 @@ We focus on addressing the significant challenge of identifying and managing mis
 
 For the remaining covariates, missing data is minimal, consistent across months, and typically located near the map's edges.
 
-[$\color{blue}{Explore Data Analysis and Missing Data}$](./1_data_analysis_&_missing_data)
-
-> **Note** [*Explore Data Analysis and Missing Data*](./1_data_analysis_&_missing_data)
-
-> **Note** 
-> [*Explore Data Analysis and Missing Data*](./1_data_analysis_&_missing_data)
-
-> **Explore Data Analysis and Missing Data**
-> [*Explore Data Analysis and Missing Data*](./1_data_analysis_&_missing_data)
-
 > [!NOTE]
-> Highlights information that users should take into account, even when skimming.
+> [*Explore Data Analysis and Missing Data*](./1_data_analysis_&_missing_data)
 
 ### 2. Data Preparation (Downsampling strategy)
 
@@ -65,7 +55,8 @@ As the downsampling process still results in a substantial dataset of approximat
   <img src="assets/zones.png"  width="70%" />
 </p>
 
-[$\color{blueviolet}{Explore Data Preparation}$](./2_data_preparation)
+> [!NOTE]
+> [*Explore Data Preparation*](./2_data_preparation)
 
 ### 3. Model Assessment, Ensemble Model, and Results
 
@@ -73,7 +64,8 @@ In the Model Assessment, Ensemble Model, and Results step, we evaluate the perfo
 
 Additionally, we create ensemble models for each zone, combining the four methods using a linear combination technique. The weights for each method in the ensemble are determined based on the normalized AUCPR metric. This ensemble approach optimizes predictive accuracy for each zone.
 
-[$\color{blueviolet}{Explore Model Assessment}$](./3_model_assessment_&_ensemble_model)
+> [!NOTE]
+> [*Explore Model Assessment*](./3_model_assessment_&_ensemble_model)
 
 
 ### 4. Maps and Time Trends of Fire Probability
