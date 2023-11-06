@@ -36,7 +36,9 @@ For the remaining covariates, missing data is minimal, consistent across months,
 
 [$\color{blue}{Explore Data Analysis and Missing Data}$](./1_data_analysis_&_missing_data)
 
-> **Note**
+> **Note** [*Explore Data Analysis and Missing Data*](./1_data_analysis_&_missing_data)
+
+> **Note** 
 > [*Explore Data Analysis and Missing Data*](./1_data_analysis_&_missing_data)
 
 > **Explore Data Analysis and Missing Data**
