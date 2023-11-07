@@ -34,3 +34,7 @@ This downsampling strategy not only addresses the class imbalance but also allow
 <p align="center">
   <img src="img/1.jpg"  width="100%" />
 </p>
+
+<p align="center">
+  <img src="img/22.png"  width="100%" />
+</p>
