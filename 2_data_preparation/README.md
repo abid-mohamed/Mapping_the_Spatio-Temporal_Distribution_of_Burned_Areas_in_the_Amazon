@@ -32,5 +32,5 @@ This downsampling strategy not only addresses the class imbalance but also allow
 
 
 <p align="center">
-  <img src="img/Downsamling_approach.jpg"  width="100%" />
+  <img src="img/1.jpg"  width="100%" />
 </p>
