@@ -30,3 +30,7 @@ This downsampling strategy not only addresses the class imbalance but also allow
 > [!WARNING]  
 > Critical content demanding immediate user attention due to potential risks.
 
+
+<p align="center">
+  <img src="img/Downsamling_approach.jpg"  width="100%" />
+</p>
