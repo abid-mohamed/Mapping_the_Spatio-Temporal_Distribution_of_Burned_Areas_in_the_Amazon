@@ -1,0 +1,47 @@
+-------------------------------------------------
+Cells always corresponding to 'Water' regions
+Cells Always Associated with 'Water' Regions
+Cells Always Related to 'Water' Regions
+Cells are Always 'Water' Regions
+
+Cells Always with 'Water' Event
+-------------------------------------------------
+Cells with 'No Fire' events
+
+Cells with 'No Fire' Events
+-------------------------------------------------
+Cells with at least a 'Fire' event
+
+Cells with at Least One 'Fire' Event
+-------------------------------------------------
+Cells may correspond to  'Water' or 'No Fire' regions
+
+Cells that can be 'Water/No Fire' Regions
+-------------------------------------------------
+Cells always corresponding to 'No Fire' regions
+
+Cells Always Corresponding to 'No Fire' Regions
+Cells are Always 'No Fire' Regions
+-------------------------------------------------
+Pattern for cells with 'no fire' and missing data
+
+Pattern Cells with 'No Fire' Events and missing data
+
+Pattern of Cells with 'No Fire' and Missing Data
+-------------------------------------------------
+Pattern for cells with 'no fire' and no missing data
+
+Pattern Cells with 'No Fire' and No Missing Data
+-------------------------------------------------
+Pattern for cells that may correspond to 'water' or 'no fire' regions
+
+Pattern Cells that can be 'Water/No Fire' Regions   20
+-------------------------------------------------
+Pattern for cells that didn't have any fire event
+
+Pattern of Cells with 'No Fire' Events
+-------------------------------------------------
+Missing data in 'Land Surface Temprature'
+
+Cells with Missing data in LandSurfaceTemprature
+-------------------------------------------------
