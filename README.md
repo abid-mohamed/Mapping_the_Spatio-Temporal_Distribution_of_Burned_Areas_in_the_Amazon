@@ -56,7 +56,7 @@ As the downsampling process still results in a substantial dataset of approximat
 </p>
 
 > [!NOTE]
-> Additional information :point_right: [*Explore Data Preparation*](./2_data_preparation/README.md)
+> Additional information :point_right: [*Explore Data Preparation*](./2_data_preparation/readme.md)
 
 ### 3. Model Assessment, Ensemble Model, and Results
 
