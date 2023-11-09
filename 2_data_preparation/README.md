@@ -1,7 +1,7 @@
 
 # Data Preparation (Downsampling)
 
-## Select Data
+## Select Data (Downsampling approach)
 
 Our dataset features a spatial resolution of 500 meters, resulting in an extensive amount of data. To address the class imbalance in the "Burnt Area" response variable, we employed a careful data preparation strategy known as downsampling. Here's how we balanced the response variable:
 
