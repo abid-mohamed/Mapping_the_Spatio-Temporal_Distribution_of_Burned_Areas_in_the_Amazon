@@ -93,3 +93,8 @@ These visualizations are powerful tools for understanding the dynamics and patte
 
 > **Note** 
 > Each folder contains detailed documentation, code, and any additional resources relevant to the corresponding step. You can follow the links to explore each aspect of the project in more detail.
+
+
+<p align="center">
+  <img src="img/Img1.png"  width="100%" />
+</p>
