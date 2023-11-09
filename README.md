@@ -56,7 +56,7 @@ As the downsampling process still results in a substantial dataset of approximat
 </p>
 
 > [!NOTE]
-> Additional information :point_right: [*Explore Data Preparation*](./2_data_preparation/Readme.md)
+> Additional information :point_right: [*Explore Data Preparation*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md)
 
 ### 3. Model Assessment, Ensemble Model, and Results
 
