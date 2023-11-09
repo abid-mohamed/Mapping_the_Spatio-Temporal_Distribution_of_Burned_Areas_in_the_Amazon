@@ -96,5 +96,5 @@ These visualizations are powerful tools for understanding the dynamics and patte
 
 
 <p align="center">
-  <img src="img/img1.png"  width="100%" />
+  <img src="assets/img1.png"  width="100%" />
 </p>
