@@ -31,22 +31,3 @@ This downsampling strategy not only addresses the class imbalance but also allow
 > Critical content demanding immediate user attention due to potential risks.
 
 
-<p align="center">
-  <img src="img/1.jpg"  width="100%" />
-</p>
-
-<p align="center">
-  <img src="img/18.png"  width="100%" />
-</p>
-
-<p align="center">
-  <img src="img/20.png"  width="100%" />
-</p>
-
-<p align="center">
-  <img src="img/22.png"  width="100%" />
-</p>
-
-<p align="center">
-  <img src="img/19_l1.png"  width="100%" />
-</p>
