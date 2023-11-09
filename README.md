@@ -46,7 +46,7 @@ In this step, we address the class imbalance issue identified in the Data Analys
 - For cells without any fire events during this period, we randomly select a single observation from across all the months. It's important to note that this selection ensures that there are no missing values in the _land surface temperature_ covariate or the response variable _burnt area_.
 
 <p align="center">
-  <img src="assets/Downsampling_approach.jpg" alt="Downsampling strategy"  width="60%" />
+  <img src="assets/Downsampling_approach.jpg" width="60%" />
 </p>
 
 As the downsampling process still results in a substantial dataset of approximately 550 million observations, we have opted to partition our data into 11 zones, with each zone containing approximately 50 million observations. This division not only reduces the computational load but also enhances the usability and manageability of the dataset.
@@ -93,8 +93,3 @@ These visualizations are powerful tools for understanding the dynamics and patte
 
 > **Note** 
 > Each folder contains detailed documentation, code, and any additional resources relevant to the corresponding step. You can follow the links to explore each aspect of the project in more detail.
-
-
-<p align="center">
-  <img src="assets/img1.png"  width="100%" />
-</p>
