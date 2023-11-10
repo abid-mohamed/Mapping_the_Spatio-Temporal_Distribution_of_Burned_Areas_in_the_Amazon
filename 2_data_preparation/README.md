@@ -13,6 +13,10 @@ Our dataset features a spatial resolution of 500 meters, resulting in an extensi
   <img src="./img/Img1.png"  width="100%" />
 </p>
 
+<p align="center">
+  <img src="./img/Img2.png"  width="100%" />
+</p>
+
 This approach resulted in a dataset containing approximately 550 million observations, covering a substantial portion of the Amazon rainforest. To facilitate further analysis and modeling, we normalized the data and divided it into 11 zones, each with roughly 50 million observations. The zone allocation and data distribution are visualized in Figure 7.
 
 [Insert Figure 7: Visualization of Data Zones and Distribution]
