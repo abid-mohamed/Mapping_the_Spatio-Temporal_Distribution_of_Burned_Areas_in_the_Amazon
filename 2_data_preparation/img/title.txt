@@ -45,3 +45,6 @@ Missing data in 'Land Surface Temprature'
 
 Cells with Missing data in LandSurfaceTemprature
 -------------------------------------------------
+
+
+Pattern of Cells with 'No Fire'
