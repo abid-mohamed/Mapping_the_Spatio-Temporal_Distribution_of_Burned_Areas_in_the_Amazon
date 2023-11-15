@@ -10,10 +10,10 @@ Our dataset features a spatial resolution of 500 meters, resulting in an extensi
 2. For cells that did not experience any fire events during the study period, we randomly selected one observation from each of the 238 months. We ensured that the selected value was not missing data for the covariate "Land Surface Temperature" and was either 0 (unburnt) or 1 (burnt) for the response variable "Burnt Area."
 
 <p align="center">
-  <img src="./img/Img1.png"  width="100%" />
-  <img src="./img/Img3.png"  width="100%" />
-  <img src="./img/Img5.png"  width="100%" />
-  <img src="./img/Img7.png"  width="100%" />
+  <img src="./img/Img1.jpg"  width="100%" />
+  <img src="./img/Img2.jpg"  width="100%" />
+  <img src="./img/Img3.jpg"  width="100%" />
+  <img src="./img/Img4.jpg"  width="100%" />
 </p>
 
 
