@@ -15,11 +15,12 @@ Our dataset features a spatial resolution of 500 meters, resulting in an extensi
 
 <p align="center">
   <img src="./img/Img3.png"  width="100%" />
-| For every cell, we systematically chose a single observation from each of the 238 months, excluding cells with missing data in the “Land Surface Temperature” variable. | Select cells which are ‘No Fire’ region in each month for the variables “Burnt Area” and “Land Surface Temperature”. |
-| abc | abc |
-
   <img src="./img/Img4.png"  width="100%" />
 </p>
+
+| For every cell | Select cells. |
+| abc | abc |
+| abc | abc |
 
 This approach resulted in a dataset containing approximately 550 million observations, covering a substantial portion of the Amazon rainforest. To facilitate further analysis and modeling, we normalized the data and divided it into 11 zones, each with roughly 50 million observations. The zone allocation and data distribution are visualized in Figure 7.
 
