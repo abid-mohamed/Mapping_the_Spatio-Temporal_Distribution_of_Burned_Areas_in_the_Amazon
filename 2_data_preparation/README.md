@@ -11,20 +11,6 @@ Our dataset features a spatial resolution of 500 meters, resulting in an extensi
 
 <p align="center">
   <img src="./img/Img1.png"  width="100%" />
-</p>
-
-<p align="center">
-  <img src="./img/Img3.png"  width="100%" />
-  <table style="width:100%">
-    <tr>
-      <td style="width:50%"><p align="center">
-        For every cell, we systematically chose a single observation from each of the 238 months, excluding cells with missing data in the “Land Surface Temperature” variable.
-        </p></td>
-      <td style="width:50%"><p align="center">
-        Select cells which are ‘No Fire’ region in each month for the variables “Burnt Area” and “Land Surface Temperature”.
-      </p></td>
-    </tr>
-  </table>
   <img src="./img/Img4.png"  width="100%" />
 </p>
 
