@@ -100,9 +100,5 @@ These visualizations are powerful tools for understanding the dynamics and patte
     </a>
 </p>
 
-<div id="textbox">
-  <p class="alignleft">Text on the left.</p>
-  <p class="alignright">Text on the right.</p>
-</div>
-
-<div style="clear: both;"></div>
+<p style="text-align: left; width:49%; display: inline-block;">LEFT</p>
+<p style="text-align: right; width:50%;  display: inline-block;">RIGHT</p>
