@@ -48,3 +48,6 @@ Cells with Missing data in LandSurfaceTemprature
 
 
 Pattern of Cells with 'No Fire'
+
+Minimum Value 
+of Burnt Area
