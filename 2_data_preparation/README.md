@@ -1,8 +1,7 @@
-<p align="center">
-  <a href="link-to-previous-page" style="float: left;">Previous Page</a>
-  <a href="link-to-next-page" style="float: right;">Next Page</a>
-</p>
-
+<div align="center">
+  <a href="link-to-previous-page" style="margin-right: auto;">Previous Page</a>
+  <a href="link-to-next-page" style="margin-left: auto;">Next Page</a>
+</div>
 
 
 
