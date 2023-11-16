@@ -1,15 +1,11 @@
-{::options parse_block_html="true" /}
-
-<p style="text-align:left;">
-    <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/1_data_analysis_%26_missing_data/README.md">
-    <em><< 1. Data Analysis & Missing Data</em>
-    </a>
-    <span style="float:right;">
-    <a href="github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/3_model_assessment_&_ensemble_model/README.md">
-    <em>3. Model Assessment, Ensemble Model, and Results >></em>
-    </a>
-    </span>
+<p align="center">
+  <a href="link-to-previous-page" style="float: left;">Previous Page</a>
+  <a href="link-to-next-page" style="float: right;">Next Page</a>
 </p>
+
+
+
+
 
 # Data Preparation (Downsampling)
 
