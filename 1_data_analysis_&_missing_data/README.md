@@ -2071,3 +2071,6 @@ amaz.na.df
     </a>
     </span>
 </p>
+
+| Getting Started | Features | Download |
+| =============== | ======== | ======== |
