@@ -58,8 +58,9 @@ This downsampling strategy not only addresses the class imbalance but also allow
     <em>Model Assessment, Ensemble Model, and Results >></em>
     </a>
     </span>
-</p>
-
-<p align="center">
+    <p align="center">
   <img src="./img/bar.jpg" width="100%" height="5px"/>
 </p>
+</p>
+
+
