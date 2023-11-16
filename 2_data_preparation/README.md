@@ -59,3 +59,10 @@ This downsampling strategy not only addresses the class imbalance but also allow
     </a>
     </span>
 </p>
+
+
+
+
+<p align="center">
+  <img src="./img/bar.jpg"  width="100%" />
+</p>
