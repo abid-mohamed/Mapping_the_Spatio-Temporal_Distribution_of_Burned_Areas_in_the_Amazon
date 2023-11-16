@@ -99,6 +99,3 @@ These visualizations are powerful tools for understanding the dynamics and patte
     <em>1. Data Analysis & Missing Data >></em>
     </a>
 </p>
-
-<p style="text-align: left; width:40%; display: inline-block;">LEFT</p>
-<p style="text-align: right; width:40%;  display: inline-block;">RIGHT</p>
