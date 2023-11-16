@@ -27,8 +27,8 @@ In contrast, other covariates like "Precipitation," "Soil Moisture," "Specific H
 Before looking for each variable, we import the Amazon shape file and initialize variables and function to use them after for each variable:
 
 <details>
-    <summary markdown="span">
-      <em>Show/Hide code</em>
+    <summary>
+      <em><code>Show/Hide code</code></em>
     </summary>
 
 ```r

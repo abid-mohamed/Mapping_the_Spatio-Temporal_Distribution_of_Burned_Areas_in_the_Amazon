@@ -1,3 +1,5 @@
+{::options parse_block_html="true" /}
+
 <p style="text-align:left;">
     <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/1_data_analysis_%26_missing_data/README.md">
     <em><< 1. Data Analysis & Missing Data</em>
