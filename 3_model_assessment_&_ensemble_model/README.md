@@ -1,10 +1,10 @@
 <p style="text-align:left;">
     <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md">
-    <em><< Data Preparation</em>
+    <em><< 2. Data Preparation</em>
     </a>
     <span style="float:right;">
     <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/README.md#4-maps-and-time-trends-of-fire-probability">
-    <em>Maps and Time Trends of Fire Probability >></em>
+    <em>4. Maps and Time Trends of Fire Probability >></em>
     </a>
     </span>
 </p>
@@ -35,11 +35,11 @@ The dataset includes 10 variables that capture various factors related to fires,
 
 <p style="text-align:left;">
     <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md">
-    <em><< Data Preparation</em>
+    <em><< 2. Data Preparation</em>
     </a>
     <span style="float:right;">
     <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/README.md#4-maps-and-time-trends-of-fire-probability">
-    <em>Maps and Time Trends of Fire Probability >></em>
+    <em>4. Maps and Time Trends of Fire Probability >></em>
     </a>
     </span>
 </p>

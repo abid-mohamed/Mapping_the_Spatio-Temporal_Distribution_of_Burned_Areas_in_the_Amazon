@@ -4,7 +4,7 @@
     </a>
     <span style="float:right;">
     <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon">
-    <em>Data Preparation >></em>
+    <em>1. Data Preparation >></em>
     </a>
     </span>
 </p>
@@ -2067,7 +2067,7 @@ amaz.na.df
     </a>
     <span style="float:right;">
     <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon">
-    <em>Data Preparation >></em>
+    <em>1. Data Preparation >></em>
     </a>
     </span>
 </p>
