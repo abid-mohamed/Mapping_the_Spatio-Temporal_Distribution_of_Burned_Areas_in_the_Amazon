@@ -1,7 +1,19 @@
-<table style="width: 100%;" cellspacing="0" cellpadding="0">
+<table style="width: 100%;" cellspacing="0" cellpadding="0" border="0">
   <tr>
     <td style="text-align: left;"><a href="link-to-previous-page">Previous Page</a></td>
     <td style="text-align: right;"><a href="link-to-next-page">Next Page</a></td>
+  </tr>
+  <tr>
+    <td style="text-align: left;">
+    <p align="center">
+  <img src="./img/bar.jpg" width="100%" height="5px"/>
+</p>
+    </td>
+    <td style="text-align: right;">
+    <p align="center">
+  <img src="./img/bar.jpg" width="100%" height="5px"/>
+</p>
+    </td>
   </tr>
 </table>
 
@@ -58,9 +70,8 @@ This downsampling strategy not only addresses the class imbalance but also allow
     <em>Model Assessment, Ensemble Model, and Results >></em>
     </a>
     </span>
-    <p align="center">
+</p>
+
+<p align="center">
   <img src="./img/bar.jpg" width="100%" height="5px"/>
 </p>
-</p>
-
-
