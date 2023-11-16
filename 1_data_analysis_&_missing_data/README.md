@@ -1,3 +1,14 @@
+<p style="text-align:left;">
+    <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md">
+    <em><< Main Page</em>
+    </a>
+    <span style="float:right;">
+    <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon">
+    <em>Data Preparation >></em>
+    </a>
+    </span>
+</p>
+
 # 1. Data Analysis and Missing Data
 
 The dataset includes 10 variables that capture various factors related to fires, land use, environmental conditions, and climate. It provides a spatial resolution of 500 meters, allowing a detailed analysis of the Amazon rainforest. These variables are measured on a monthly basis, covering the entire period from 2001 to 2020, and each variable contains a substantial monthly dataset, with around 26.8 million observations per month.
@@ -2048,4 +2059,15 @@ amaz.na.df
 <p align="center">
   <img src="img/MissingData1.png"  width="49.5%" />
   <img src="img/MissingData2.png"  width="49.5%" />
+</p>
+
+<p style="text-align:left;">
+    <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md">
+    <em><< Main Page</em>
+    </a>
+    <span style="float:right;">
+    <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon">
+    <em>Data Preparation >></em>
+    </a>
+    </span>
 </p>

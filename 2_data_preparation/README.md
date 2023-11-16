@@ -1,3 +1,13 @@
+<p style="text-align:left;">
+    <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/1_data_analysis_%26_missing_data/README.md">
+    <em><< Data Analysis & Missing Data</em>
+    </a>
+    <span style="float:right;">
+    <a href="github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/3_model_assessment_&_ensemble_model/README.md">
+    <em>Model Assessment, Ensemble Model, and Results >></em>
+    </a>
+    </span>
+</p>
 
 # Data Preparation (Downsampling)
 
@@ -42,3 +52,13 @@ This downsampling strategy not only addresses the class imbalance but also allow
 > [!WARNING]  
 > Critical content demanding immediate user attention due to potential risks.
 
+<p style="text-align:left;">
+    <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/1_data_analysis_%26_missing_data/README.md">
+    <em><< Data Analysis & Missing Data</em>
+    </a>
+    <span style="float:right;">
+    <a href="github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/3_model_assessment_&_ensemble_model/README.md">
+    <em>Model Assessment, Ensemble Model, and Results >></em>
+    </a>
+    </span>
+</p>
