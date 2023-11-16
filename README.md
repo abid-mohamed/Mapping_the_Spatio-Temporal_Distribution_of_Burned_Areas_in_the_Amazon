@@ -100,5 +100,5 @@ These visualizations are powerful tools for understanding the dynamics and patte
     </a>
 </p>
 
-<p style="text-align: left; width:49%; display: inline-block;">LEFT</p>
-<p style="text-align: right; width:50%;  display: inline-block;">RIGHT</p>
+<p style="text-align: left; width:40%; display: inline-block;">LEFT</p>
+<p style="text-align: right; width:40%;  display: inline-block;">RIGHT</p>
