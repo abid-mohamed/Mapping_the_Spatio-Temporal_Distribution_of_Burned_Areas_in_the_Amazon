@@ -1,5 +1,5 @@
 <p style="text-align:left;">
-    <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md">
+    <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon">
     <em><< Main Page</em>
     </a>
     <span style="float:right;">
@@ -2062,12 +2062,12 @@ amaz.na.df
 </p>
 
 <p style="text-align:left;">
-    <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md">
+    <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon">
     <em><< Main Page</em>
     </a>
     <span style="float:right;">
-    <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon">
-    <em>1. Data Preparation >></em>
+    <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md">
+    <em>2. Data Preparation >></em>
     </a>
     </span>
 </p>
