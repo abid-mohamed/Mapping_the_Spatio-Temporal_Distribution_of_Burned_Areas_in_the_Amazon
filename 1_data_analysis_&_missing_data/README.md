@@ -9,6 +9,10 @@
     </span>
 </p>
 
+
+| Getting Started | Features | Download |
+| === | === | === |
+
 # 1. Data Analysis and Missing Data
 
 The dataset includes 10 variables that capture various factors related to fires, land use, environmental conditions, and climate. It provides a spatial resolution of 500 meters, allowing a detailed analysis of the Amazon rainforest. These variables are measured on a monthly basis, covering the entire period from 2001 to 2020, and each variable contains a substantial monthly dataset, with around 26.8 million observations per month.
@@ -2071,6 +2075,3 @@ amaz.na.df
     </a>
     </span>
 </p>
-
-| Getting Started | Features | Download |
-| =============== | ======== | ======== |
