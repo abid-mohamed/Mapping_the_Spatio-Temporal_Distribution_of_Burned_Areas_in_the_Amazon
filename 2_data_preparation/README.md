@@ -1,10 +1,9 @@
-<table width="100%" cellspacing="0" cellpadding="0" border="0">
+<table style="width: 100%;" cellspacing="0" cellpadding="0">
   <tr>
-    <td align="left"><a href="link-to-previous-page">Previous Page</a></td>
-    <td align="right"><a href="link-to-next-page">Next Page</a></td>
+    <td style="text-align: left;"><a href="link-to-previous-page">Previous Page</a></td>
+    <td style="text-align: right;"><a href="link-to-next-page">Next Page</a></td>
   </tr>
 </table>
-
 
 
 # Data Preparation (Downsampling)
