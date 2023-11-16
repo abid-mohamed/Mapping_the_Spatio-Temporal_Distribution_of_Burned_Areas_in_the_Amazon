@@ -1,10 +1,5 @@
 # Mapping the Spatio-Temporal Distribution of Fires in the Amazon from 2001 to 2020: An Ensemble Modeling Approach
 
-<div id="textbox">
-  <p class="alignleft">Text on the left.</p>
-  <p class="alignright">Text on the right.</p>
-</div>
-
 ## Overview
 This project was conducted during my 6-month internship at King Abdullah University of Science and Technology (KAUST). It was supervised by Prof. Paula Moraga and Dr. Jonatan A. González.
 
@@ -104,3 +99,10 @@ These visualizations are powerful tools for understanding the dynamics and patte
     <em>1. Data Analysis & Missing Data >></em>
     </a>
 </p>
+
+<div id="textbox">
+  <p class="alignleft">Text on the left.</p>
+  <p class="alignright">Text on the right.</p>
+</div>
+
+<div style="clear: both;"></div>
