@@ -1,6 +1,6 @@
 <div align="center">
-  <a href="link-to-previous-page" style="margin-right: auto;">Previous Page</a>
-  <a href="link-to-next-page" style="margin-left: auto;">Next Page</a>
+  <a href="link-to-previous-page" style="margin-right: 200px;">Previous Page</a>&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="link-to-next-page" style="margin-left: 200px;">Next Page</a>
 </div>
 
 
