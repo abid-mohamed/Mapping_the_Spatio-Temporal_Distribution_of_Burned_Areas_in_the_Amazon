@@ -1,17 +1,7 @@
-<p style="text-align:left;">
-    <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon">
-    <em><< Main Page</em>
-    </a>
-    <span style="float:right;">
-    <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md">
-    <em>2. Data Preparation >></em>
-    </a>
-    </span>
-</p>
 
-
-| Getting Started | Features | Download |
-| === | === | === |
+[*<< Main Page*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon) 
+| 
+[*2. Data Preparation >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md)
 
 # 1. Data Analysis and Missing Data
 
@@ -2065,13 +2055,6 @@ amaz.na.df
   <img src="img/MissingData2.png"  width="49.5%" />
 </p>
 
-<p style="text-align:left;">
-    <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon">
-    <em><< Main Page</em>
-    </a>
-    <span style="float:right;">
-    <a href="https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md">
-    <em>2. Data Preparation >></em>
-    </a>
-    </span>
-</p>
+[*<< Main Page*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon) 
+|
+[*2. Data Preparation >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md)
