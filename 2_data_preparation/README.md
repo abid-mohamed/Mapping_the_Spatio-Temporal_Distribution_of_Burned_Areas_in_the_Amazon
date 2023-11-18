@@ -25,8 +25,9 @@ By identifying the maximum value of each cell across the 238-month dataset in th
 <img align="right" src="./img/2.ras1.png" width="20%" >
 
 ### 1.1. Cells with at Least One 'Fire' Event 
-This group encompasses cells that encountered at least one fire event during the 238-month study period.</br>
-Each cell within this group is characterized as either 'Water' (-2), 'No Fire' event (0), or 'Fire' event (1) over the course of the study.
+This group includes cells that encountered at least one fire event during the 238-month study period.</br>
+Each cell in this category is labeled as either 'Water' (-2), 'No Fire' event (0), or 'Fire' event (1) over the study duration.</br>
+For these cells, we retain the values of all variables, excluding any cells with missing data.
 
 <br clear="right"/>
 
@@ -36,17 +37,21 @@ Each cell within this group is characterized as either 'Water' (-2), 'No Fire' e
 Cells consistently identified as 'Water' regions are treated as missing data and excluded from our study.</br>
 Each cell in this group is exclusively labeled as 'Water' (-2) throughout the study period.
 
+Cells consistently identified as 'Water' regions are treated as missing data and excluded from our study.</br>
+Each cell in this group is exclusively labeled as 'Water' (-2) throughout the study period.
+
 <br clear="right"/>
 
 <img align="right" src="./img/2.ras0.png" width="20%" >
 
 ### 1.3. Cells with 'No Fire' Events
-This group comprises cells that did not experience any fire events during the study period.</br>
-These cells are further categorized into two subgroups:
+This group comprises cells that did not experience any fire events during the study period. These cells are further categorized into two subgroups:
 
 - **Cells are Always 'No Fire' Regions:** Each cell in this subgroup remains classified as 'No Fire' (0) consistently throughout the study period.
 
 - **Cells that can be 'Water/No Fire' Regions:** Cells in this subgroup fluctuate between 'Water' (-2) and 'No Fire' event (0) during the study period.
+
+For these two subgroups, we proceed with the data selection, as represented in the following graph:
 
 <br clear="right"/>
 
