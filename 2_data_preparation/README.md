@@ -28,7 +28,7 @@ By identifying the maximum value of each cell across the 238-month dataset in th
 This group encompasses cells that encountered at least one fire event during the 238-month study period.</br>
 Each cell within this group is characterized as either 'Water' (-2), 'No Fire' event (0), or 'Fire' event (1) over the course of the study.
 
-<br clear="right"/></br>
+<br clear="right"/>
 
 <img align="right" src="./img/2.ras-2.png" width="20%" >
 
@@ -36,7 +36,7 @@ Each cell within this group is characterized as either 'Water' (-2), 'No Fire' e
 Cells consistently identified as 'Water' regions are treated as missing data and excluded from our study.</br>
 Each cell in this group is exclusively labeled as 'Water' (-2) throughout the study period.
 
-<br clear="right"/></br>
+<br clear="right"/>
 
 <img align="right" src="./img/2.ras0.png" width="20%" >
 
