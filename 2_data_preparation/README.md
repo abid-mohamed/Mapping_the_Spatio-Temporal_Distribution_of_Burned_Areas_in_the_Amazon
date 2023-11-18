@@ -65,8 +65,7 @@ For these two subgroups, we proceed with the data selection, as represented in t
   <img src="./img/Img5.jpg"  width="100%" />
 </p>
 
-
-This approach resulted in a dataset containing approximately 550 million observations, covering a substantial portion of the Amazon rainforest. To facilitate further analysis and modeling, we normalized the data and divided it into 11 zones, each with roughly 50 million observations. The zone allocation and data distribution are visualized in Figure 7.
+This approach resulted in a dataset comprising around 550 million observations, providing comprehensive coverage of a significant portion of the Amazon rainforest. To enhance subsequent analysis and modeling, we normalized the data and partitioned it into 11 zones, each containing approximately 50 million observations. The allocation of zones and the distribution of data are visually represented in the following figure.
 
 
 <p align="center">
@@ -74,15 +73,6 @@ This approach resulted in a dataset containing approximately 550 million observa
 </p>
 
 This downsampling strategy not only addresses the class imbalance but also allows for efficient modeling and analysis, providing a balanced and representative dataset for our study.
-
-> **Note**
-> This is a note
-
-> **IMPORTANT**  
-> Crucial information necessary for users to succeed.
-
-> **WARNING**
-> This is a warning
 
 > [!NOTE]  
 > Highlights information that users should take into account, even when skimming.
