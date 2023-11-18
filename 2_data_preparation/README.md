@@ -22,29 +22,32 @@ By identifying the maximum value of each cell across the 238-month dataset in th
   <img src="./img/Img1.jpg"  width="100%" />
 </p>
 
+### 1.1. Cells with at Least One 'Fire' Event 
+
 <img align="right" src="./img/2.ras1.png" width="20%" >
 
-### 1.1. Cells with at Least One 'Fire' Event 
 This group includes cells that encountered at least one fire event during the 238-month study period.</br>
 Each cell in this category is labeled as either 'Water' (-2), 'No Fire' event (0), or 'Fire' event (1) over the study duration.</br>
 For these cells, we retain the values of all variables, excluding any cells with missing data.
 
-<br clear="right"/></br>
+<br clear="right"/>
+
+### 1.2. Cells are Always 'Water' Regions
 
 <img align="right" src="./img/2.ras-2.png" width="20%" >
 
-### 1.2. Cells are Always 'Water' Regions
 Cells consistently identified as 'Water' regions are treated as missing data and excluded from our study.</br>
 Each cell in this group is exclusively labeled as 'Water' (-2) throughout the study period.
 
 Cells consistently identified as 'Water' regions are treated as missing data and excluded from our study.</br>
 Each cell in this group is exclusively labeled as 'Water' (-2) throughout the study period.
 
-<br clear="right"/></br>
+<br clear="right"/>
+
+### 1.3. Cells with 'No Fire' Events
 
 <img align="right" src="./img/2.ras0.png" width="20%" >
 
-### 1.3. Cells with 'No Fire' Events
 This group comprises cells that did not experience any fire events during the study period. These cells are further categorized into two subgroups:
 
 - **Cells are Always 'No Fire' Regions:** Each cell in this subgroup remains classified as 'No Fire' (0) consistently throughout the study period.
