@@ -18,6 +18,10 @@ Our dataset features a spatial resolution of 500 meters, resulting in an extensi
 
 By identifying the maximum value of each cell across the 238-month dataset in the response variable *Burnt Area*, we can categorize cells into distinct groups.
 
+<p align="center">
+  <img src="./img/Img1.jpg"  width="100%" />
+</p>
+
 <img align="right" src="./img/2.ras1.png" width="20%" >
 
 ### 1.1. Cells with at Least One 'Fire' Event 
@@ -47,7 +51,6 @@ These cells are further categorized into two subgroups:
 <br clear="right"/>
 
 <p align="center">
-  <img src="./img/Img1.jpg"  width="100%" />
   <img src="./img/Img2.jpg"  width="100%" />
   <img src="./img/Img3.jpg"  width="100%" />
   <img src="./img/Img4.jpg"  width="100%" />
