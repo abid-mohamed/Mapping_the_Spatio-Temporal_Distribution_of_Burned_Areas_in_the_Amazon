@@ -6,7 +6,7 @@
 
 ## Select Data (Downsampling approach)
 
-Our dataset features a spatial resolution of 500 meters, resulting in an extensive amount of data. To address the class imbalance in the "Burnt Area" response variable, we employed a careful data preparation strategy known as downsampling. Here's how we balanced the response variable:
+Our dataset features a spatial resolution of 500 meters, resulting in an extensive amount of data. To address the class imbalance in the response variable *Burnt Area*, we employed a careful data preparation strategy known as downsampling. Here's how we balanced the response variable:
 
 1. For cells that experienced at least one fire event during the 238-month study period, we retained all observations for these cells, eliminating any missing data for the corresponding months.
 
@@ -15,6 +15,24 @@ Our dataset features a spatial resolution of 500 meters, resulting in an extensi
 <p align="center">
   <img src="../assets/Downsampling_approach.jpg" width="50%" />
 </p>
+
+By selecting the maximum value of each cell across the 238-months in the response variable  *Burnt Area*, we obtain the 3 categoricals of cells :
+
+
+1. Cells with at Least One 'Fire' Event: Each cell can be 'Water' (-2), 'No Fire' event (0) or 'Fire' event (1) during the period of time.
+
+<img align="right" src="./img/2.ras1.png" width="50%" >
+
+some text aligned to the right of the image
+
+<br clear="right"/>
+
+2. Cells are Always 'Water' Regions: Each cell can be only 'Water' (-2) during the period of time.
+
+3. Cells with 'No Fire' Events, These cells we divided them into 2 parts:
+  a. Cells are Always 'No Fire' Regions: Each cell are always 'No Fire' (0) during the period of time.
+
+  b. Cells that can be 'Water/No Fire' Regions: Each cell change between 'Water' (-2) and 'No Fire' event (0) during the period of time.
 
 <p align="center">
   <img src="./img/Img1.jpg"  width="100%" />
@@ -27,7 +45,10 @@ Our dataset features a spatial resolution of 500 meters, resulting in an extensi
 
 This approach resulted in a dataset containing approximately 550 million observations, covering a substantial portion of the Amazon rainforest. To facilitate further analysis and modeling, we normalized the data and divided it into 11 zones, each with roughly 50 million observations. The zone allocation and data distribution are visualized in Figure 7.
 
-[Insert Figure 7: Visualization of Data Zones and Distribution]
+
+<p align="center">
+  <img src="../assets/zones.png"  width="60%" />
+</p>
 
 This downsampling strategy not only addresses the class imbalance but also allows for efficient modeling and analysis, providing a balanced and representative dataset for our study.
 
