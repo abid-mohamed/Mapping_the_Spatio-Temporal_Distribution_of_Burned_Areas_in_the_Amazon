@@ -34,9 +34,9 @@ By selecting the maximum value of each cell across the 238-months in the respons
 
 3. Cells with 'No Fire' Events, These cells we divided them into 2 parts:
    
-  a. Cells are Always 'No Fire' Regions: Each cell are always 'No Fire' (0) during the period of time.
+    a. Cells are Always 'No Fire' Regions: Each cell are always 'No Fire' (0) during the period of time.
 
-  b. Cells that can be 'Water/No Fire' Regions: Each cell change between 'Water' (-2) and 'No Fire' event (0) during the period of time.
+    b. Cells that can be 'Water/No Fire' Regions: Each cell change between 'Water' (-2) and 'No Fire' event (0) during the period of time.
 
 <br clear="right"/>
 
