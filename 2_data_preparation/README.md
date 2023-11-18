@@ -29,7 +29,7 @@ This group includes cells that encountered at least one fire event during the 23
 Each cell in this category is labeled as either 'Water' (-2), 'No Fire' event (0), or 'Fire' event (1) over the study duration.</br>
 For these cells, we retain the values of all variables, excluding any cells with missing data.
 
-<br clear="right"/>
+<br clear="right"/></br>
 
 <img align="right" src="./img/2.ras-2.png" width="20%" >
 
@@ -40,7 +40,7 @@ Each cell in this group is exclusively labeled as 'Water' (-2) throughout the st
 Cells consistently identified as 'Water' regions are treated as missing data and excluded from our study.</br>
 Each cell in this group is exclusively labeled as 'Water' (-2) throughout the study period.
 
-<br clear="right"/>
+<br clear="right"/></br>
 
 <img align="right" src="./img/2.ras0.png" width="20%" >
 
@@ -53,7 +53,7 @@ This group comprises cells that did not experience any fire events during the st
 
 For these two subgroups, we proceed with the data selection, as represented in the following graph:
 
-<br clear="right"/>
+<br clear="right"/></br>
 
 <p align="center">
   <img src="./img/Img2.jpg"  width="100%" />
