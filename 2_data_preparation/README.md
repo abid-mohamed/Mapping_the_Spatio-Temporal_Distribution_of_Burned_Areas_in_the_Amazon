@@ -4,7 +4,7 @@
 
 # Data Preparation (Downsampling)
 
-## Select Data (Downsampling approach)
+## 1. Select Data (Downsampling approach)
 
 Our dataset features a spatial resolution of 500 meters, resulting in an extensive amount of data. To address the class imbalance in the response variable *Burnt Area*, we employed a careful data preparation strategy known as downsampling. Here's how we balanced the response variable:
 
@@ -16,11 +16,11 @@ Our dataset features a spatial resolution of 500 meters, resulting in an extensi
   <img src="../assets/Downsampling_approach.jpg" width="50%" />
 </p>
 
-By identifying the maximum value of each cell across the 238-month dataset in the response variable *Burnt Area*, we can categorize cells into distinct groups:
+By identifying the maximum value of each cell across the 238-month dataset in the response variable *Burnt Area*, we can categorize cells into distinct groups.
 
 <img align="right" src="./img/2.ras1.png" width="20%" >
 
-### 1. Cells with at Least One 'Fire' Event 
+### 1.1. Cells with at Least One 'Fire' Event 
 This group encompasses cells that encountered at least one fire event during the 238-month study period.</br>
 Each cell within this group is characterized as either 'Water' (-2), 'No Fire' event (0), or 'Fire' event (1) over the course of the study.
 
@@ -28,7 +28,7 @@ Each cell within this group is characterized as either 'Water' (-2), 'No Fire' e
 
 <img align="right" src="./img/2.ras-2.png" width="20%" >
 
-### 2. Cells are Always 'Water' Regions
+### 1.2. Cells are Always 'Water' Regions
 Cells consistently identified as 'Water' regions are treated as missing data and excluded from our study.</br>
 Each cell in this group is exclusively labeled as 'Water' (-2) throughout the study period.
 
@@ -36,15 +36,13 @@ Each cell in this group is exclusively labeled as 'Water' (-2) throughout the st
 
 <img align="right" src="./img/2.ras0.png" width="20%" >
 
-### 3. Cells with 'No Fire' Events
+### 1.3. Cells with 'No Fire' Events
 This group comprises cells that did not experience any fire events during the study period.</br>
 These cells are further categorized into two subgroups:
 
-#### Cells are Always 'No Fire' Regions
-Each cell in this subgroup remains classified as 'No Fire' (0) consistently throughout the study period.
+- **Cells are Always 'No Fire' Regions:** Each cell in this subgroup remains classified as 'No Fire' (0) consistently throughout the study period.
 
-#### Cells that can be 'Water/No Fire' Regions
-ells in this subgroup fluctuate between 'Water' (-2) and 'No Fire' event (0) during the study period.
+- **Cells that can be 'Water/No Fire' Regions:** Cells in this subgroup fluctuate between 'Water' (-2) and 'No Fire' event (0) during the study period.
 
 <br clear="right"/>
 
