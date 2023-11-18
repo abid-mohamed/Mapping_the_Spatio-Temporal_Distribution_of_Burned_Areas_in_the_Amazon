@@ -2,7 +2,7 @@
 | 
 [*3. Model Assessment, Ensemble Model, and Results >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/3_model_assessment_%26_ensemble_model/README.md)
 
-# Data Preparation (Downsampling)
+# Data Preparation
 
 ## 1. Select Data (Downsampling approach)
 
@@ -77,15 +77,6 @@ To enhance subsequent analysis and modeling, we normalized the data and partitio
 </p>
 
 This downsampling strategy not only addresses the class imbalance but also allows for efficient modeling and analysis, providing a balanced and representative dataset for our study.
-
-> [!NOTE]  
-> Highlights information that users should take into account, even when skimming.
-
-> [!IMPORTANT]  
-> Crucial information necessary for users to succeed.
-
-> [!WARNING]  
-> Critical content demanding immediate user attention due to potential risks.
 
 [*<< 1. Data Analysis & Missing Data*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/1_data_analysis_%26_missing_data/README.md) 
 | 
