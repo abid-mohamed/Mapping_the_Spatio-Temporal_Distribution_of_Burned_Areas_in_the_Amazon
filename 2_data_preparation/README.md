@@ -18,21 +18,31 @@ Our dataset features a spatial resolution of 500 meters, resulting in an extensi
 
 By selecting the maximum value of each cell across the 238-months in the response variable  *Burnt Area*, we obtain the 3 categoricals of cells :
 
+<img align="right" src="./img/2.ras1.png" width="20%" >
 
 1. Cells with at Least One 'Fire' Event: Each cell can be 'Water' (-2), 'No Fire' event (0) or 'Fire' event (1) during the period of time.
 
-<img align="right" src="./img/2.ras1.png" width="50%" >
-
-some text aligned to the right of the image
-
 <br clear="right"/>
+
+<img align="right" src="./img/2.ras-2.png" width="20%" >
 
 2. Cells are Always 'Water' Regions: Each cell can be only 'Water' (-2) during the period of time.
 
+<br clear="right"/>
+
+<img align="right" src="./img/2.ras0.png" width="20%" >
+
 3. Cells with 'No Fire' Events, These cells we divided them into 2 parts:
+   
   a. Cells are Always 'No Fire' Regions: Each cell are always 'No Fire' (0) during the period of time.
 
   b. Cells that can be 'Water/No Fire' Regions: Each cell change between 'Water' (-2) and 'No Fire' event (0) during the period of time.
+
+<br clear="right"/>
+
+
+
+
 
 <p align="center">
   <img src="./img/Img1.jpg"  width="100%" />
