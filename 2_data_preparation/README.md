@@ -65,7 +65,11 @@ For these two subgroups, we proceed with the data selection, as represented in t
   <img src="./img/Img5.jpg"  width="100%" />
 </p>
 
-This approach resulted in a dataset comprising around 550 million observations, providing comprehensive coverage of a significant portion of the Amazon rainforest. To enhance subsequent analysis and modeling, we normalized the data and partitioned it into 11 zones, each containing approximately 50 million observations. The allocation of zones and the distribution of data are visually represented in the following figure.
+This approach resulted in a dataset comprising around 550 million observations, providing comprehensive coverage of a significant portion of the Amazon rainforest. 
+
+## 2. Prepare Data
+
+To enhance subsequent analysis and modeling, we normalized the data and partitioned it into 11 zones, each containing approximately 50 million observations. The allocation of zones and the distribution of data are visually represented in the following figure.
 
 
 <p align="center">
