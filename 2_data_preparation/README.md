@@ -20,23 +20,23 @@ By selecting the maximum value of each cell across the 238-months in the respons
 
 <img align="right" src="./img/2.ras1.png" width="20%" >
 
-1. Cells with at Least One 'Fire' Event: Each cell can be 'Water' (-2), 'No Fire' event (0) or 'Fire' event (1) during the period of time.
+1. **Cells with at Least One 'Fire' Event**: Each cell can be 'Water' (-2), 'No Fire' event (0) or 'Fire' event (1) during the period of time.
 
 <br clear="right"/>
 
 <img align="right" src="./img/2.ras-2.png" width="20%" >
 
-2. Cells are Always 'Water' Regions: Each cell can be only 'Water' (-2) during the period of time.
+2. **Cells are Always 'Water' Regions**: Each cell can be only 'Water' (-2) during the period of time.
 
 <br clear="right"/>
 
 <img align="right" src="./img/2.ras0.png" width="20%" >
 
-3. Cells with 'No Fire' Events, These cells we divided them into 2 parts:
+3. **Cells with 'No Fire' Events:** These cells we divided them into 2 parts:
    
-    a. Cells are Always 'No Fire' Regions: Each cell are always 'No Fire' (0) during the period of time.
+    a. **Cells are Always 'No Fire' Regions:** Each cell are always 'No Fire' (0) during the period of time.
 
-    b. Cells that can be 'Water/No Fire' Regions: Each cell change between 'Water' (-2) and 'No Fire' event (0) during the period of time.
+    b. **Cells that can be 'Water/No Fire' Regions:** Each cell change between 'Water' (-2) and 'No Fire' event (0) during the period of time.
 
 <br clear="right"/>
 
