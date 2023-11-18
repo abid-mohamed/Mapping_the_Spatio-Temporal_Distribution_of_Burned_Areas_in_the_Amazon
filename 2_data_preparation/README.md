@@ -16,30 +16,30 @@ Our dataset features a spatial resolution of 500 meters, resulting in an extensi
   <img src="../assets/Downsampling_approach.jpg" width="50%" />
 </p>
 
-By selecting the maximum value of each cell across the 238-months in the response variable  *Burnt Area*, we can differentiate between the different group of cells, which are:
+By identifying the maximum value of each cell across the 238-month dataset in the response variable *Burnt Area*, we can categorize cells into distinct groups:
 
 <img align="right" src="./img/2.ras1.png" width="20%" >
 
-1. **Cells with at Least One 'Fire' Event**: This group of cells which experienced at least one fire event during the 238-month study period.</br>
-Each cell can be 'Water' (-2), 'No Fire' event (0) or 'Fire' event (1) during the study period.
+1. **Cells with at Least One 'Fire' Event**: This group encompasses cells that encountered at least one fire event during the 238-month study period.</br>
+Each cell within this group is characterized as either 'Water' (-2), 'No Fire' event (0), or 'Fire' event (1) over the course of the study.
 
 <br clear="right"/></br>
 
 <img align="right" src="./img/2.ras-2.png" width="20%" >
 
-2. **Cells are Always 'Water' Regions**: This group of cells which are consistently identified as 'Water' regions are treated as missing data and excluded from our study.</br>
-Each cell can be only 'Water' (-2) during the study period.
+2. **Cells are Always 'Water' Regions**: Cells consistently identified as 'Water' regions are treated as missing data and excluded from our study.</br>
+Each cell in this group is exclusively labeled as 'Water' (-2) throughout the study period.
 
 <br clear="right"/></br>
 
 <img align="right" src="./img/2.ras0.png" width="20%" >
 
-3. **Cells with 'No Fire' Events:** This group of cells which did not experience any fire events during the study period.</br>
-These cells we divided them into 2 parts:
-   
-    a. **Cells are Always 'No Fire' Regions:** Each cell are always 'No Fire' (0) during the period of time.
+3. **Cells with 'No Fire' Events:** This group comprises cells that did not experience any fire events during the study period.</br>
+These cells are further categorized into two subgroups:
 
-    b. **Cells that can be 'Water/No Fire' Regions:** Each cell change between 'Water' (-2) and 'No Fire' event (0) during the period of time.
+    a. **Cells are Always 'No Fire' Regions:** Each cell in this subgroup remains classified as 'No Fire' (0) consistently throughout the study period.
+
+    b. **Cells that can be 'Water/No Fire' Regions:** Cells in this subgroup fluctuate between 'Water' (-2) and 'No Fire' event (0) during the study period.
 
 <br clear="right"/>
 
