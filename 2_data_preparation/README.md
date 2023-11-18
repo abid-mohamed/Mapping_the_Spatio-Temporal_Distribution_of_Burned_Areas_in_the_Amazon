@@ -27,9 +27,9 @@ Each cell can be 'Water' (-2), 'No Fire' event (0) or 'Fire' event (1) during th
 
 <br clear="right"/>
 
----
-
 <img align="right" src="./img/2.ras-2.png" width="20%" >
+
+---
 
 2. **Cells are Always 'Water' Regions**: This group of cells which are consistently identified as 'Water' regions are treated as missing data and excluded from our study.
 Each cell can be only 'Water' (-2) during the study period.
