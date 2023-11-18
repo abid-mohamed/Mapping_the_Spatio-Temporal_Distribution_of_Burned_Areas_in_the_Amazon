@@ -18,7 +18,7 @@ Our dataset features a spatial resolution of 500 meters, resulting in an extensi
 
 By selecting the maximum value of each cell across the 238-months in the response variable  *Burnt Area*, we can differentiate between the different group of cells, which are:
 
----
+***
 
 <img align="right" src="./img/2.ras1.png" width="20%" >
 
