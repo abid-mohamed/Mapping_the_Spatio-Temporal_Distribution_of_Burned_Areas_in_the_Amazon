@@ -23,18 +23,18 @@ By selecting the maximum value of each cell across the 238-months in the respons
 1. **Cells with at Least One 'Fire' Event**: This group of cells which experienced at least one fire event during the 238-month study period.
 Each cell can be 'Water' (-2), 'No Fire' event (0) or 'Fire' event (1) during the study period.
 
-<br clear="right"/>
+<br clear="right"/></br>
 
 <img align="right" src="./img/2.ras-2.png" width="20%" >
 
-1. **Cells are Always 'Water' Regions**: This group of cells which are consistently identified as 'Water' regions are treated as missing data and excluded from our study.
+2. **Cells are Always 'Water' Regions**: This group of cells which are consistently identified as 'Water' regions are treated as missing data and excluded from our study.
 Each cell can be only 'Water' (-2) during the study period.
 
-<br clear="right"/>
+<br clear="right"/></br>
 
 <img align="right" src="./img/2.ras0.png" width="20%" >
 
-1. **Cells with 'No Fire' Events:** This group of cells which did not experience any fire events during the study period.
+3. **Cells with 'No Fire' Events:** This group of cells which did not experience any fire events during the study period.
 These cells we divided them into 2 parts:
    
     a. **Cells are Always 'No Fire' Regions:** Each cell are always 'No Fire' (0) during the period of time.
@@ -42,10 +42,6 @@ These cells we divided them into 2 parts:
     b. **Cells that can be 'Water/No Fire' Regions:** Each cell change between 'Water' (-2) and 'No Fire' event (0) during the period of time.
 
 <br clear="right"/>
-
-
-
-
 
 <p align="center">
   <img src="./img/Img1.jpg"  width="100%" />
