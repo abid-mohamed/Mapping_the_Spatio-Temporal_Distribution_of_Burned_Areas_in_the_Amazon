@@ -56,7 +56,7 @@ This group comprises cells that did not experience any fire events during the st
 
 For these two subgroups, we proceed with the data selection, as represented in the following graph:
 
-<br clear="right"/></br>
+<br clear="right"/>
 
 <p align="center">
   <img src="./img/Img2.jpg"  width="100%" />
