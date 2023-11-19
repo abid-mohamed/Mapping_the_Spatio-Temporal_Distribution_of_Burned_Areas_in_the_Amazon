@@ -71,7 +71,6 @@ This approach resulted in a dataset comprising around 550 million observations, 
 
 To enhance subsequent analysis and modeling, we normalized the data and partitioned it into 11 zones, each containing approximately 50 million observations. The allocation of zones and the distribution of data are visually represented in the following figure.
 
-
 <p align="center">
   <img src="../assets/zones.png"  width="60%" />
 </p>
