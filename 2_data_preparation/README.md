@@ -62,6 +62,8 @@ For these two subgroups, we proceed with the data selection, as represented in t
   <img src="./img/Img5.jpg"  width="100%" />
 </p>
 
+### 1.4 Merging Data
+
 By merging the data from "Cells with at Least One 'Fire' Event" and "Cells with 'No Fire' Events," we compile a dataset containing approximately 550 million observations, offering extensive coverage of a significant portion of the Amazon rainforest.
 
 ## 2. Prepare Data
