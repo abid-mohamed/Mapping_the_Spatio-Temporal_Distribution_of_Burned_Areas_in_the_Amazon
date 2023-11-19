@@ -39,9 +39,6 @@ For these cells, we retain the values of all variables, excluding any cells with
 Cells consistently identified as 'Water' regions are treated as missing data and excluded from our study.</br>
 Each cell in this group is exclusively labeled as 'Water' (-2) throughout the study period.
 
-Cells consistently identified as 'Water' regions are treated as missing data and excluded from our study.</br>
-Each cell in this group is exclusively labeled as 'Water' (-2) throughout the study period.
-
 <br clear="right"/>
 
 ### 1.3. Cells with 'No Fire' Events
@@ -65,7 +62,7 @@ For these two subgroups, we proceed with the data selection, as represented in t
   <img src="./img/Img5.jpg"  width="100%" />
 </p>
 
-This approach resulted in a dataset comprising around 550 million observations, providing comprehensive coverage of a significant portion of the Amazon rainforest. 
+By merging the data from "Cells with at Least One 'Fire' Event" and "Cells with 'No Fire' Events," we compile a dataset containing approximately 550 million observations, offering extensive coverage of a significant portion of the Amazon rainforest.
 
 ## 2. Prepare Data
 
