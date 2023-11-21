@@ -25,14 +25,12 @@ The dataset includes 10 variables that capture various factors related to fires,
 
 - **Air Temperature**: Represented in Kelvin, with values ranging from 268 to 307.
 
-<p align="center">
-  <img src="./img/perf.df_1.png"  width="40%" />
-  &emsp;&emsp;&emsp;
-  <img src="./img/perf.df_4.png"  width="40%" /></br>
-  <img src="./img/perf.df_2.png"  width="40%" />
-  &emsp;&emsp;&emsp;
-  <img src="./img/perf.df_5.png"  width="40%" /></br>
-  <img src="./img/perf.df_3.png"  width="40%" />
+<p>
+  &emsp;&emsp; <img src="./img/perf.df_1.png"  width="30%" />
+  <img src="./img/perf.df_2.png"  width="30%" />
+  <img src="./img/perf.df_3.png"  width="30%" />
+  &emsp;&emsp; <img src="./img/perf.df_4.png"  width="30%" />
+  <img src="./img/perf.df_5.png"  width="30%" />
   &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 </p>
 
