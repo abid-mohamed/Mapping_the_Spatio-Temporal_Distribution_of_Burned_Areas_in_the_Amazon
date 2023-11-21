@@ -31,7 +31,6 @@ The dataset includes 10 variables that capture various factors related to fires,
   <img src="./img/perf.df_3.png"  width="30%" />
   &emsp;&emsp; <img src="./img/perf.df_4.png"  width="30%" />
   <img src="./img/perf.df_5.png"  width="30%" />
-  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 </p>
 
 
