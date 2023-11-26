@@ -328,10 +328,11 @@ for (ras_id in amaz.burntArea.list){
 percentage.fires <- sum(freq.dt[, '1']) / sum(freq.dt[, c('0', '1')])
 percentage.fires
 ```
-```
-    [1] 0.00089637
-```
 </details>
+
+```
+  [1] 0.00089637
+```
 
 
 ### I.1.2. Missing Data
