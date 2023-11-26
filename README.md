@@ -69,7 +69,7 @@ Additionally, we create ensemble models for each zone, combining the four method
 
 ### IV. Maps and Time Trends of Fire Probability
 
-In the "Maps and Time Trends of Fire Probability" section, we present the results of our ensemble model's predictions for fire probabilities in the Amazon rainforest. This section includes two types of visualizations:
+In this section, we present the results of our ensemble model's predictions for fire probabilities in the Amazon rainforest. This section includes two types of visualizations:
 
 **Monthly Fire Probability Maps**
 
@@ -89,10 +89,4 @@ The boxplots presented below depict the time trend of fire probability during th
 
 These visualizations are powerful tools for understanding the dynamics and patterns of fires in the Amazon rainforest.
 
----
-
-> **Note** 
-> Each folder contains detailed documentation, code, and any additional resources relevant to the corresponding step. You can follow the links to explore each aspect of the project in more detail.
-
-
-| [*I. Data Analysis & Missing Data >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/1_data_analysis_%26_missing_data/README.md)
+>| [*I. Data Analysis & Missing Data >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/1_data_analysis_%26_missing_data/README.md)
