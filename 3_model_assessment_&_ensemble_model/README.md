@@ -25,10 +25,6 @@ The dataset includes 10 variables that capture various factors related to fires,
 
 - **Air Temperature**: Represented in Kelvin, with values ranging from 268 to 307.
 
-<p align="center">
-  <img src="./img/perf.df.jpg"  width="100%" />
-</p>
-
 
 
 [*<< 2. Data Preparation*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md) 

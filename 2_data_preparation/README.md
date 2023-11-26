@@ -2,9 +2,17 @@
 | 
 [*3. Model Assessment, Ensemble Model, and Results >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/3_model_assessment_%26_ensemble_model/README.md)
 
-# Data Preparation
+# II. Data Preparation
 
-## 1. Select Data (Downsampling approach)
+$\begin{itemize} 
+\item arabic, option par défaut en classe article, report et partie principale de la classe book ; numérotation en chiffres arabes : 1,2,3... 
+\item roman, option par défaut de la "frontmatter" de la classe book ; numérotation chiffres romains minuscules : i,ii,iii... 
+\item Roman : numérotation en chiffres romains majuscules : I,II,III... 
+\item alpha : numérotation alphabétique minuscule : a,b,c... 
+\item Alpha : numérotation alphabétique majuscule : A,B,C... 
+\end{itemize}$
+
+## 2.1. Select Data (Downsampling approach)
 
 Our dataset features a spatial resolution of 500 meters, resulting in an extensive amount of data. To address the class imbalance in the response variable *Burnt Area*, we employed a careful data preparation strategy known as downsampling. Here's how we balanced the response variable:
 
