@@ -1,18 +1,10 @@
-[*<< 1. Data Analysis & Missing Data*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/1_data_analysis_%26_missing_data/README.md) 
+[*<< I. Data Analysis & Missing Data*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/1_data_analysis_%26_missing_data/README.md) 
 | 
-[*3. Model Assessment, Ensemble Model, and Results >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/3_model_assessment_%26_ensemble_model/README.md)
+[*III. Model Assessment, Ensemble Model, and Results >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/3_model_assessment_%26_ensemble_model/README.md)
 
 # II. Data Preparation
 
-$\begin{itemize} 
-\item arabic, option par défaut en classe article, report et partie principale de la classe book ; numérotation en chiffres arabes : 1,2,3... 
-\item roman, option par défaut de la "frontmatter" de la classe book ; numérotation chiffres romains minuscules : i,ii,iii... 
-\item Roman : numérotation en chiffres romains majuscules : I,II,III... 
-\item alpha : numérotation alphabétique minuscule : a,b,c... 
-\item Alpha : numérotation alphabétique majuscule : A,B,C... 
-\end{itemize}$
-
-## 2.1. Select Data (Downsampling approach)
+## II.1. Select Data (Downsampling approach)
 
 Our dataset features a spatial resolution of 500 meters, resulting in an extensive amount of data. To address the class imbalance in the response variable *Burnt Area*, we employed a careful data preparation strategy known as downsampling. Here's how we balanced the response variable:
 
@@ -30,7 +22,7 @@ By identifying the maximum value of each cell across the 238-month dataset in th
   <img src="./img/Img1.jpg"  width="100%" />
 </p>
 
-### 1.1. Cells with at Least One 'Fire' Event 
+### II.1.1. Cells with at Least One 'Fire' Event 
 
 <img align="right" src="./img/2.ras1.png" width="20%" >
 
@@ -40,7 +32,7 @@ For these cells, we retain the values of all variables, excluding any cells with
 
 <br clear="right"/>
 
-### 1.2. Cells are Always 'Water' Regions
+### II.1.2. Cells are Always 'Water' Regions
 
 <img align="right" src="./img/2.ras-2.png" width="20%" >
 
@@ -49,7 +41,7 @@ Each cell in this group is exclusively labeled as 'Water' (-2) throughout the st
 
 <br clear="right"/>
 
-### 1.3. Cells with 'No Fire' Events
+### II.1.3. Cells with 'No Fire' Events
 
 <img align="right" src="./img/2.ras0.png" width="20%" >
 
@@ -70,11 +62,11 @@ For these two subgroups, we proceed with the data selection, as represented in t
   <img src="./img/Img5.jpg"  width="100%" />
 </p>
 
-### 1.4. Merging Data
+### II.1.4. Merging Data
 
 By merging the data from "Cells with at Least One 'Fire' Event" and "Cells with 'No Fire' Events", we compile a dataset containing approximately 550 million observations, offering extensive coverage of a significant portion of the Amazon rainforest.
 
-## 2. Prepare Data
+## II.2. Prepare Data
 
 To enhance subsequent analysis and modeling, we normalized the data and partitioned it into 11 zones, each containing approximately 50 million observations. The allocation of zones and the distribution of data are visually represented in the following figure.
 
@@ -84,6 +76,6 @@ To enhance subsequent analysis and modeling, we normalized the data and partitio
 
 This downsampling strategy not only addresses the class imbalance but also allows for efficient modeling and analysis, providing a balanced and representative dataset for our study.
 
-[*<< 1. Data Analysis & Missing Data*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/1_data_analysis_%26_missing_data/README.md) 
+[*<< I. Data Analysis & Missing Data*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/1_data_analysis_%26_missing_data/README.md) 
 | 
-[*3. Model Assessment, Ensemble Model, and Results >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/3_model_assessment_%26_ensemble_model/README.md)
+[*III. Model Assessment, Ensemble Model, and Results >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/3_model_assessment_%26_ensemble_model/README.md)

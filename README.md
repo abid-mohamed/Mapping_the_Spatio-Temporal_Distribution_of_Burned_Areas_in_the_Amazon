@@ -16,15 +16,15 @@ These packages facilitated various aspects of our project
 
 This project is structured into distinct steps to facilitate understanding and organization. Each step corresponds to a specific aspect of the analysis and modeling process. You can navigate through the folders corresponding to each step for detailed code and documentation.
 
-### 1. Data Analysis and Missing Data
+### I. Data Analysis and Missing Data
 
-#### 1.1. Data Analysis 
+#### I.1. Data Analysis 
 
 In this step, we perform an initial data analysis to enhance our understanding of the dataset. This involves exploring the dataset's structure, visualizing important variables, and detecting any missing or unusual data points.
 
 The dataset comprises 10 variables that encompass essential information related to fires, land use, environmental conditions, and climate factors. Operating at a spatial resolution of 500 meters, it consists of approximately 26.8 million cells for each variable within every monthly dataset, enabling detailed analyses of the Amazon rainforest. These variables are recorded on a monthly basis, covering the extensive period from 2001 to 2020.
 
-#### 1.2. Missing Data
+#### I.2. Missing Data
 
 We focus on addressing the significant challenge of identifying and managing missing data within our dataset. We discovered that missing data is predominantly concentrated in two areas:
 
@@ -37,7 +37,7 @@ For the remaining covariates, missing data is minimal, consistent across months,
 > [!NOTE]
 > Additional information :point_right: [*1. Data Analysis & Missing Data*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/1_data_analysis_%26_missing_data/README.md)
 
-### 2. Data Preparation (Downsampling strategy)
+### II. Data Preparation (Downsampling strategy)
 
 In this step, we address the class imbalance issue identified in the Data Analysis step. To reduce the data imbalance, we employ a down-sampling strategy, which involves the following two key actions:
 
@@ -58,7 +58,7 @@ As the downsampling process still results in a substantial dataset of approximat
 > [!NOTE]
 > Additional information :point_right: [*2. Data Preparation*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md)
 
-### 3. Model Assessment, Ensemble Model, and Results
+### III. Model Assessment, Ensemble Model, and Results
 
 In the Model Assessment, Ensemble Model, and Results step, we evaluate the performance of various machine learning models, including Distributed Random Forest (DRF), Generalized Linear Models (GLM), Gradient Boosting Machine (GBM), and eXtreme Gradient Boosting (XGB). Performance assessment is based on two key metrics: AUC (Area Under the Receiver Operating Characteristic Curve) and AUCPR (Area Under the Precision-Recall Curve). These metrics are computed using the $\texttt{h2o}$ package.
 
@@ -67,7 +67,7 @@ Additionally, we create ensemble models for each zone, combining the four method
 > [!NOTE]
 > Additional information :point_right: [*3. Model Assessment*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/3_model_assessment_&_ensemble_model/README.md)
 
-### 4. Maps and Time Trends of Fire Probability
+### IV. Maps and Time Trends of Fire Probability
 
 In the "Maps and Time Trends of Fire Probability" section, we present the results of our ensemble model's predictions for fire probabilities in the Amazon rainforest. This section includes two types of visualizations:
 

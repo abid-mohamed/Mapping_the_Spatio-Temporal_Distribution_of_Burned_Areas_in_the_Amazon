@@ -1,9 +1,9 @@
 
 [*<< Main Page*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon) 
 | 
-[*2. Data Preparation >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md)
+[*II. Data Preparation >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md)
 
-# 1. Data Analysis and Missing Data
+# I. Data Analysis and Missing Data
 
 The dataset includes 10 variables that capture various factors related to fires, land use, environmental conditions, and climate. It provides a spatial resolution of 500 meters, allowing a detailed analysis of the Amazon rainforest. These variables are measured on a monthly basis, covering the entire period from 2001 to 2020, and each variable contains a substantial monthly dataset, with around 26.8 million observations per month.
 
@@ -129,9 +129,9 @@ amaz.basin.shp <- st_read(
 
 Now, let's take a closer look at each variable:
 
-## 1.1. Burnt Area
+## I.1. Burnt Area
 
-### Data Analysis
+### I.1.1. Data Analysis
 
 _Burnt Area_ Represents the extent of burned areas in the Amazon rainforest, categorized as burnt (1), unburnt (0), missing (-1), or water (-2).
 
@@ -334,7 +334,7 @@ percentage.fires
 </details>
 
 
-### Missing Data
+### I.1.2. Missing Data
 
 <details>
     <summary>
@@ -377,9 +377,9 @@ burntArea.freq.na
   <img src="img/1.4.ba.na3.png"  width="49.5%" />
 </p>
 
-## 1.2. Land Cover
+## I.2. Land Cover
 
-### Data Analysis
+### I.2.1. Data Analysis
 
 _Land Cover_ is a categorical variable with 11 classes, providing information on different land cover types such as water, urban, forest, grassland, and more.
 
@@ -495,7 +495,7 @@ p.lc
   <img src="img/2.2.lc.png"  width="60%" />
 </p>
 
-### Missing Data
+### I.2.2. Missing Data
 
 <details>
     <summary>
@@ -535,9 +535,9 @@ landCover.freq.na
   <img src="img/2.3.lc.png"  width="60%" />
 </p>
 
-## 1.3. Precipitation
+## I.3. Precipitation
 
-### Data Analysis
+### I.3.1. Data Analysis
 
 _Precipitation_ is measured in millimeters per hour, with a range between 0 and 3300.
 
@@ -653,7 +653,7 @@ p.prec
   <img src="img/3.2.prec.png"  width="60%" />
 </p>
 
-### Missing Data
+### I.3.2. Missing Data
 
 <details>
     <summary>
@@ -693,7 +693,7 @@ precipitation.freq.na
   <img src="img/3.3.prec.png"  width="60%" />
 </p>
 
-### Zoom plot of missing data
+#### *Plot of missing data*
 
 <details>
     <summary>
@@ -729,9 +729,9 @@ p.prec.na
   <img src="img/3.4.prec.png"  width="60%" />
 </p>
 
-## 1.4. Soil Moisture
+## I.4. Soil Moisture
 
-### Data Analysis
+### I.4.1. Data Analysis
 
 _Soil Moisture_ is measured in millimeters, with missing values marked as -9.99e+08, and a range between 0 and 4291.
 
@@ -890,7 +890,7 @@ p.soilm
   <img src="img/4.4.soilm.png"  width="60%" />
 </p>
 
-### Missing Data
+### I.4.2. Missing Data
 
 <details>
     <summary>
@@ -932,7 +932,7 @@ soilmoisture.freq.na
   <img src="img/4.5.soilm.png"  width="60%" />
 </p>
 
-#### Plot Missing Data
+#### *Plot of Missing Data*
 
 <details>
     <summary>
@@ -963,9 +963,9 @@ p.soilm.na
   <img src="img/4.6.soilm.png"  width="70%" />
 </p>
 
-## 1.5. Elevation
+## I.5. Elevation
 
-### Data Analysis
+### I.5.1. Data Analysis
 
 _Elevation_ is measured in meters, with a range between -85 and 6471.
 
@@ -1046,7 +1046,7 @@ p.elev
   <img src="img/5.2.elev.png"  width="60%" />
 </p>
 
-### Missing Data
+### I.5.2. Missing Data
 
 <details>
     <summary>
@@ -1066,9 +1066,9 @@ elevation.freq.na
   <img src="img/5.3.elev.png"  width="60%" />
 </p>
 
-## 1.6. Land Surface Temperature
+## I.6. Land Surface Temperature
 
-### Data Analysis
+### I.6.1. Data Analysis
 
 _Land Surface Temperature_ is represented in Kelvin, with values adjusted by a scale factor of 0.02. Different months have varying missing data.
 
@@ -1180,7 +1180,7 @@ p.lst
   <img src="img/6.2.lst.png"  width="60%" />
 </p>
 
-### Missing Data
+### I.6.2. Missing Data
 
 <details>
     <summary>
@@ -1223,7 +1223,7 @@ landsurftemp.freq.na
   <img src="img/6.3.lst.png"  width="60%" />
 </p>
 
-#### Plot Missing Data
+#### *Plot of Missing Data*
 
 <details>
     <summary>
@@ -1259,9 +1259,9 @@ p.lst.4na
   <img src="img/6.4-1.lst.png"  width="70%" />
 </p>
 
-## 1.7. Specific Humidity
+## I.7. Specific Humidity
 
-### Data Analysis
+### I.7.1. Data Analysis
 
 _Specific Humidity_ is represented as kg/kg, indicating the ratio of kilograms of water (moisture) per kilogram of air. It ranges from 9.59e-04 to 2.15e-02.
 
@@ -1374,7 +1374,7 @@ p.hum
   <img src="img/7.2.hum.png"  width="70%" />
 </p>
 
-### Missing Data
+### I.7.2. Missing Data
 
 <details>
     <summary>
@@ -1414,7 +1414,7 @@ humidity.freq.na
   <img src="img/7.3.hum.png"  width="70%" />
 </p>
 
-#### Plot Missing Data
+#### *Plot of Missing Data*
 
 <details>
     <summary>
@@ -1447,9 +1447,9 @@ p.hum.na
   <img src="img/7.4.hum.png"  width="70%" />
 </p>
 
-## 1.8. Evapotranspiration
+## I.8. Evapotranspiration
 
-### Data Analysis
+### I.8.1. Data Analysis
 
 _Evapotranspiration_ is measured in kg/m2s, with values ranging between -2.02e-07 and 9.69e-05.
 
@@ -1565,7 +1565,7 @@ p.evapot
   <img src="img/8.2.evapot.png"  width="70%" />
 </p>
 
-### Missing Data
+### I.8.2. Missing Data
 
 <details>
     <summary>
@@ -1606,7 +1606,7 @@ evapotranspiration.freq.na
   <img src="img/8.3.evapot.png"  width="70%" />
 </p>
 
-#### Plot Missing Data
+#### *Plot of Missing Data*
 
 <details>
     <summary>
@@ -1639,9 +1639,9 @@ p.evapot.na
   <img src="img/8.4.evapot.png"  width="70%" />
 </p>
 
-## 1.9. Wind Speed
+## I.9. Wind Speed
 
-### Data Analysis
+### I.9.1. Data Analysis
 
 _Wind Speed_ is measured in m/s, with values between 0.86 and 9.85.
 
@@ -1758,7 +1758,7 @@ p.wind
   <img src="img/9.2.wind.png"  width="70%" />
 </p>
 
-### Missing Data
+### I.9.2. Missing Data
 
 <details>
     <summary>
@@ -1798,7 +1798,7 @@ wind.freq.na
   <img src="img/9.3.wind.png"  width="70%" />
 </p>
 
-#### Plot Missing Data
+#### *Plot of Missing Data*
 
 <details>
     <summary>
@@ -1833,9 +1833,9 @@ p.wind.na
   <img src="img/9.4.wind.png"  width="70%" />
 </p>
 
-## 1.10. Air Temperature
+## I.10. Air Temperature
 
-### Data Analysis
+### I.10.1. Data Analysis
 
 _Air Temperature_ is represented in Kelvin, with values ranging from 268 to 307.
 
@@ -1948,7 +1948,7 @@ p.airtemp
   <img src="img/10.2.airtemp.png"  width="70%" />
 </p>
 
-### Missing Data
+### I.10.2. Missing Data
 
 <details>
     <summary>
@@ -1988,7 +1988,7 @@ airtemp.freq.na
   <img src="img/10.3.airtemp.png"  width="70%" />
 </p>
 
-#### Plot Missing Data
+#### *Plot of Missing Data*
 
 <details>
     <summary>
@@ -2021,7 +2021,7 @@ p.airtemp.na
   <img src="img/10.4.airtemp.png"  width="70%" />
 </p>
 
-## 1.11. Merge all dataframes of missing values.
+## I.11. Merge all dataframes of missing values.
 
 <details>
     <summary>
@@ -2057,4 +2057,4 @@ amaz.na.df
 
 [*<< Main Page*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon) 
 |
-[*2. Data Preparation >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md)
+[*II. Data Preparation >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md)
