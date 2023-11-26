@@ -2,6 +2,8 @@
 | 
 [*III. Model Assessment, Ensemble Model, and Results >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/3_model_assessment_%26_ensemble_model/README.md)
 
+___
+
 # II. Data Preparation
 
 ## II.1. Select Data (Downsampling approach)
