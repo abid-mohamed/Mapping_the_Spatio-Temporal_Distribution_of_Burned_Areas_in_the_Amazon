@@ -89,4 +89,4 @@ The boxplots presented below depict the time trend of fire probability during th
 
 These visualizations are powerful tools for understanding the dynamics and patterns of fires in the Amazon rainforest.
 
->| [*I. Data Analysis & Missing Data >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/1_data_analysis_%26_missing_data/README.md)
+| [*I. Data Analysis & Missing Data >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/1_data_analysis_%26_missing_data/README.md)
