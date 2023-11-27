@@ -55,7 +55,7 @@ renameLayers <- function(dataRast, fileStart, prefix){
   return(dataRast)
 }
 
-#---- Function to plot ----
+#---- Plot Function ----
 myPlot <- function(
   rast, 
   title=NULL, 
