@@ -2,14 +2,30 @@
 | 
 [*IV. Maps and Time Trends of Fire Probability >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/README.md#iv-maps-and-time-trends-of-fire-probability)
 
-# III. Model Assessment, Ensemble Model, and Results
+# III. Models, Ensemble Model and Methods Assessment
 
-## III.1. Model Assessment
+## III.1. Hyperparameters Tuning
 
+## III.2. Models
 
-## III.2. Ensemble Model and Performance
+### Gradient Boosting Machine (GBM)
 
-### Compute beta
+### Distributed Random Forest (DRF)
+
+### Generalized Linear Models (GLM)
+
+### Extreme Gradient Boosting (XGBoost)
+
+### Methods Assessment
+
+## III.3. Ensemble Model and Performance
+
+### Compute the weigh of each model
+
+### Ensemble Model
+
+### Ensemble Assessment
+
 
 
 [*<< II. Data Preparation*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md) 
