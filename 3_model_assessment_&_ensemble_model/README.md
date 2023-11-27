@@ -16,15 +16,13 @@
 
 ### Extreme Gradient Boosting (XGBoost)
 
-### Methods Assessment
-
 ## III.3. Ensemble Model and Performance
 
 ### Compute the weigh of each model
 
 ### Ensemble Model
 
-### Ensemble Assessment
+## III.4. Methods Assessment
 
 
 
