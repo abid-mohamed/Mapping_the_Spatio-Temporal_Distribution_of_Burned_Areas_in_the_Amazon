@@ -81,7 +81,7 @@ This downsampling strategy not only addresses the class imbalance but also allow
 ### II.2.2. Split data to training and testing data by zone
 
 As we have unbalanced data for the response variable *Burnt Area*, it's important that the training data and the testing data they have similar proportion of cells containing (0) and cells containing (1).
-For this I used the function `initial_split()` form the package $\texttt{rsample}$ by specifiying the option <code>strata = BurntArea</code>
+For this I used the function `initial_split()` form the package $\texttt{rsample}$ by specifiying the option `strata = BurntArea`
 
 [*<< I. Data Analysis & Missing Data*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/1_data_analysis_%26_missing_data/README.md) 
 | 
