@@ -1,6 +1,6 @@
 
 [*<< Main Page*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon) 
-| 
+&emsp; | &emsp; 
 [*II. Data Preparation >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md)
 
 # I. Data Analysis and Missing Data
@@ -2057,5 +2057,5 @@ amaz.na.df
 </p>
 
 [*<< Main Page*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon) 
-|
+&emsp; | &emsp; 
 [*II. Data Preparation >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md)
