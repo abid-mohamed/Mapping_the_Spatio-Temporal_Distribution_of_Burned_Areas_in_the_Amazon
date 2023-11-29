@@ -71,150 +71,149 @@ The table below presents the calculated performance metrics for various models a
     <th>AUCPR</th>
   </tr>
   <tr align="center">
-    <td>1</td>
-    <td>0.862</td>
-    <td>0.061</td>
-    <td>0.864</td>
-    <td>0.061</td>
-    <td>0.769</td>
-    <td>0.024</td>
-    <td>0.861</td>
-    <td>0.074</td>
-    <td>0.875</td>
-    <td>0.088</td>
+    <td><small>1</small></td>
+    <td><small>0.862</small></td>
+    <td><small>0.061</small></td>
+    <td><small>0.864</small></td>
+    <td><small>0.061</small></td>
+    <td><small>0.769</small></td>
+    <td><small>0.024</small></td>
+    <td><small>0.861</small></td>
+    <td><small>0.074</small></td>
+    <td><small>0.875</small></td>
+    <td><small>0.088</small></td>
   </tr>
   <tr align="center">
-    <td>2</td>
-    <td>0.710</td>
-    <td>0.027</td>
-    <td>0.846</td>
-    <td>0.041</td>
-    <td>0.723</td>
-    <td>0.027</td>
-    <td>0.849</td>
-    <td>0.061</td>
-    <td>0.839</td>
-    <td>0.038</td>
+    <td><small>2</small></td>
+    <td><small>0.710</small></td>
+    <td><small>0.027</small></td>
+    <td><small>0.846</small></td>
+    <td><small>0.041</small></td>
+    <td><small>0.723</small></td>
+    <td><small>0.027</small></td>
+    <td><small>0.849</small></td>
+    <td><small>0.061</small></td>
+    <td><small>0.839</small></td>
+    <td><small>0.038</small></td>
   </tr>
   <tr align="center">
-    <td>3</td>
-    <td>0.864</td>
-    <td>0.057</td>
-    <td>0.859</td>
-    <td>0.055</td>
-    <td>0.804</td>
-    <td>0.038</td>
-    <td>0.863</td>
-    <td>0.078</td>
-    <td>0.945</td>
-    <td>0.158</td>
+    <td><small>3</small></td>
+    <td><small>0.864</small></td>
+    <td><small>0.057</small></td>
+    <td><small>0.859</small></td>
+    <td><small>0.055</small></td>
+    <td><small>0.804</small></td>
+    <td><small>0.038</small></td>
+    <td><small>0.863</small></td>
+    <td><small>0.078</small></td>
+    <td><small>0.945</small></td>
+    <td><small>0.158</small></td>
   </tr>
   <tr align="center">
-    <td>4</td>
-    <td>0.793</td>
-    <td>0.061</td>
-    <td>0.850</td>
-    <td>0.051</td>
-    <td>0.787</td>
-    <td>0.029</td>
-    <td>0.834</td>
-    <td>0.077</td>
-    <td>0.922</td>
-    <td>0.156</td>
+    <td><small>4</small></td>
+    <td><small>0.793</small></td>
+    <td><small>0.061</small></td>
+    <td><small>0.850</small></td>
+    <td><small>0.051</small></td>
+    <td><small>0.787</small></td>
+    <td><small>0.029</small></td>
+    <td><small>0.834</small></td>
+    <td><small>0.077</small></td>
+    <td><small>0.922</small></td>
+    <td><small>0.156</small></td>
   </tr>
   <tr align="center">
-    <td>5</td>
-    <td>0.839</td>
-    <td>0.057</td>
-    <td>0.855</td>
-    <td>0.048</td>
-    <td>0.773</td>
-    <td>0.027</td>
-    <td>0.839</td>
-    <td>0.075</td>
-    <td>0.907</td>
-    <td>0.163</td>
+    <td><small>5</small></td>
+    <td><small>0.839</small></td>
+    <td><small>0.057</small></td>
+    <td><small>0.855</small></td>
+    <td><small>0.048</small></td>
+    <td><small>0.773</small></td>
+    <td><small>0.027</small></td>
+    <td><small>0.839</small></td>
+    <td><small>0.075</small></td>
+    <td><small>0.907</small></td>
+    <td><small>0.163</small></td>
   </tr>
   <tr align="center">
-    <td>6</td>
-    <td>0.825</td>
-    <td>0.057</td>
-    <td>0.856</td>
-    <td>0.051</td>
-    <td>0.776</td>
-    <td>0.030</td>
-    <td>0.833</td>
-    <td>0.080</td>
-    <td>0.925</td>
-    <td>0.168</td>
+    <td><small>6</small></td>
+    <td><small>0.825</small></td>
+    <td><small>0.057</small></td>
+    <td><small>0.856</small></td>
+    <td><small>0.051</small></td>
+    <td><small>0.776</small></td>
+    <td><small>0.030</small></td>
+    <td><small>0.833</small></td>
+    <td><small>0.080</small></td>
+    <td><small>0.925</small></td>
+    <td><small>0.168</small></td>
   </tr>
   <tr align="center">
-    <td>7</td>
-    <td>0.767</td>
-    <td>0.040</td>
-    <td>0.817</td>
-    <td>0.047</td>
-    <td>0.744</td>
-    <td>0.021</td>
-    <td>0.818</td>
-    <td>0.063</td>
-    <td>0.806</td>
-    <td>0.035</td>
+    <td><small>7</small></td>
+    <td><small>0.767</small></td>
+    <td><small>0.040</small></td>
+    <td><small>0.817</small></td>
+    <td><small>0.047</small></td>
+    <td><small>0.744</small></td>
+    <td><small>0.021</small></td>
+    <td><small>0.818</small></td>
+    <td><small>0.063</small></td>
+    <td><small>0.806</small></td>
+    <td><small>0.035</small></td>
   </tr>
   <tr align="center">
-    <td>8</td>
-    <td>0.798</td>
-    <td>0.030</td>
-    <td>0.824</td>
-    <td>0.035</td>
-    <td>0.749</td>
-    <td>0.024</td>
-    <td>0.833</td>
-    <td>0.075</td>
-    <td>0.885</td>
-    <td>0.157</td>
+    <td><small>8</small></td>
+    <td><small>0.798</small></td>
+    <td><small>0.030</small></td>
+    <td><small>0.824</small></td>
+    <td><small>0.035</small></td>
+    <td><small>0.749</small></td>
+    <td><small>0.024</small></td>
+    <td><small>0.833</small></td>
+    <td><small>0.075</small></td>
+    <td><small>0.885</small></td>
+    <td><small>0.157</small></td>
   </tr>
   <tr align="center">
-    <td>9</td>
-    <td>0.798</td>
-    <td>0.037</td>
-    <td>0.827</td>
-    <td>0.036</td>
-    <td>0.765</td>
-    <td>0.026</td>
-    <td>0.829</td>
-    <td>0.047</td>
-    <td>0.904</td>
-    <td>0.081</td>
+    <td><small>9</small></td>
+    <td><small>0.798</small></td>
+    <td><small>0.037</small></td>
+    <td><small>0.827</small></td>
+    <td><small>0.036</small></td>
+    <td><small>0.765</small></td>
+    <td><small>0.026</small></td>
+    <td><small>0.829</small></td>
+    <td><small>0.047</small></td>
+    <td><small>0.904</small></td>
+    <td><small>0.081</small></td>
   </tr>
   <tr align="center">
-    <td>10</td>
-    <td>0.721</td>
-    <td>0.019</td>
-    <td>0.857</td>
-    <td>0.051</td>
-    <td>0.788</td>
-    <td>0.032</td>
-    <td>0.849</td>
-    <td>0.067</td>
-    <td>0.927</td>
-    <td>0.108</td>
+    <td><small>10</small></td>
+    <td><small>0.721</small></td>
+    <td><small>0.019</small></td>
+    <td><small>0.857</small></td>
+    <td><small>0.051</small></td>
+    <td><small>0.788</small></td>
+    <td><small>0.032</small></td>
+    <td><small>0.849</small></td>
+    <td><small>0.067</small></td>
+    <td><small>0.927</small></td>
+    <td><small>0.108</small></td>
   </tr>
   <tr align="center">
-    <td>11</td>
-    <td>0.797</td>
-    <td>0.047</td>
-    <td>0.841</td>
-    <td>0.056</td>
-    <td>0.713</td>
-    <td>0.026</td>
-    <td>0.826</td>
-    <td>0.081</td>
-    <td>0.959</td>
-    <td>0.299</td>
+    <td><small>11</small></td>
+    <td><small>0.797</small></td>
+    <td><small>0.047</small></td>
+    <td><small>0.841</small></td>
+    <td><small>0.056</small></td>
+    <td><small>0.713</small></td>
+    <td><small>0.026</small></td>
+    <td><small>0.826</small></td>
+    <td><small>0.081</small></td>
+    <td><small>0.959</small></td>
+    <td><small>0.299</small></td>
   </tr>
 </table>
-
 
 
 
@@ -241,149 +240,151 @@ The table below presents the calculated performance metrics for various models a
     <th>AUCPR</th>
   </tr>
   <tr align="center">
-    <td style="font-size:12px">1</td>
-    <td style="font-size:12px">0.862</td>
-    <td style="font-size:12px">0.061</td>
-    <td style="font-size:12px">0.864</td>
-    <td style="font-size:12px">0.061</td>
-    <td style="font-size:12px">0.769</td>
-    <td style="font-size:12px">0.024</td>
-    <td style="font-size:12px">0.861</td>
-    <td style="font-size:12px">0.074</td>
-    <td style="font-size:12px">0.875</td>
-    <td style="font-size:12px">0.088</td>
+    <td><small>1</small></td>
+    <td><small>0.862</small></td>
+    <td><small>0.061</small></td>
+    <td><small>0.864</small></td>
+    <td><small>0.061</small></td>
+    <td><small>0.769</small></td>
+    <td><small>0.024</small></td>
+    <td><small>0.861</small></td>
+    <td><small>0.074</small></td>
+    <td><small>0.875</small></td>
+    <td><small>0.088</small></td>
   </tr>
   <tr align="center">
-    <td style="font-size:12px">2</td>
-    <td style="font-size:12px">0.710</td>
-    <td style="font-size:12px">0.027</td>
-    <td style="font-size:12px">0.846</td>
-    <td style="font-size:12px">0.041</td>
-    <td style="font-size:12px">0.723</td>
-    <td style="font-size:12px">0.027</td>
-    <td style="font-size:12px">0.849</td>
-    <td style="font-size:12px">0.061</td>
-    <td style="font-size:12px">0.839</td>
-    <td style="font-size:12px">0.038</td>
+    <td><small>2</small></td>
+    <td><small>0.710</small></td>
+    <td><small>0.027</small></td>
+    <td><small>0.846</small></td>
+    <td><small>0.041</small></td>
+    <td><small>0.723</small></td>
+    <td><small>0.027</small></td>
+    <td><small>0.849</small></td>
+    <td><small>0.061</small></td>
+    <td><small>0.839</small></td>
+    <td><small>0.038</small></td>
   </tr>
   <tr align="center">
-    <td style="font-size:12px">3</td>
-    <td style="font-size:12px">0.864</td>
-    <td style="font-size:12px">0.057</td>
-    <td style="font-size:12px">0.859</td>
-    <td style="font-size:12px">0.055</td>
-    <td style="font-size:12px">0.804</td>
-    <td style="font-size:12px">0.038</td>
-    <td style="font-size:12px">0.863</td>
-    <td style="font-size:12px">0.078</td>
-    <td style="font-size:12px">0.945</td>
-    <td style="font-size:12px">0.158</td>
+    <td><small>3</small></td>
+    <td><small>0.864</small></td>
+    <td><small>0.057</small></td>
+    <td><small>0.859</small></td>
+    <td><small>0.055</small></td>
+    <td><small>0.804</small></td>
+    <td><small>0.038</small></td>
+    <td><small>0.863</small></td>
+    <td><small>0.078</small></td>
+    <td><small>0.945</small></td>
+    <td><small>0.158</small></td>
   </tr>
   <tr align="center">
-    <td style="font-size:12px">4</td>
-    <td style="font-size:12px">0.793</td>
-    <td style="font-size:12px">0.061</td>
-    <td style="font-size:12px">0.850</td>
-    <td style="font-size:12px">0.051</td>
-    <td style="font-size:12px">0.787</td>
-    <td style="font-size:12px">0.029</td>
-    <td style="font-size:12px">0.834</td>
-    <td style="font-size:12px">0.077</td>
-    <td style="font-size:12px">0.922</td>
-    <td style="font-size:12px">0.156</td>
+    <td><small>4</small></td>
+    <td><small>0.793</small></td>
+    <td><small>0.061</small></td>
+    <td><small>0.850</small></td>
+    <td><small>0.051</small></td>
+    <td><small>0.787</small></td>
+    <td><small>0.029</small></td>
+    <td><small>0.834</small></td>
+    <td><small>0.077</small></td>
+    <td><small>0.922</small></td>
+    <td><small>0.156</small></td>
   </tr>
   <tr align="center">
-    <td style="font-size:12px">5</td>
-    <td style="font-size:12px">0.839</td>
-    <td style="font-size:12px">0.057</td>
-    <td style="font-size:12px">0.855</td>
-    <td style="font-size:12px">0.048</td>
-    <td style="font-size:12px">0.773</td>
-    <td style="font-size:12px">0.027</td>
-    <td style="font-size:12px">0.839</td>
-    <td style="font-size:12px">0.075</td>
-    <td style="font-size:12px">0.907</td>
-    <td style="font-size:12px">0.163</td>
+    <td><small>5</small></td>
+    <td><small>0.839</small></td>
+    <td><small>0.057</small></td>
+    <td><small>0.855</small></td>
+    <td><small>0.048</small></td>
+    <td><small>0.773</small></td>
+    <td><small>0.027</small></td>
+    <td><small>0.839</small></td>
+    <td><small>0.075</small></td>
+    <td><small>0.907</small></td>
+    <td><small>0.163</small></td>
   </tr>
   <tr align="center">
-    <td style="font-size:12px">6</td>
-    <td style="font-size:12px">0.825</td>
-    <td style="font-size:12px">0.057</td>
-    <td style="font-size:12px">0.856</td>
-    <td style="font-size:12px">0.051</td>
-    <td style="font-size:12px">0.776</td>
-    <td style="font-size:12px">0.030</td>
-    <td style="font-size:12px">0.833</td>
-    <td style="font-size:12px">0.080</td>
-    <td style="font-size:12px">0.925</td>
-    <td style="font-size:12px">0.168</td>
+    <td><small>6</small></td>
+    <td><small>0.825</small></td>
+    <td><small>0.057</small></td>
+    <td><small>0.856</small></td>
+    <td><small>0.051</small></td>
+    <td><small>0.776</small></td>
+    <td><small>0.030</small></td>
+    <td><small>0.833</small></td>
+    <td><small>0.080</small></td>
+    <td><small>0.925</small></td>
+    <td><small>0.168</small></td>
   </tr>
   <tr align="center">
-    <td style="font-size:12px">7</td>
-    <td style="font-size:12px">0.767</td>
-    <td style="font-size:12px">0.040</td>
-    <td style="font-size:12px">0.817</td>
-    <td style="font-size:12px">0.047</td>
-    <td style="font-size:12px">0.744</td>
-    <td style="font-size:12px">0.021</td>
-    <td style="font-size:12px">0.818</td>
-    <td style="font-size:12px">0.063</td>
-    <td style="font-size:12px">0.806</td>
-    <td style="font-size:12px">0.035</td>
+    <td><small>7</small></td>
+    <td><small>0.767</small></td>
+    <td><small>0.040</small></td>
+    <td><small>0.817</small></td>
+    <td><small>0.047</small></td>
+    <td><small>0.744</small></td>
+    <td><small>0.021</small></td>
+    <td><small>0.818</small></td>
+    <td><small>0.063</small></td>
+    <td><small>0.806</small></td>
+    <td><small>0.035</small></td>
   </tr>
   <tr align="center">
-    <td style="font-size:12px">8</td>
-    <td style="font-size:12px">0.798</td>
-    <td style="font-size:12px">0.030</td>
-    <td style="font-size:12px">0.824</td>
-    <td style="font-size:12px">0.035</td>
-    <td style="font-size:12px">0.749</td>
-    <td style="font-size:12px">0.024</td>
-    <td style="font-size:12px">0.833</td>
-    <td style="font-size:12px">0.075</td>
-    <td style="font-size:12px">0.885</td>
-    <td style="font-size:12px">0.157</td>
+    <td><small>8</small></td>
+    <td><small>0.798</small></td>
+    <td><small>0.030</small></td>
+    <td><small>0.824</small></td>
+    <td><small>0.035</small></td>
+    <td><small>0.749</small></td>
+    <td><small>0.024</small></td>
+    <td><small>0.833</small></td>
+    <td><small>0.075</small></td>
+    <td><small>0.885</small></td>
+    <td><small>0.157</small></td>
   </tr>
   <tr align="center">
-    <td style="font-size:12px">9</td>
-    <td style="font-size:12px">0.798</td>
-    <td style="font-size:12px">0.037</td>
-    <td style="font-size:12px">0.827</td>
-    <td style="font-size:12px">0.036</td>
-    <td style="font-size:12px">0.765</td>
-    <td style="font-size:12px">0.026</td>
-    <td style="font-size:12px">0.829</td>
-    <td style="font-size:12px">0.047</td>
-    <td style="font-size:12px">0.904</td>
-    <td style="font-size:12px">0.081</td>
+    <td><small>9</small></td>
+    <td><small>0.798</small></td>
+    <td><small>0.037</small></td>
+    <td><small>0.827</small></td>
+    <td><small>0.036</small></td>
+    <td><small>0.765</small></td>
+    <td><small>0.026</small></td>
+    <td><small>0.829</small></td>
+    <td><small>0.047</small></td>
+    <td><small>0.904</small></td>
+    <td><small>0.081</small></td>
   </tr>
   <tr align="center">
-    <td style="font-size:12px">10</td>
-    <td style="font-size:12px">0.721</td>
-    <td style="font-size:12px">0.019</td>
-    <td style="font-size:12px">0.857</td>
-    <td style="font-size:12px">0.051</td>
-    <td style="font-size:12px">0.788</td>
-    <td style="font-size:12px">0.032</td>
-    <td style="font-size:12px">0.849</td>
-    <td style="font-size:12px">0.067</td>
-    <td style="font-size:12px">0.927</td>
-    <td style="font-size:12px">0.108</td>
+    <td><small>10</small></td>
+    <td><small>0.721</small></td>
+    <td><small>0.019</small></td>
+    <td><small>0.857</small></td>
+    <td><small>0.051</small></td>
+    <td><small>0.788</small></td>
+    <td><small>0.032</small></td>
+    <td><small>0.849</small></td>
+    <td><small>0.067</small></td>
+    <td><small>0.927</small></td>
+    <td><small>0.108</small></td>
   </tr>
   <tr align="center">
-    <td style="font-size:12px">11</td>
-    <td style="font-size:12px">0.797</td>
-    <td style="font-size:12px">0.047</td>
-    <td style="font-size:12px">0.841</td>
-    <td style="font-size:12px">0.056</td>
-    <td style="font-size:12px">0.713</td>
-    <td style="font-size:12px">0.026</td>
-    <td style="font-size:12px">0.826</td>
-    <td style="font-size:12px">0.081</td>
-    <td style="font-size:12px">0.959</td>
-    <td style="font-size:12px">0.299</td>
+    <td><small>11</small></td>
+    <td><small>0.797</small></td>
+    <td><small>0.047</small></td>
+    <td><small>0.841</small></td>
+    <td><small>0.056</small></td>
+    <td><small>0.713</small></td>
+    <td><small>0.026</small></td>
+    <td><small>0.826</small></td>
+    <td><small>0.081</small></td>
+    <td><small>0.959</small></td>
+    <td><small>0.299</small></td>
   </tr>
 </table>
+
+
 
 
 
