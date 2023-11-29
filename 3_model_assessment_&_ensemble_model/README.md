@@ -49,6 +49,12 @@ The table below presents the calculated performance metrics for various models a
 
 
 <!-- Table -->
+<style>
+  table {
+    font-size: small;
+  }
+</style>
+
 <table align="center">
   <tr>
     <th rowspan="2">Zone</th>
