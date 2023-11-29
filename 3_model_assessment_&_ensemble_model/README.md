@@ -48,7 +48,6 @@ The table below presents the calculated performance metrics for various models a
 
 
 
-
 <!-- Table -->
 <table align="center">
   <tr>
@@ -97,8 +96,123 @@ The table below presents the calculated performance metrics for various models a
     <td>0.839</td>
     <td>0.038</td>
   </tr>
-  <!-- Add the rest of the rows following the same format -->
-  <!-- ... -->
+  <tr align="center">
+    <td>3</td>
+    <td>0.864</td>
+    <td>0.057</td>
+    <td>0.859</td>
+    <td>0.055</td>
+    <td>0.804</td>
+    <td>0.038</td>
+    <td>0.863</td>
+    <td>0.078</td>
+    <td>0.945</td>
+    <td>0.158</td>
+  </tr>
+  <tr align="center">
+    <td>4</td>
+    <td>0.793</td>
+    <td>0.061</td>
+    <td>0.850</td>
+    <td>0.051</td>
+    <td>0.787</td>
+    <td>0.029</td>
+    <td>0.834</td>
+    <td>0.077</td>
+    <td>0.922</td>
+    <td>0.156</td>
+  </tr>
+  <tr align="center">
+    <td>5</td>
+    <td>0.839</td>
+    <td>0.057</td>
+    <td>0.855</td>
+    <td>0.048</td>
+    <td>0.773</td>
+    <td>0.027</td>
+    <td>0.839</td>
+    <td>0.075</td>
+    <td>0.907</td>
+    <td>0.163</td>
+  </tr>
+  <tr align="center">
+    <td>6</td>
+    <td>0.825</td>
+    <td>0.057</td>
+    <td>0.856</td>
+    <td>0.051</td>
+    <td>0.776</td>
+    <td>0.030</td>
+    <td>0.833</td>
+    <td>0.080</td>
+    <td>0.925</td>
+    <td>0.168</td>
+  </tr>
+  <tr align="center">
+    <td>7</td>
+    <td>0.767</td>
+    <td>0.040</td>
+    <td>0.817</td>
+    <td>0.047</td>
+    <td>0.744</td>
+    <td>0.021</td>
+    <td>0.818</td>
+    <td>0.063</td>
+    <td>0.806</td>
+    <td>0.035</td>
+  </tr>
+  <tr align="center">
+    <td>8</td>
+    <td>0.798</td>
+    <td>0.030</td>
+    <td>0.824</td>
+    <td>0.035</td>
+    <td>0.749</td>
+    <td>0.024</td>
+    <td>0.833</td>
+    <td>0.075</td>
+    <td>0.885</td>
+    <td>0.157</td>
+  </tr>
+  <tr align="center">
+    <td>9</td>
+    <td>0.798</td>
+    <td>0.037</td>
+    <td>0.827</td>
+    <td>0.036</td>
+    <td>0.765</td>
+    <td>0.026</td>
+    <td>0.829</td>
+    <td>0.047</td>
+    <td>0.904</td>
+    <td>0.081</td>
+  </tr>
+  <tr align="center">
+    <td>10</td>
+    <td>0.721</td>
+    <td>0.019</td>
+    <td>0.857</td>
+    <td>0.051</td>
+    <td>0.788</td>
+    <td>0.032</td>
+    <td>0.849</td>
+    <td>0.067</td>
+    <td>0.927</td>
+    <td>0.108</td>
+  </tr>
+  <tr align="center">
+    <td>11</td>
+    <td>0.797</td>
+    <td>0.047</td>
+    <td>0.841</td>
+    <td>0.056</td>
+    <td>0.713</td>
+    <td>0.026</td>
+    <td>0.826</td>
+    <td>0.081</td>
+    <td>0.959</td>
+    <td>0.299</td>
+  </tr>
 </table>
 
 
