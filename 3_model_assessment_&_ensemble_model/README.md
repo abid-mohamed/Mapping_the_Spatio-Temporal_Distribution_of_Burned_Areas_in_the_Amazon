@@ -32,7 +32,7 @@ The table below presents the calculated performance metrics for various models a
 
 <!-- Table -->
 | **Zone** | **GLM AUC** | **GLM AUCPR** | **GBM AUC** | **GBM AUCPR** | **XGB AUC** | **XGB AUCPR** | **DRF AUC** | **DRF AUCPR** | **Ensemble AUC** | **Ensemble AUCPR** |
-|----------|-------------|---------------|-------------|---------------|-------------|---------------|-------------|---------------|------------------|---------------------|
+|:--------:|:-----------:|:-------------:|:-----------:|:---------------:|-------------|---------------|-------------|---------------|------------------|---------------------|
 | 1        | 0.862       | 0.061         | 0.864       | 0.061         | 0.769       | 0.024         | 0.861       | 0.074         | 0.875            | 0.088               |
 | 2        | 0.710       | 0.027         | 0.846       | 0.041         | 0.723       | 0.027         | 0.849       | 0.061         | 0.839            | 0.038               |
 | 3        | 0.864       | 0.057         | 0.859       | 0.055         | 0.804       | 0.038         | 0.863       | 0.078         | 0.945            | 0.158               |
@@ -44,6 +44,64 @@ The table below presents the calculated performance metrics for various models a
 | 9        | 0.798       | 0.037         | 0.827       | 0.036         | 0.765       | 0.026         | 0.829       | 0.047         | 0.904            | 0.081               |
 | 10       | 0.721       | 0.019         | 0.857       | 0.051         | 0.788       | 0.032         | 0.849       | 0.067         | 0.927            | 0.108               |
 | 11       | 0.797       | 0.047         | 0.841       | 0.056         | 0.713       | 0.026         | 0.826       | 0.081         | 0.959            | 0.299               |
+
+
+
+
+
+<!-- Table -->
+<table align="center">
+  <tr>
+    <th rowspan="2">Zone</th>
+    <th colspan="2">GLM</th>
+    <th colspan="2">GBM</th>
+    <th colspan="2">XGB</th>
+    <th colspan="2">DRF</th>
+    <th colspan="2">Ensemble</th>
+  </tr>
+  <tr>
+    <th>AUC</th>
+    <th>AUCPR</th>
+    <th>AUC</th>
+    <th>AUCPR</th>
+    <th>AUC</th>
+    <th>AUCPR</th>
+    <th>AUC</th>
+    <th>AUCPR</th>
+    <th>AUC</th>
+    <th>AUCPR</th>
+  </tr>
+  <tr align="center">
+    <td>1</td>
+    <td>0.862</td>
+    <td>0.061</td>
+    <td>0.864</td>
+    <td>0.061</td>
+    <td>0.769</td>
+    <td>0.024</td>
+    <td>0.861</td>
+    <td>0.074</td>
+    <td>0.875</td>
+    <td>0.088</td>
+  </tr>
+  <tr align="center">
+    <td>2</td>
+    <td>0.710</td>
+    <td>0.027</td>
+    <td>0.846</td>
+    <td>0.041</td>
+    <td>0.723</td>
+    <td>0.027</td>
+    <td>0.849</td>
+    <td>0.061</td>
+    <td>0.839</td>
+    <td>0.038</td>
+  </tr>
+  <!-- Add the rest of the rows following the same format -->
+  <!-- ... -->
+</table>
+
+
 
 
 
