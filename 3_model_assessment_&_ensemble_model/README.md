@@ -2,6 +2,8 @@
 &emsp; | &emsp;
 [*IV. Maps and Time Trends of Fire Probability >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/README.md#iv-maps-and-time-trends-of-fire-probability)
 
+#
+
 # III. Models, Ensemble Model and Models Assessment
 
 ## III.1. Models
@@ -34,10 +36,7 @@ The table below presents the calculated performance metrics for various models a
   <img src="img/AUC_AUCPR.png"  width="80%" />
 </p>
 
-
-
-
-
+#
 
 [*<< II. Data Preparation*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md) 
 &emsp; | &emsp;
