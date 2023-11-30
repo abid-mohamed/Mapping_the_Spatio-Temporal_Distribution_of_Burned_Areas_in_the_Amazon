@@ -31,7 +31,7 @@ For each zone, we construct an ensemble model by computing a linear combination 
 The table below presents the calculated performance metrics for various models and ensemble models across all zones:
 
 <!-- Table -->
-| **Zone** | **GLM AUC** | **GLM AUCPR** | **GBM AUC** | **GBM AUCPR** | **XGB AUC** | **XGB AUCPR** | **DRF AUC** | **DRF AUCPR** | **Ensemble AUC** | **Ensemble AUCPR** |
+| **Zone** | **GLM _AUC_** | **GLM _AUCPR_** | **GBM _AUC_** | **GBM _AUCPR_** | **XGB _AUC_** | **XGB _AUCPR_** | **DRF _AUC_** | **DRF _AUCPR_** | **Ensemble _AUC_** | **Ensemble _AUCPR_** |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | 1 | 0.862 | 0.061 | 0.864 | 0.061 | 0.769 | 0.024 | 0.861 | 0.074 | 0.875 | 0.088 |
 | 2 | 0.710 | 0.027 | 0.846 | 0.041 | 0.723 | 0.027 | 0.849 | 0.061 | 0.839 | 0.038 |
