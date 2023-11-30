@@ -2,7 +2,7 @@
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 |&emsp;&emsp;
-[*I. Data Analysis & Missing Data >>*](./1_data_analysis_%26_missing_data/README.md)
+[*I. Data Analysis & Missing Data :arrow_right:*](./1_data_analysis_%26_missing_data/README.md)
 #
 
 # Mapping the Spatio-Temporal Distribution of Fires in the Amazon from 2001 to 2020: An Ensemble Modeling Approach
