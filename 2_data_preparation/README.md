@@ -1,8 +1,7 @@
 [*<< I. Data Analysis & Missing Data*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/1_data_analysis_%26_missing_data/README.md) 
 &emsp; | &emsp;
 [*III. Model Assessment, Ensemble Model, and Results >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/3_model_assessment_%26_ensemble_model/README.md)
-
----
+#
 
 # II. Data Preparation
 
@@ -83,10 +82,9 @@ This downsampling strategy not only addresses the class imbalance but also allow
 ### II.2.2. Split data to training and testing data by zone
 
 Recognizing the imbalanced distribution of the response variable *Burnt Area*, it is imperative to maintain a comparable proportion of cells with 'No Fire' event (0) and cells with 'Fire' event (1) in both the training and testing datasets, particularly within each zone.
-##
-To achieve this balance, I employed the `initial_split()` function from the $\texttt{rsample}$ package, setting the split ratio to 75% for training data and 25% for testing data. Specifically, I leveraged the `strata = BurntArea` option to ensure a stratified split, guaranteeing an equitable representation of the response variable in both the training and testing datasets across all zones.
 
----
+To achieve this balance, I employed the `initial_split()` function from the $\texttt{rsample}$ package, setting the split ratio to 75% for training data and 25% for testing data. Specifically, I leveraged the `strata = BurntArea` option to ensure a stratified split, guaranteeing an equitable representation of the response variable in both the training and testing datasets across all zones.
+#
 [*<< I. Data Analysis & Missing Data*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/1_data_analysis_%26_missing_data/README.md) 
 &emsp; | &emsp;
 [*III. Model Assessment, Ensemble Model, and Results >>*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/3_model_assessment_%26_ensemble_model/README.md)
