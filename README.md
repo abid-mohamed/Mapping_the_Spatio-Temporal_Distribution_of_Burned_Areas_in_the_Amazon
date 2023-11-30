@@ -101,4 +101,4 @@ These visualizations are powerful tools for understanding the dynamics and patte
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 |&emsp;&emsp;
-[*I. Data Analysis & Missing Data *](./1_data_analysis_%26_missing_data/README.md) :arrow_right:
+[*I. Data Analysis & Missing Data :arrow_right:*](./1_data_analysis_%26_missing_data/README.md)
