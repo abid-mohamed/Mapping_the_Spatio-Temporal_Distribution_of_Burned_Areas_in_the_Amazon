@@ -1,5 +1,7 @@
 [*<< I. Data Analysis & Missing Data*](../1_data_analysis_%26_missing_data/README.md) 
-&emsp; | &emsp;
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+|
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 [*III. Model Assessment, Ensemble Model, and Results >>*](../3_model_assessment_%26_ensemble_model/README.md)
 
 #
@@ -89,5 +91,7 @@ To achieve this balance, I employed the `initial_split()` function from the $\te
 #
 
 [*<< I. Data Analysis & Missing Data*](../1_data_analysis_%26_missing_data/README.md) 
-&emsp; | &emsp;
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+|
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 [*III. Model Assessment, Ensemble Model, and Results >>*](../3_model_assessment_%26_ensemble_model/README.md)
