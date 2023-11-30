@@ -1,7 +1,8 @@
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-|&emsp; [*I. Data Analysis & Missing Data >>*](./1_data_analysis_%26_missing_data/README.md)
+| &emsp;&emsp;
+[*I. Data Analysis & Missing Data >>*](./1_data_analysis_%26_missing_data/README.md)
 #
 
 # Mapping the Spatio-Temporal Distribution of Fires in the Amazon from 2001 to 2020: An Ensemble Modeling Approach
@@ -103,4 +104,4 @@ These visualizations are powerful tools for understanding the dynamics and patte
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-|&emsp; [*I. Data Analysis & Missing Data >>*](./1_data_analysis_%26_missing_data/README.md)
+| &emsp; [*I. Data Analysis & Missing Data >>*](./1_data_analysis_%26_missing_data/README.md)
