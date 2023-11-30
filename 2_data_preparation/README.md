@@ -88,7 +88,6 @@ Recognizing the imbalanced distribution of the response variable *Burnt Area*, i
 To achieve this balance, I employed the `initial_split()` function from the $\texttt{rsample}$ package, setting the split ratio to 75% for training data and 25% for testing data. Specifically, I leveraged the `strata = BurntArea` option to ensure a stratified split, guaranteeing an equitable representation of the response variable in both the training and testing datasets across all zones.
 
 #
-
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 [*<< I. Data Analysis & Missing Data*](../1_data_analysis_%26_missing_data/README.md) 
 &emsp;&emsp; | &emsp;&emsp;
