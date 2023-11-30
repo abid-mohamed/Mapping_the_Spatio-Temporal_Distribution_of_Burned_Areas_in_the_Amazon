@@ -1,8 +1,8 @@
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 &emsp;&emsp;&emsp;&emsp;&emsp;
-[*<< II. Data Preparation*](../2_data_preparation/README.md) 
+[*:arrow_left: II. Data Preparation*](../2_data_preparation/README.md) 
 &emsp;&emsp; | &emsp;&emsp;
-[*IV. Maps and Time Trends of Fire Probability >>*](../README.md#iv-maps-and-time-trends-of-fire-probability)
+[*IV. Maps and Time Trends of Fire Probability :arrow_right:*](../README.md#iv-maps-and-time-trends-of-fire-probability)
 
 #
 
@@ -41,6 +41,6 @@ The table below presents the calculated performance metrics for various models a
 #
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 &emsp;&emsp;&emsp;&emsp;&emsp;
-[*<< II. Data Preparation*](../2_data_preparation/README.md) 
+[*:arrow_left: II. Data Preparation*](../2_data_preparation/README.md) 
 &emsp;&emsp; | &emsp;&emsp;
-[*IV. Maps and Time Trends of Fire Probability >>*](../README.md#iv-maps-and-time-trends-of-fire-probability)
+[*IV. Maps and Time Trends of Fire Probability :arrow_right:*](../README.md#iv-maps-and-time-trends-of-fire-probability)
