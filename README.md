@@ -97,11 +97,8 @@ The boxplots presented below depict the time trend of fire probability during th
 These visualizations are powerful tools for understanding the dynamics and patterns of fires in the Amazon rainforest.
 
 #
-
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-| &emsp; [*I. Data Analysis & Missing Data >>*](./1_data_analysis_%26_missing_data/README.md)
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+|&emsp;&emsp;
+[*I. Data Analysis & Missing Data >>*](./1_data_analysis_%26_missing_data/README.md)
