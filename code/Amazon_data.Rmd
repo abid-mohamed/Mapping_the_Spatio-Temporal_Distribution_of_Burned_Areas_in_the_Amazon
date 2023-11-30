@@ -1,0 +1,1233 @@
+---
+title: "Preparation_Amazon_data"
+date: "2022-12-28"
+output:
+  html_document: 
+    number_sections: yes
+    fig_caption: yes
+    toc: true
+    toc_float: 
+      collapsed: true
+    theme: cerulean
+    highlight: kate
+    toc_depth: 5
+    keep_md: yes
+    df_print: paged
+---
+
+# Load libraries
+
+```{r}
+# load libraries
+library(tictoc)
+library(tidyverse)
+library(dplyr)
+library(terra)
+library(raster)
+library(sf)
+library(RColorBrewer)
+library(scico)
+library(tidyterra)
+library(ggforce)
+library(latex2exp)
+library(rts)
+library(doParallel)
+library(parallel)
+library(foreach)
+library(data.table)
+```
+
+# Functions
+
+```{r}
+#---- Function to rename layers ----
+renameLayers <- function(dataRast, fileStart, prefix){
+  # index of file name in the path
+  id.date <- unlist(gregexpr(fileStart, sources(dataRast)[[1]])) + nchar(fileStart)
+  # rename layers
+  names(dataRast) <- 
+    substr(sources(dataRast), id.date, (id.date+50)) %>%
+    gsub(".tif", "_1", .) %>%
+    as.Date("%Y_%m_%d") %>%
+    format(., '%Y_%m') %>%
+    paste0(prefix, .)
+  
+  return(dataRast)
+}
+
+#---- Function to plot ----
+myPlot <- function(
+  rast, 
+  title=NULL, 
+  sub_title=NULL, 
+  theme=2, 
+  xy.limit = list(xmin=NULL, xmax=NULL, ymin=NULL, ymax=NULL),
+  xy.zoom = list(xmin=NULL, xmax=NULL, ymin=NULL, ymax=NULL, zoom.size=NULL),
+  max_cell=1e8,
+  x_angle=0,
+  b_size=16,
+  na.color=NA,
+  v_unit=c(2, 2, 2, 2) # c(t, r, b, l)
+){
+  p1 <- ggplot()
+  p1 <- switch(
+    theme,
+    p1,
+    p1 + theme_bw(base_size=b_size),
+    p1 + theme_linedraw(base_size=b_size),
+    p1 + theme_light(base_size=b_size),
+    p1 + theme_minimal(base_size=b_size),
+    p1 + theme_classic(base_size=b_size),
+    p1 + theme_gray(base_size=b_size),
+    p1 + theme_dark(base_size=b_size)
+  )
+  p1 <- p1  +
+    geom_spatvector(data = amaz.basin.shp$geometry, fill = na.color, color = "gray40") +
+    geom_spatraster(data = rast, maxcell = max_cell) +
+    scale_x_continuous(limits = c(xy.limit$xmin, xy.limit$xmax), 
+                       labels = function(x) format(x, scientific = T)) +
+    scale_y_continuous(limits = c(xy.limit$ymin, xy.limit$ymax), 
+                       labels = function(x) format(x, scientific = T)) +
+    ggtitle(label=title, subtitle=sub_title) +
+    coord_sf(datum = pull_crs(rast)) +
+    theme(
+      axis.text.x = element_text(angle = x_angle)
+      , plot.margin = unit(v_unit, "pt")
+    )
+  
+  if (!all(sapply(xy.zoom, is.null))) {
+    p1 <- p1 + facet_zoom(xlim = c(xy.zoom$xmin, xy.zoom$xmax),
+                          ylim = c(xy.zoom$ymin, xy.zoom$ymax), 
+                          zoom.size=xy.zoom$zoom) 
+  }
+  
+  if (theme == 1) {p1 <- p1 + theme_void(base_size=b_size)}
+
+  return(p1)
+}
+```
+
+# Path
+
+```{r}
+my.path <- "/Users/abid.med/Documents/Data_ScienceTech_Institute/00.Intership/Project/Code_official_data"
+path.data <- paste0(my.path, "/Amazon_new_data")
+# load("/Users/abid.med/Documents/Data_ScienceTech_Institute/00.Intership/email/Amazon_data_R/data-amaz_na3.RData")
+```
+
+# Initialization
+
+```{r}
+# Create a sequence date
+seq.dates <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month")
+# Create name of layers
+ordered.names <- format(seq.dates, '%Y_%m')
+# Import shape file
+amaz.basin.shp <- st_read(
+  paste0(path.data,"/0. Amazon_shapefile/projected/amazon_shp_projected.shp"))
+```
+
+#=====================
+
+# Burnt Area data
+
+## Import data
+
+```{r}
+# list of files
+amaz.burntArea.list <- list.files(
+  paste0(path.data,"/1. Burnt Area/03. Working Data"),
+  full.names=TRUE,
+  pattern = ".tif$")
+# Import data with "Terra"
+burntArea.rast <- rast(amaz.burntArea.list)
+burntArea.rast
+```
+
+## Rename layers
+
+```{r}
+# Rename layers
+burntArea.rast <- renameLayers(burntArea.rast, 'burntarea_working_', '')
+burntArea.rast
+```
+
+## Order layers
+
+```{r}
+burntArea.rast <- burntArea.rast[[ordered.names]]
+burntArea.rast
+```
+
+## Verification of the values
+
+```{r}
+# Verification of the values
+burntArea.minmax <- minmax(burntArea.rast) %>% t() %>% as.data.frame()
+burntArea.minmax[which((burntArea.minmax[,1] != -2) & (burntArea.minmax[,2] != 1)),]
+```
+
+## Plot the month of October 2020
+
+```{r , warning=FALSE}
+# Create the `rts` object
+burntArea.rts <- rts(burntArea.rast, seq.dates)
+# Applying the mask to plot only the amazon area.
+ba <- burntArea.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# Change values as categorical 
+levels(ba) <- data.frame(id=c(-2, 0, 1), val=c('-2', '0', '1'))
+# Plot
+my.colors <- c("mediumblue", "mediumseagreen", "firebrick")
+p.ba <- myPlot(ba, title = "Burnt Area") +
+  scale_fill_manual(name = NULL, values = my.colors, na.translate=FALSE) 
+p.ba
+```
+
+```{r}
+# Convert the raster object to a datatable
+ba.dt <- as.data.table(ba, cell=T, xy=T)
+# Plot
+ggplot(data = ba.dt, aes(x = val)) + 
+  geom_bar(stat = "count", aes(fill = val), position = "dodge") + 
+  labs(title="Burnt Area in October 2020", x="Burnt Area") +
+  coord_flip() + 
+  scale_fill_manual(name = "Burnt Area", values = my.colors) +
+  stat_count(geom = "text", 
+             aes(label = ..count..),
+             position=position_stack(vjust=0.5),
+             colour = "black", size = 3.5) + 
+  theme_bw(base_size=16)
+```
+
+## Percentage of fires
+
+```{r}
+freq.dt <- matrix(nrow = 0, ncol = 3) %>% as.data.table()
+colnames(freq.dt) <- c("layer", "0", "1")
+for (ras_id in amaz.burntArea.list){ # ras_id <- amaz.burntArea.list[1]
+  cat("\n", ras_id)
+  ras <- rast(ras_id) %>%
+    renameLayers(., 'burntarea_working_', '') %>%
+    mask(mask = amaz.basin.shp)
+ 
+  # Replace -2 and -1 value by `NA`
+  ras[ras %in% c(-2, -1)] <- NA
+  ras.freq <- freq(ras, digits=0, usenames=T) %>% as.data.table()
+  tmp <- dcast(ras.freq,layer ~ value,value.var = c("count"))
+  freq.dt <- rbind(freq.dt, tmp)
+}
+percentage.fires <- sum(freq.dt[, '1']) / sum(freq.dt[, c('0', '1')])
+```
+
+## Missing Data
+
+```{r}
+cl <- makeCluster(detectCores() - 1)
+registerDoParallel(cl, cores=detectCores() - 1)
+
+# Raster to datatable in parallel: one raster per thread
+rasList <- foreach (
+  ras_id=amaz.burntArea.list, 
+  .packages=c('terra', 'sf', 'dplyr'), 
+  .combine='c') %dopar% {
+    # Read and rename raster
+    ras <- rast(ras_id) %>% renameLayers(., 'burntarea_working_', '')
+    # Replace negative value by `NA`
+    if (names(ras) %in% c("2012_07", "2012_09")) {ras[ras == -1] <- NA}
+    # Count the missing data
+    ras.freq.na <- not.na(ras) %>%
+      mask(amaz.basin.shp) %>%
+      terra::freq(., digits=0, value=0, usenames=T)
+  
+    list(ras.freq.na)
+  }
+stopCluster(cl)
+
+# Bind all per-raster into one dataframe
+burntArea.freq.na <- rbindlist(rasList, fill=T, use.names=T)
+# Order
+colnames(burntArea.freq.na)[3] <- "burntArea_na"
+burntArea.freq.na <- burntArea.freq.na[order(burntArea.freq.na$layer)]
+burntArea.freq.na
+```
+
+#=====================
+
+# Land Cover data
+
+## Import data
+
+```{r}
+# list of files
+amaz.landCover.list <- list.files(
+  paste0(path.data,"/2. Land Cover/03. Working Data"),
+  full.names=TRUE,
+  pattern = ".tif$")
+# Import data with "Terra"
+landCover.rast <- rast(amaz.landCover.list)
+landCover.rast
+```
+
+## Rename and order layers
+
+```{r}
+# Rename layers
+landCover.rast <- renameLayers(landCover.rast, 'landcover_working_', '')
+# Order layers
+landCover.rast <- landCover.rast[[ordered.names]]
+landCover.rast
+```
+
+## Verification of the values
+
+```{r}
+# Verification of the values
+landCover.minmax <- minmax(landCover.rast) %>% t() %>% as.data.frame()
+landCover.minmax[
+  which((!landCover.minmax[,1] %in% c(0:10)) & (!landCover.minmax[,2] %in% c(0:10))), ]
+```
+
+## Plot the month of October 2020
+
+```{r}
+# Create the `rts` object
+landCover.rts <- rts(landCover.rast, seq.dates)
+# Applying the mask to plot only the amazon area.
+lc <- landCover.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)  
+# Change values as categorical 
+levels(lc) <- data.frame(id=0:10, val=as.character(c(0:10)))
+# Plot
+p.lc <- myPlot(lc, title = "Land Cover") + 
+  scale_fill_hypso_d(
+    name = NULL,
+    palette = "colombia_hypso", 
+    na.translate=FALSE)
+p.lc
+```
+
+## Missing Data
+
+```{r}
+cl <- makeCluster(detectCores() - 1)
+registerDoParallel(cl, cores=detectCores() - 1)
+
+# Raster to datatable in parallel: one raster per thread
+rasList <- foreach (
+  ras_id=amaz.landCover.list, 
+  .packages=c('terra', 'sf', 'dplyr'), 
+  .combine='c') %dopar% {
+    # Read and rename raster
+    ras <- rast(ras_id) %>% renameLayers(., 'landcover_working_', '')
+    # Count the missing data
+    ras.freq.na <- not.na(ras) %>%
+      mask(amaz.basin.shp) %>%
+      terra::freq(., digits=0, value=0, usenames=T)
+  
+    list(ras.freq.na)
+  }
+stopCluster(cl)
+
+# Bind all per-raster into one dataframe
+landCover.freq.na <- rbindlist(rasList, fill=T, use.names=T)
+# Order
+colnames(landCover.freq.na)[3] <- "landCover_na"
+landCover.freq.na <- landCover.freq.na[order(landCover.freq.na$layer)]
+landCover.freq.na
+```
+
+#=====================
+
+# Precipitation data
+
+## Import data
+
+```{r}
+# list of files
+amaz.precipitation.list <- list.files(
+  paste0(path.data,"/3. Precipitation/03. Working Data"),
+  full.names=TRUE,
+  pattern = ".tif$")
+# Import data with "Terra"
+precipitation.rast <- rast(amaz.precipitation.list)
+precipitation.rast
+```
+
+## Rename and order layers
+
+```{r}
+# Rename layers
+precipitation.rast <- renameLayers(precipitation.rast, 'precipitation_working_', '')
+# Order layers
+precipitation.rast <- precipitation.rast[[ordered.names]]
+precipitation.rast
+```
+
+## Verification of the values
+
+```{r}
+# Verification of the values
+precipitation.minmax <- minmax(precipitation.rast) %>% t() %>% as.data.frame()
+precipitation.minmax
+```
+
+## Plot the month of October 2020
+
+```{r}
+# Create a sequence date for 'rts' object
+precipitation.rts <- rts(precipitation.rast, seq.dates)
+# Applying the mask to plot only the amazon area.
+prec <- precipitation.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# Plot
+p.prec <- myPlot(prec, title = "Precipitation") + 
+  scale_fill_scico(
+    name = TeX(r"($\textit{(mm/hr)}$)"),
+    palette = "lapaz", 
+    direction = -1,
+    trans = "pseudo_log",
+    breaks = c(0,10,50,200,550),
+    na.value = "transparent")
+p.prec
+```
+
+## Missing Data
+
+```{r}
+cl <- makeCluster(detectCores() - 1)
+registerDoParallel(cl, cores=detectCores() - 1)
+
+# Raster to datatable in parallel: one raster per thread
+rasList <- foreach (
+  ras_id=amaz.precipitation.list, 
+  .packages=c('terra', 'sf', 'dplyr'), 
+  .combine='c') %dopar% {
+    # Read and rename raster
+    ras <- rast(ras_id) %>% renameLayers(., 'precipitation_working_', '')
+    # Count the missing data
+    ras.freq.na <- not.na(ras) %>%
+      mask(amaz.basin.shp) %>%
+      terra::freq(., digits=0, value=0, usenames=T)
+  
+    list(ras.freq.na)
+  }
+stopCluster(cl)
+
+# Bind all per-raster into one dataframe
+precipitation.freq.na <- rbindlist(rasList, fill=T, use.names=T)
+# Order
+colnames(precipitation.freq.na)[3] <- "precipitation_na"
+precipitation.freq.na <- precipitation.freq.na[order(precipitation.freq.na$layer)]
+precipitation.freq.na
+```
+
+### Zoom Plot
+
+```{r}
+# Applying the mask to plot only the amazon area.
+prec <- precipitation.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# define the zoom area
+prec.xy.zoom <- list(xmin=-0.385e+06, xmax=-0.37e+06, ymin=ymin(prec), ymax=1.64e+06, zoom=0.4)
+# Plot
+p.prec.na <- myPlot(
+  prec, title = "Precipitation", 
+  max_cell=1e7,
+  x_angle=90,
+  b_size=12,
+  na.color="black",
+  xy.zoom = prec.xy.zoom
+) + 
+  scale_fill_scico(
+    name = TeX(r"($\textit{(mm/hr)}$)"),
+    palette = "lapaz", 
+    direction = -1,
+    trans = "pseudo_log",
+    breaks = c(0,10,50,200,550),
+    na.value = "transparent")
+p.prec.na
+```
+
+#=====================
+
+# Soil Moisture data
+
+## Import data
+
+```{r}
+# list of files
+amaz.soilMoisture.list <- list.files(
+  paste0(path.data,"/4. Soil Moisture/03. Working Data"),
+  full.names=TRUE,
+  pattern = ".tif$")
+# Import data with "Terra"
+soilMoisture.rast <- rast(amaz.soilMoisture.list)
+soilMoisture.rast
+```
+
+## Rename and order layers
+
+```{r}
+# Rename layers
+soilMoisture.rast <- renameLayers(soilMoisture.rast, 'soilmoisture_working_', '')
+# Order layers
+soilMoisture.rast <- soilMoisture.rast[[ordered.names]]
+soilMoisture.rast
+```
+
+## Verification of the values
+
+```{r}
+# Verification of the values
+soilMoisture.minmax <- minmax(soilMoisture.rast) %>% t() %>% as.data.frame()
+soilMoisture.minmax
+```
+
+## Frequency of the negative values
+
+```{r}
+soilMoisture.freq <- freq(soilMoisture.rast, digits=3, usenames=T)
+soilMoisture.freq[soilMoisture.freq$value < 0,]
+```
+
+### Zoom Plot
+
+```{r}
+# Create the `rts` object
+soilMoisture.rts <- rts(soilMoisture.rast, seq.dates)
+# Applying the mask to plot only the amazon area.
+soilm <- soilMoisture.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# define the zoom area
+soilm.xy.zoom <- list(xmin=0.15e+06, xmax=0.2e+06, ymin=4.35e+06, ymax=4.5e+06, zoom=0.4)
+# Plot
+p.soilm.na <- myPlot(
+  soilm, title = "Soil Moisture", 
+  max_cell=1e7,
+  x_angle=90,
+  b_size=12,
+  xy.zoom = soilm.xy.zoom
+) + 
+  scale_fill_hypso_c(
+    name = TeX(r"($\textit{(mm)$})"),
+    palette = "wiki-schwarzwald-cont", 
+    na.value = "transparent")
+p.soilm.na
+```
+
+## Plot the month of October 2020
+
+```{r}
+# Remove negative values.
+soilm[soilm < 0] <- NA
+# Plot
+p.soilm <- myPlot(soilm, title = "Soil Moisture") + 
+  scale_fill_hypso_c(
+    name = TeX(r"($\textit{(mm)$})"),
+    palette = "wiki-schwarzwald-cont", 
+    na.value = "transparent")
+p.soilm
+```
+
+
+### Zoom Plot after removing negative values
+
+```{r}
+# define the zoom area
+soilm.xy.zoom <- list(xmin=0.15e+06, xmax=0.2e+06, ymin=4.35e+06, ymax=4.5e+06, zoom=0.4)
+# Plot
+p.soilm.na <- myPlot(
+  soilm, title = "Soil Moisture", 
+  max_cell=1e7,
+  x_angle=90,
+  b_size=12,
+  na.color="black",
+  xy.zoom = soilm.xy.zoom
+) + 
+  scale_fill_hypso_c(
+    name = TeX(r"($\textit{(mm)$})"),
+    palette = "wiki-schwarzwald-cont", 
+    na.value = "transparent")
+p.soilm.na
+```
+
+## Missing Data
+
+```{r}
+cl <- makeCluster(detectCores() - 1)
+registerDoParallel(cl, cores=detectCores() - 1)
+
+# Raster to datatable in parallel: one raster per thread
+rasList <- foreach (
+  ras_id=amaz.soilMoisture.list, 
+  .packages=c('terra', 'sf', 'dplyr'), 
+  .combine='c') %dopar% {
+    # Read and rename raster
+    ras <- rast(ras_id) %>% renameLayers(., 'soilmoisture_working_', '')
+    # Replace negative value by `NA`
+    ras[ras < 0] <- NA
+    # Count the missing data
+    ras.freq.na <- not.na(ras) %>%
+      mask(amaz.basin.shp) %>%
+      terra::freq(., digits=0, value=0, usenames=T)
+  
+    list(ras.freq.na)
+  }
+stopCluster(cl)
+
+# Bind all per-raster into one dataframe
+soilmoisture.freq.na <- rbindlist(rasList, fill=T, use.names=T)
+# Order
+colnames(soilmoisture.freq.na)[3] <- "soilmoisture_na"
+soilmoisture.freq.na <- soilmoisture.freq.na[order(soilmoisture.freq.na$layer)]
+soilmoisture.freq.na
+```
+
+#=====================
+
+# Elevation data
+
+## Import data
+
+```{r}
+# list of files
+amaz.elevation.list <- list.files(
+  paste0(path.data,"/5. Elevation/03. Working Data"),
+  full.names=TRUE,
+  pattern = ".tif$")
+# Import data with "Terra"
+elevation.rast <- rast(amaz.elevation.list)
+elevation.rast
+```
+
+## Rename layer
+
+```{r}
+names(elevation.rast) <- "elevation"
+elevation.rast
+```
+
+## Verification of the values
+
+```{r}
+# Verification of the values
+elevation.minmax <- minmax(elevation.rast) %>% t() %>% as.data.frame()
+elevation.minmax
+```
+
+## Plot the month of October 2020
+
+```{r}
+# Applying the mask to plot only the amazon area.
+elev <- elevation.rast %>% mask(mask = amaz.basin.shp)
+# Plot
+wikicols <- hypsometric_tints_db %>% filter(pal == "wiki-2.0")
+wikicols <- wikicols[wikicols$limit %between% c(-100, 6500),]
+p.elev <- myPlot(elev, title = "Elevation") + 
+  scale_fill_gradientn(
+    name = TeX(r"($\textit{(m)}$)"),
+    colors = wikicols$hex,
+    values = scales::rescale(wikicols$limit),
+    limit = range(wikicols$limit),
+    na.value = "transparent")
+p.elev
+```
+
+## Missing Data
+
+```{r}
+# Count the missing data
+elevation.freq.na <- not.na(elevation.rast) %>% 
+  mask(amaz.basin.shp) %>% 
+  freq(., digits=0, value=0, usenames=T)
+elevation.freq.na
+```
+
+#=====================
+
+# LandSurfaceTemp data
+
+## Import data
+
+```{r}
+# list of files
+amaz.landSurfaceTemp.list <- list.files(
+  paste0(path.data,"/6. LandSurfaceTemp/03. Working Data"),
+  full.names=TRUE,
+  pattern = ".tif$")
+# Import data with "Terra"
+landSurfaceTemp.rast <- rast(amaz.landSurfaceTemp.list)
+landSurfaceTemp.rast
+```
+
+## Rename and order layers
+
+```{r}
+# Rename layers
+landSurfaceTemp.rast <- renameLayers(landSurfaceTemp.rast, 'landsurftemp_working_', '')
+# Order layers
+landSurfaceTemp.rast <- landSurfaceTemp.rast[[ordered.names]]
+landSurfaceTemp.rast
+```
+
+## Verification of the values
+
+```{r}
+# Verification of the values
+landSurfaceTemp.minmax <- minmax(landSurfaceTemp.rast) %>% t() %>% as.data.frame()
+landSurfaceTemp.minmax
+```
+
+## Plot the month of October 2020
+
+```{r}
+# Create a sequence date for 'rts' object
+landSurfaceTemp.rts <- rts(landSurfaceTemp.rast, seq.dates)
+# Applying the mask to plot only the amazon area.
+lst <- landSurfaceTemp.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# Plot
+p.lst <- myPlot(lst, title = "Land Surface Temperature") +
+  scale_fill_whitebox_c(
+    name = TeX(r"($\textit{(K)}$)"),
+    palette = "muted", 
+    na.value = "transparent")
+p.lst
+```
+
+## Missing Data
+
+```{r}
+cl <- makeCluster(detectCores() - 1)
+registerDoParallel(cl, cores=detectCores() - 1)
+
+# Raster to datatable in parallel: one raster per thread
+rasList <- foreach (
+  ras_id=amaz.landSurfaceTemp.list, 
+  .packages=c('terra', 'sf', 'dplyr'), 
+  .combine='c') %dopar% {
+    # Read and rename raster
+    ras <- rast(ras_id) %>% renameLayers(., 'landsurftemp_working_', '')
+    # Count the missing data
+    ras.freq.na <- not.na(ras) %>%
+      mask(amaz.basin.shp) %>%
+      terra::freq(., digits=0, value=0, usenames=T)
+  
+    list(ras.freq.na)
+  }
+stopCluster(cl)
+
+# Bind all per-raster into one dataframe
+landsurftemp.freq.na <- rbindlist(rasList, fill=T, use.names=T)
+# Order
+colnames(landsurftemp.freq.na)[3] <- "landsurftemp_na"
+landsurftemp.freq.na <- landsurftemp.freq.na[
+  order(landsurftemp.freq.na$landsurftemp_na, decreasing=TRUE)]
+landsurftemp.freq.na
+```
+
+### Plot 
+
+```{r}
+# Select the 4 months they have the most missing data
+lst.4na <- landsurftemp.freq.na[1:4,]
+lst.4na.month <- lst.4na$layer %>% paste0(., "_01") %>% gsub("_", "-", .)
+lst.4na.rts <- subset(landSurfaceTemp.rts, lst.4na.month)
+lst.4na.rast <- lst.4na.rts@raster %>% mask(mask = amaz.basin.shp) 
+# Plot
+p.lst.4na <- ggplot() +
+  geom_spatvector(data = amaz.basin.shp$geometry, fill = "black", color = "gray40") +
+  stat_spatraster(data = lst.4na.rast) +
+  scale_x_continuous(labels = function(x) format(x, scientific = T, digits = 1)) +
+  scale_y_continuous(labels = function(x) format(x, scientific = T, digits = 2)) + 
+  ggtitle(label="Land Surface Temperature", subtitle=NULL) +
+  coord_sf(datum = pull_crs(lst.4na.rast)) + 
+  theme_bw(base_size=12) +
+  scale_fill_whitebox_c(
+    name = TeX(r"($\textit{(K)}$)"),
+    palette = "muted", 
+    na.value = "transparent") + 
+  facet_wrap(~lyr, ncol = 2) +
+  theme(axis.text.x = element_text(angle = 90))
+p.lst.4na
+```
+
+#=====================
+
+# Specific Humidity data
+
+## Import data
+
+```{r}
+# list of files
+amaz.humidity.list <- list.files(
+  paste0(path.data,"/7. Specific Humidity/03. Working Data"),
+  full.names=TRUE,
+  pattern = ".tif$")
+# Import data with "Terra"
+humidity.rast <- rast(amaz.humidity.list)
+humidity.rast
+```
+
+## Rename and order layers
+
+```{r}
+# Rename layers
+humidity.rast <- renameLayers(humidity.rast, 'humidity_working_', '')
+# Order layers
+humidity.rast <- humidity.rast[[ordered.names]]
+humidity.rast
+```
+
+## Verification of the values
+
+```{r}
+# Verification of the values
+humidity.minmax <- minmax(humidity.rast) %>% t() %>% as.data.frame()
+humidity.minmax
+```
+
+## Plot the month of October 2020
+
+```{r}
+# Create a sequence date for 'rts' object
+humidity.rts <- rts(humidity.rast, seq.dates)
+# Applying the mask to plot only the amazon area.
+hum <- humidity.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# Plot
+p.hum <- myPlot(hum, title = "Humidity") +
+  scale_fill_cross_blended_c(
+    name = TeX(r"($\textit{(kg_{water} / kg_{air})$})"),
+    palette = "warm_humid", 
+    na.value = "transparent")
+p.hum
+```
+
+## Missing Data
+
+```{r}
+cl <- makeCluster(detectCores() - 1)
+registerDoParallel(cl, cores=detectCores() - 1)
+
+# Raster to datatable in parallel: one raster per thread
+rasList <- foreach (
+  ras_id=amaz.humidity.list, 
+  .packages=c('terra', 'sf', 'dplyr'), 
+  .combine='c') %dopar% {
+    # Read and rename raster
+    ras <- rast(ras_id) %>% renameLayers(., 'humidity_working_', '')
+    # Count the missing data
+    ras.freq.na <- not.na(ras) %>%
+      mask(amaz.basin.shp) %>%
+      terra::freq(., digits=0, value=0, usenames=T)
+  
+    list(ras.freq.na)
+  }
+stopCluster(cl)
+
+# Bind all per-raster into one dataframe
+humidity.freq.na <- rbindlist(rasList, fill=T, use.names=T)
+# Order
+colnames(humidity.freq.na)[3] <- "humidity_na"
+humidity.freq.na <- humidity.freq.na[order(humidity.freq.na$layer)]
+humidity.freq.na
+```
+
+### Zoom Plot
+
+```{r}
+# Applying the mask to plot only the amazon area.
+hum <- humidity.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# define the zoom area
+hum.xy.zoom <- list(xmin=1.e+06, xmax=1.4e+06, ymin=3.4e+06, ymax=4e+06, zoom=0.4)
+# Plot
+p.hum.na <- myPlot(
+  hum, title = "Humidity", 
+  max_cell=1e7,
+  x_angle=90,
+  b_size=12,
+  na.color="black",
+  xy.zoom = hum.xy.zoom
+) +
+  scale_fill_cross_blended_c(
+    name = TeX(r"($\textit{(kg_{water} / kg_{air})$})"),
+    palette = "warm_humid", 
+    na.value = "transparent")
+p.hum.na
+```
+
+#=====================
+
+# Evapotranspiration data
+
+## Import data
+
+```{r}
+# list of files
+amaz.evapotranspiration.list <- list.files(
+  paste0(path.data,"/8. Evapotranspiration/03. Working Data"),
+  full.names=TRUE,
+  pattern = ".tif$")
+# Import data with "Terra"
+evapotranspiration.rast <- rast(amaz.evapotranspiration.list)
+evapotranspiration.rast
+```
+
+## Rename and order layers
+
+```{r}
+# Rename layers
+evapotranspiration.rast <- renameLayers(
+  evapotranspiration.rast, 'evapotranspiration_working_', '')
+# Order layers
+evapotranspiration.rast <- evapotranspiration.rast[[ordered.names]]
+evapotranspiration.rast
+```
+
+## Verification of the values
+
+```{r}
+# Verification of the values
+evapotranspiration.minmax <- minmax(evapotranspiration.rast) %>% 
+  t() %>% 
+  as.data.frame()
+evapotranspiration.minmax
+```
+
+## Plot the month of October 2020
+
+```{r}
+# Create a sequence date for 'rts' object
+evapotranspiration.rts <- rts(evapotranspiration.rast, seq.dates)
+# Applying the mask to plot only the amazon area.
+evapot <- evapotranspiration.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# Plot
+p.evapot <- myPlot(evapot, title = "Evapotranspiration") +
+  scale_fill_whitebox_c(
+    name = TeX(r"($\textit{(kg/m^2s)}$)"),
+    palette = "bl_yl_rd", 
+    na.value = "transparent")
+p.evapot
+```
+
+## Missing Data
+
+```{r}
+cl <- makeCluster(detectCores() - 1)
+registerDoParallel(cl, cores=detectCores() - 1)
+
+# Raster to datatable in parallel: one raster per thread
+rasList <- foreach (
+  ras_id=amaz.evapotranspiration.list, 
+  .packages=c('terra', 'sf', 'dplyr'), 
+  .combine='c') %dopar% {
+    # Read and rename raster
+    ras <- rast(ras_id) %>% renameLayers(., 'evapotranspiration_working_', '')
+    # Count the missing data
+    ras.freq.na <- not.na(ras) %>%
+      mask(amaz.basin.shp) %>%
+      terra::freq(., digits=0, value=0, usenames=T)
+  
+    list(ras.freq.na)
+  }
+stopCluster(cl)
+
+# Bind all per-raster into one dataframe
+evapotranspiration.freq.na <- rbindlist(rasList, fill=T, use.names=T)
+# Order
+colnames(evapotranspiration.freq.na)[3] <- "evapotranspiration_na"
+evapotranspiration.freq.na <- 
+  evapotranspiration.freq.na[order(evapotranspiration.freq.na$layer)]
+evapotranspiration.freq.na
+```
+
+### Zoom Plot
+
+```{r}
+# Applying the mask to plot only the amazon area.
+evapot <- evapotranspiration.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# define the zoom area
+evapot.xy.zoom <- list(xmin=0.9e+06, xmax=1.4e+06, ymin=3e+06, ymax=3.6e+06, zoom=0.4)
+# Plot
+p.evapot.na <- myPlot(
+  evapot, title = "Evapotranspiration", 
+  max_cell=1e7,
+  x_angle=90,
+  b_size=12,
+  na.color="black",
+  xy.zoom = evapot.xy.zoom
+) +
+  scale_fill_whitebox_c(
+    name = TeX(r"($\textit{(kg/m^2s)}$)"),
+    palette = "bl_yl_rd", 
+    na.value = "transparent")
+p.evapot.na
+```
+
+#=====================
+
+# Wind Speed data
+
+## Import data
+
+```{r}
+# list of files
+amaz.wind.list <- list.files(
+  paste0(path.data,"/9. Wind Speed/03. Working Data"),
+  full.names=TRUE,
+  pattern = ".tif$")
+# Import data with "Terra"
+wind.rast <- rast(amaz.wind.list)
+wind.rast
+```
+
+## Rename and order layers
+
+```{r}
+# Rename layers
+wind.rast <- renameLayers(wind.rast, 'wind_working_', '')
+# Order layers
+wind.rast <- wind.rast[[ordered.names]]
+wind.rast
+```
+
+## Verification of the values
+
+```{r}
+# Verification of the values
+wind.minmax <- minmax(wind.rast) %>% t() %>% as.data.frame()
+wind.minmax
+```
+
+## Plot the month of October 2020
+
+```{r}
+# Create a sequence date for 'rts' object
+wind.rts <- rts(wind.rast, seq.dates)
+# Applying the mask to plot only the amazon area.
+wind <- wind.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# Plot
+p.wind <- myPlot(wind, title = "Wind Speed") +
+  scale_fill_hypso_c(
+    name = TeX(r"($\textit{(m / s)}$)"),
+    palette = "gmt_globe_bathy", 
+    trans = "pseudo_log",
+    direction = -1,
+    na.value = "transparent")
+p.wind
+```
+
+## Missing Data
+
+```{r}
+cl <- makeCluster(detectCores() - 1)
+registerDoParallel(cl, cores=detectCores() - 1)
+
+# Raster to datatable in parallel: one raster per thread
+rasList <- foreach (
+  ras_id=amaz.wind.list, 
+  .packages=c('terra', 'sf', 'dplyr'), 
+  .combine='c') %dopar% {
+    # Read and rename raster
+    ras <- rast(ras_id) %>% renameLayers(., 'wind_working_', '')
+    # Count the missing data
+    ras.freq.na <- not.na(ras) %>%
+      mask(amaz.basin.shp) %>%
+      terra::freq(., digits=0, value=0, usenames=T)
+  
+    list(ras.freq.na)
+  }
+stopCluster(cl)
+
+# Bind all per-raster into one dataframe
+wind.freq.na <- rbindlist(rasList, fill=T, use.names=T)
+# Order
+colnames(wind.freq.na)[3] <- "wind_na"
+wind.freq.na <- wind.freq.na[order(wind.freq.na$layer)]
+wind.freq.na
+```
+
+### Zoom Plot
+
+```{r}
+# Applying the mask to plot only the amazon area.
+wind <- wind.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# define the zoom area
+wind.xy.zoom <- list(xmin=0.9e+06, xmax=1.4e+06, ymin=3.4e+06, ymax=4e+06, zoom=0.4)
+# Plot
+p.wind.na <- myPlot(
+  wind, title = "Wind Speed", 
+  max_cell=1e7,
+  x_angle=90,
+  b_size=12,
+  na.color="black",
+  xy.zoom = wind.xy.zoom
+) +
+  scale_fill_hypso_c(
+    name = TeX(r"($\textit{(m / s)}$)"),
+    palette = "gmt_globe_bathy", 
+    trans = "pseudo_log",
+    direction = -1,
+    na.value = "transparent")
+p.wind.na
+```
+
+#=====================
+
+# Air Temperature data
+
+## Import data
+
+```{r}
+# list of files
+amaz.airtemp.list <- list.files(
+  paste0(path.data,"/10. Air Temperature/03. Working Data"),
+  full.names=TRUE,
+  pattern = ".tif$")
+# Import data with "Terra"
+airtemp.rast <- rast(amaz.airtemp.list)
+airtemp.rast
+```
+
+## Rename and order layers
+
+```{r}
+# Rename layers
+airtemp.rast <- renameLayers(airtemp.rast, 'airtemp_working_', '')
+# Order layers
+airtemp.rast <- airtemp.rast[[ordered.names]]
+airtemp.rast
+```
+
+## Verification of the values
+
+```{r}
+# Verification of the values
+airtemp.minmax <- minmax(airtemp.rast) %>% t() %>% as.data.frame()
+airtemp.minmax
+```
+
+## Plot the month of October 2020
+
+```{r}
+# Create a sequence date for 'rts' object
+airtemp.rts <- rts(airtemp.rast, seq.dates)
+# Applying the mask to plot only the amazon area.
+airtemp <- airtemp.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# Plot
+p.airtemp <- myPlot(airtemp, title = "Air Temperature") +
+  scale_fill_whitebox_c(
+    name = TeX(r"($\textit{(K)}$)"),
+    palette = "bl_yl_rd", 
+    na.value = "transparent")
+p.airtemp
+```
+
+## Missing Data
+
+```{r}
+cl <- makeCluster(detectCores() - 1)
+registerDoParallel(cl, cores=detectCores() - 1)
+
+# Raster to datatable in parallel: one raster per thread
+rasList <- foreach (
+  ras_id=amaz.airtemp.list, 
+  .packages=c('terra', 'sf', 'dplyr'), 
+  .combine='c') %dopar% {
+    # Read and rename raster
+    ras <- rast(ras_id) %>% renameLayers(., 'airtemp_working_', '')
+    # Count the missing data
+    ras.freq.na <- not.na(ras) %>%
+      mask(amaz.basin.shp) %>%
+      terra::freq(., digits=0, value=0, usenames=T)
+  
+    list(ras.freq.na)
+  }
+stopCluster(cl)
+
+# Bind all per-raster into one dataframe
+airtemp.freq.na <- rbindlist(rasList, fill=T, use.names=T)
+# Order
+colnames(airtemp.freq.na)[3] <- "airtemp_na"
+airtemp.freq.na <- airtemp.freq.na[order(airtemp.freq.na$layer)]
+airtemp.freq.na
+```
+
+### Zoom Plot
+
+```{r}
+# Applying the mask to plot only the amazon area.
+airtemp <- airtemp.rts[['2020-10-01']] %>% mask(mask = amaz.basin.shp)
+# define the zoom area
+airtemp.xy.zoom <- list(xmin=0.9e+06, xmax=1.4e+06, ymin=3.4e+06, ymax=4e+06, zoom=0.4)
+# Plot
+p.airtemp.na <- myPlot(
+  airtemp, title = "Air Temperature", 
+  max_cell=1e7,
+  x_angle=90,
+  b_size=12,
+  na.color="black",
+  xy.zoom = airtemp.xy.zoom
+) +
+  scale_fill_whitebox_c(
+    name = TeX(r"($\textit{(K)}$)"),
+    palette = "bl_yl_rd", 
+    na.value = "transparent")
+p.airtemp.na
+```
+
+#=====================
+
+# Merge all dataframes of missing values.
+
+```{r}
+# create the dataframe
+amaz.na.df <- as.data.frame(ordered.names)
+colnames(amaz.na.df) <- "layer"
+# Merge the dataframes
+amaz.na.df <- list(amaz.na.df, 
+                   burntArea.freq.na[,-2], 
+                   landCover.freq.na[,-2], 
+                   precipitation.freq.na[,-2],
+                   soilmoisture.freq.na[,-2],
+                   elevation.freq.na[,-2],
+                   landsurftemp.freq.na[,-2], 
+                   humidity.freq.na[,-2], 
+                   evapotranspiration.freq.na[,-2],
+                   wind.freq.na[,-2], 
+                   airtemp.freq.na[,-2]) %>% 
+  reduce(full_join, by="layer")
+
+amaz.na.df
+```
+
+#=====================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
