@@ -241,7 +241,7 @@ burntArea.rast
 
 #### *Verification of the values*
 
-Verify whether any year has a minimum value of cells other than (-2) or a maximum value of cells other than (1).
+Verify whether any month has a minimum value of cells other than (-2) or a maximum value of cells other than (1).
 
 <details>
     <summary>
@@ -461,6 +461,8 @@ landCover.rast
 
 #### *Verification of the values*
 
+Check if any month has a minimum or maximum value of cells outside the range of integers from 0 to 10.
+
 <details>
     <summary>
       <em><code>Show/Hide code</code></em>
@@ -545,6 +547,8 @@ landCover.freq.na
 <p align="center">
   <img src="img/2.3.lc.png"  width="60%" />
 </p>
+
+>> In this variable, we don't have any missing data.
 
 ### I.2.3. Precipitation
 >_Precipitation_ is measured in millimeters per hour, with a range between 0 and 3300.
