@@ -241,6 +241,8 @@ burntArea.rast
 
 #### *Verification of the values*
 
+Verify whether any year has a minimum value of cells other than (-2) or a maximum value of cells other than (1).
+
 <details>
     <summary>
       <em><code>Show/Hide code</code></em>
@@ -252,7 +254,6 @@ burntArea.minmax <- minmax(burntArea.rast) %>% t() %>% as.data.frame()
 burntArea.minmax[which((burntArea.minmax[,1] != -2) & (burntArea.minmax[,2] != 1)),]
 ```
 </details>
-
 
 <p align="center">
   <img src="img/1.1.BurntArea-Verification of the values.png"  width="60%" />
