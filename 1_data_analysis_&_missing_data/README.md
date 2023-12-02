@@ -3,21 +3,23 @@
 [*:arrow_left: Main Page*](../) 
 &emsp;&emsp; | &emsp;&emsp;
 [*II. Data Preparation :arrow_right:*](../2_data_preparation/README.md)
-
 #
 
 # I. Data Analysis and Missing Data
 
-The dataset includes 10 variables that capture various factors related to fires, land use, environmental conditions, and climate. It provides a spatial resolution of 500 meters, allowing a detailed analysis of the Amazon rainforest. These variables are measured on a monthly basis, covering the entire period from 2001 to 2020, and each variable contains a substantial monthly dataset, with around 26.8 million observations per month.
+The dataset includes 10 variables that capture various factors related to fires, land use, environmental conditions, and climate. It provides a spatial resolution of 500 meters, allowing a detailed analysis of the Amazon rainforest. These variables are measured on a monthly basis, covering the entire period from 2001 to 2020, and each variable contains a substantial monthly dataset, with around 26.8 million observations per month. Cumulatively, these variables yield an extensive dataset, totaling about 6.3 billion observations across all months.
 
-### Missing Data
-Dealing with missing data is a crucial part of our project. In the context of the "Burnt Area" variable, cells with a value of -2 represent water. However, the status of these cells can change over time to indicate "No fire" (0) or "Fire" (1) in different months. In our analysis, we treat cells with a value of -2 as missing data.
+## I.1. Missing Data
+Dealing with missing data is a crucial part of our project. In the context of the *Burnt Area* variable, cells with a value of (-2) represent water. However, the status of these cells can change over time to indicate "No fire" (0) or "Fire" (1) in different months. In our analysis, we treat cells with a value of (-2) as missing data.
 
-For the covariate "Land Surface Temperature," missing data varies across months. We observed that 26 months had more than 1 million missing data points, with three months exceeding 2 million missing data points. February 2016 had the highest with 3.3 million missing data points. To visually understand these missing data patterns, you can refer to the plots for the months with the most significant gaps.
+For the covariate *Land Surface Temperature*, missing data varies across months. We observed that 26 months had more than 1 million missing data points, with three months exceeding 2 million missing data points. February 2016 had the highest with 3.3 million missing data points. To visually understand these missing data patterns, you can refer to the plots for the months with the most significant gaps.
 
-In contrast, other covariates like "Precipitation," "Soil Moisture," "Specific Humidity," "Evapotranspiration," "Wind Speed," and "Air Temperature" have consistent missing data patterns across all months. These covariates have missing data values mostly at the boundary of the map, and each month's missing data count is below 133,000. We decided to exclude cells with missing data in these covariates as they consistently lacked data throughout the entire study period.
+In contrast, other covariates like *Precipitation*, *Soil Moisture*, *Specific Humidity*, *Evapotranspiration*, *Wind Speed*, and *Air Temperature* have consistent missing data patterns across all months. These covariates have missing data values mostly at the boundary of the map, and each month's missing data count is below 133,000. We decided to exclude cells with missing data in these covariates as they consistently lacked data throughout the entire study period.
 
-Before looking for each variable, we import the Amazon shape file and initialize variables and function to use them after for each variable:
+Those missing data will be study and shown with the next section [I.2. Data Analysis](../##Data-Analysis)
+
+## I.2. Data Analysis
+Before looking for each variable, we import the Amazon shape file and initialize variables and functions to use them after for each variable:
 
 <details>
     <summary>
@@ -129,8 +131,6 @@ amaz.basin.shp <- st_read(
     ID     AREA PERIMETER FORMA POLYAREA     AREAPROJ                       geometry
     1  0 548.0098   241.442  <NA>  6725344 6.725344e+12 MULTIPOLYGON (((-2028457 35...
 ```
-
-Now, let's take a closer look at each variable:
 
 ## I.1. Burnt Area
 
