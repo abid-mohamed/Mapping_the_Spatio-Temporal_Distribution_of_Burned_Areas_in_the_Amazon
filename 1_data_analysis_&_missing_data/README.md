@@ -317,6 +317,8 @@ ggplot(data = ba.dt, aes(x = val)) +
 
 #### *Percentage of fires*
 
+Calculate the percentage of fire occurrence in the entire dataset.
+
 <details>
     <summary>
       <em><code>Show/Hide code</code></em>
