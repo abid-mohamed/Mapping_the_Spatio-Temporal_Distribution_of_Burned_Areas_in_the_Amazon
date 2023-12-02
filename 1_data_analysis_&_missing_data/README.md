@@ -548,7 +548,7 @@ landCover.freq.na
   <img src="img/2.3.lc.png"  width="60%" />
 </p>
 
->> In this variable, we don't have any missing data.
+In this variable, we don't have any missing data.
 
 ### I.2.3. Precipitation
 >_Precipitation_ is measured in millimeters per hour, with a range between 0 and 3300.
