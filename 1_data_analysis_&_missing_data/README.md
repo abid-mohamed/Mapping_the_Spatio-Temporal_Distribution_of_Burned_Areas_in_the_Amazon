@@ -21,6 +21,13 @@ The plot below represents the four months with the most missing data:
 
 In contrast, other covariates like *Precipitation*, *Soil Moisture*, *Specific Humidity*, *Evapotranspiration*, *Wind Speed*, and *Air Temperature* have consistent missing data patterns across all months. These covariates have missing data values mostly at the boundary of the map, and each month's missing data count is below 133,000. We decided to exclude cells with missing data in these covariates as they consistently lacked data throughout the entire study period.
 
+The following table represents the count of missing data for each variable across the initial 10 months:
+
+<p align="center">
+  <img src="img/MissingData1.png"  width="49.5%" />
+  <img src="img/MissingData2.png"  width="49.5%" />
+</p>
+
 The missing data for each variable will be investigated and presented in the upcoming section [I.2. Data Analysis](../##Data-Analysis).
 
 ## I.2. Data Analysis
@@ -2058,11 +2065,6 @@ amaz.na.df <- list(amaz.na.df,
 amaz.na.df
 ```
 </details>
-
-<p align="center">
-  <img src="img/MissingData1.png"  width="49.5%" />
-  <img src="img/MissingData2.png"  width="49.5%" />
-</p>
 
 #
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
