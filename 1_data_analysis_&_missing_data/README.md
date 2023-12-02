@@ -258,7 +258,7 @@ burntArea.minmax[which((burntArea.minmax[,1] != -2) & (burntArea.minmax[,2] != 1
   <img src="img/1.1.BurntArea-Verification of the values.png"  width="60%" />
 </p>
 
-#### *Plot of the month of October 2020*
+#### *Plot for the Month of October 2020*
 
 <details>
     <summary>
@@ -475,7 +475,7 @@ landCover.minmax[
   <img src="img/2.1.lc.png"  width="60%" />
 </p>
 
-#### *Plot of the month of October 2020*
+#### *Plot for the Month of October 2020*
 
 <details>
     <summary>
@@ -629,7 +629,7 @@ precipitation.minmax
   <img src="img/3.1.prec.png"  width="60%" />
 </p>
 
-#### *Plot of the month of October 2020*
+#### *Plot for the Month of October 2020*
 
 <details>
     <summary>
@@ -868,7 +868,7 @@ p.soilm.na
   <img src="img/4.3.soilm.png"  width="60%" />
 </p>
 
-#### *Plot of the month of October 2020*
+#### *Plot for the Month of October 2020*
 
 <details>
     <summary>
@@ -1150,7 +1150,7 @@ landSurfaceTemp.minmax
   <img src="img/6.1.lst.png"  width="60%" />
 </p>
 
-#### *Plot of the month of October 2020*
+#### *Plot for the Month of October 2020*
 
 <details>
     <summary>
@@ -1341,7 +1341,7 @@ humidity.minmax
   <img src="img/7.1.hum.png"  width="70%" />
 </p>
 
-#### *Plot of the month of October 2020*
+#### *Plot for the Month of October 2020*
 
 <details>
     <summary>
@@ -1529,7 +1529,7 @@ evapotranspiration.minmax
   <img src="img/8.1.evapot.png"  width="70%" />
 </p>
 
-#### *Plot of the month of October 2020*
+#### *Plot for the Month of October 2020*
 
 <details>
     <summary>
@@ -1717,7 +1717,7 @@ wind.minmax
 </p>
 
 
-#### *Plot of the month of October 2020*
+#### *Plot for the Month of October 2020*
 
 <details>
     <summary>
@@ -1906,7 +1906,7 @@ airtemp.minmax
   <img src="img/10.1.airtemp.png"  width="70%" />
 </p>
 
-#### *Plot of the month of October 2020*
+#### *Plot for the Month of October 2020*
 
 <details>
     <summary>
