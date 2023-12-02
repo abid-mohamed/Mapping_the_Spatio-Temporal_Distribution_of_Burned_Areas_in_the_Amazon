@@ -28,7 +28,10 @@ The following table represents the count of missing data for each variable acros
   <img src="img/MissingData2.png"  width="49.5%" />
 </p>
 
-The missing data for each variable will be investigated and presented in the upcoming section [I.2. Data Analysis](../##Data-Analysis).
+The missing data for each variable will be investigated and presented in the upcoming section [I.2. Data Analysis](./#i2-data-analysis).
+
+https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/1_data_analysis_%26_missing_data/README.md#i2-data-analysis
+
 
 ## I.2. Data Analysis
 Before looking for each variable, we import the Amazon shape file and initialize variables and functions to use them after for each variable:
