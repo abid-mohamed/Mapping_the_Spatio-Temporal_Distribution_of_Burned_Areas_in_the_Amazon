@@ -30,9 +30,6 @@ The following table represents the count of missing data for each variable acros
 
 The missing data for each variable will be investigated and presented in the upcoming section [I.2. Data Analysis](./#i2-data-analysis).
 
-https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/1_data_analysis_%26_missing_data/README.md#i2-data-analysis
-
-
 ## I.2. Data Analysis
 Before looking for each variable, we import the Amazon shape file and initialize variables and functions to use them after for each variable:
 
@@ -147,13 +144,13 @@ amaz.basin.shp <- st_read(
     1  0 548.0098   241.442  <NA>  6725344 6.725344e+12 MULTIPOLYGON (((-2028457 35...
 ```
 
-## I.1. Burnt Area
+### I.2.1. Burnt Area
 
-### I.1.1. Data Analysis
+#### I.2.1.1. Data Analysis
 
 _Burnt Area_ Represents the extent of burned areas in the Amazon rainforest, categorized as burnt (1), unburnt (0), missing (-1), or water (-2).
 
-#### *Import data*
+##### *Import data*
 
 <details>
     <summary>
@@ -187,7 +184,7 @@ burntArea.rast
     max values  :           1,           1,           1,           1,           1,           1, ...
 ```
 
-#### *Rename layers*
+##### *Rename layers*
 
 <details>
     <summary>
@@ -216,7 +213,7 @@ burntArea.rast
     max values  :       1,       1,       1,       1,       1,       1, ... 
 ```
 
-#### *Order layers*
+##### *Order layers*
 
 <details>
     <summary>
@@ -245,7 +242,7 @@ burntArea.rast
     max values  :       1,       1,       1,       1,       1,       1, ... 
 ```
 
-#### *Verification of the values*
+##### *Verification of the values*
 
 <details>
     <summary>
@@ -264,7 +261,7 @@ burntArea.minmax[which((burntArea.minmax[,1] != -2) & (burntArea.minmax[,2] != 1
   <img src="img/1.1.BurntArea-Verification of the values.png"  width="60%" />
 </p>
 
-#### *Plot of the month of October 2020*
+##### *Plot of the month of October 2020*
 
 <details>
     <summary>
@@ -321,7 +318,7 @@ ggplot(data = ba.dt, aes(x = val)) +
   <img src="img/1.3.ba.png"  width="60%" />
 </p>
 
-#### *Percentage of fires*
+##### *Percentage of fires*
 
 <details>
     <summary>
@@ -353,7 +350,7 @@ percentage.fires
 ```
 
 
-### I.1.2. Missing Data
+#### I.2.1.2. Missing Data
 
 <details>
     <summary>
@@ -396,13 +393,13 @@ burntArea.freq.na
   <img src="img/1.4.ba.na3.png"  width="49.5%" />
 </p>
 
-## I.2. Land Cover
+### I.2.2. Land Cover
 
-### I.2.1. Data Analysis
+#### I.2.2.1. Data Analysis
 
 _Land Cover_ is a categorical variable with 11 classes, providing information on different land cover types such as water, urban, forest, grassland, and more.
 
-#### *Import data*
+##### *Import data*
 
 <details>
     <summary>
@@ -436,7 +433,7 @@ landCover.rast
     max values  :          10,          10,          10,          10,          10,          10, ...
 ```
 
-#### *Rename and order layers*
+##### *Rename and order layers*
 
 <details>
     <summary>
@@ -467,7 +464,7 @@ landCover.rast
     max values  :      10,      10,      10,      10,      10,      10, ... 
 ```
 
-#### *Verification of the values*
+##### *Verification of the values*
 
 <details>
     <summary>
@@ -486,7 +483,7 @@ landCover.minmax[
   <img src="img/2.1.lc.png"  width="60%" />
 </p>
 
-#### *Plot of the month of October 2020*
+##### *Plot of the month of October 2020*
 
 <details>
     <summary>
@@ -514,7 +511,7 @@ p.lc
   <img src="img/2.2.lc.png"  width="60%" />
 </p>
 
-### I.2.2. Missing Data
+#### I.2.2.2. Missing Data
 
 <details>
     <summary>
@@ -554,13 +551,13 @@ landCover.freq.na
   <img src="img/2.3.lc.png"  width="60%" />
 </p>
 
-## I.3. Precipitation
+### I.2.3. Precipitation
 
-### I.3.1. Data Analysis
+#### I.2.3.1. Data Analysis
 
 _Precipitation_ is measured in millimeters per hour, with a range between 0 and 3300.
 
-#### *Import data*
+##### *Import data*
 
 <details>
     <summary>
@@ -594,7 +591,7 @@ precipitation.rast
     max values  :        1461,        1735,        1828,        1934,        1433,        1390, ...
 ```
 
-#### *Rename and order layers*
+##### *Rename and order layers*
 
 <details>
     <summary>
@@ -625,7 +622,7 @@ precipitation.rast
     max values  :    1461,    1433,    1390,    1096,    1678,    1706, ... 
 ```
 
-#### *Verification of the values*
+##### *Verification of the values*
 
 <details>
     <summary>
@@ -643,7 +640,7 @@ precipitation.minmax
   <img src="img/3.1.prec.png"  width="60%" />
 </p>
 
-#### *Plot of the month of October 2020*
+##### *Plot of the month of October 2020*
 
 <details>
     <summary>
@@ -672,7 +669,7 @@ p.prec
   <img src="img/3.2.prec.png"  width="60%" />
 </p>
 
-### I.3.2. Missing Data
+#### I.2.3.2. Missing Data
 
 <details>
     <summary>
@@ -712,7 +709,7 @@ precipitation.freq.na
   <img src="img/3.3.prec.png"  width="60%" />
 </p>
 
-#### *Plot of missing data*
+##### *Plot of missing data*
 
 <details>
     <summary>
@@ -748,13 +745,13 @@ p.prec.na
   <img src="img/3.4.prec.png"  width="60%" />
 </p>
 
-## I.4. Soil Moisture
+### I.2.4. Soil Moisture
 
-### I.4.1. Data Analysis
+#### I.2.4.1. Data Analysis
 
 _Soil Moisture_ is measured in millimeters, with missing values marked as -9.99e+08, and a range between 0 and 4291.
 
-#### *Import data*
+##### *Import data*
 
 <details>
     <summary>
@@ -789,7 +786,7 @@ soilMoisture.rast
   max values  :  1.076058e+03,  4.290171e+03,  7.905507e+02,  5.636223e+02,  7.509722e+02,  6.363759e+02, ... 
 ```
 
-#### *Rename and order layers*
+##### *Rename and order layers*
 
 <details>
     <summary>
@@ -820,7 +817,7 @@ soilMoisture.rast
   max values  :  1.076058e+03,  7.509722e+02,  6.363759e+02,  7.215025e+02,  6.892701e+02,  5.409775e+02, ... 
 ```
 
-#### *Verification of the values*
+##### *Verification of the values*
 
 <details>
     <summary>
@@ -885,7 +882,7 @@ p.soilm.na
   <img src="img/4.3.soilm.png"  width="60%" />
 </p>
 
-#### *Plot of the month of October 2020*
+##### *Plot of the month of October 2020*
 
 <details>
     <summary>
@@ -909,7 +906,7 @@ p.soilm
   <img src="img/4.4.soilm.png"  width="60%" />
 </p>
 
-### I.4.2. Missing Data
+#### I.2.4.2. Missing Data
 
 <details>
     <summary>
@@ -951,7 +948,7 @@ soilmoisture.freq.na
   <img src="img/4.5.soilm.png"  width="60%" />
 </p>
 
-#### *Plot of Missing Data*
+##### *Plot of Missing Data*
 
 <details>
     <summary>
@@ -982,13 +979,13 @@ p.soilm.na
   <img src="img/4.6.soilm.png"  width="70%" />
 </p>
 
-## I.5. Elevation
+### I.2.5. Elevation
 
-### I.5.1. Data Analysis
+#### I.2.5.1. Data Analysis
 
 _Elevation_ is measured in meters, with a range between -85 and 6471.
 
-#### *Import data*
+##### *Import data*
 
 <details>
     <summary>
@@ -1019,7 +1016,7 @@ elevation.rast
     max value   :         6470.5 
 ```
 
-#### *Verification of the values*
+##### *Verification of the values*
 
 <details>
     <summary>
@@ -1037,7 +1034,7 @@ elevation.minmax
   <img src="img/5.1.elev.png"  width="60%" />
 </p>
 
-#### *Plot of the Elevation*
+##### *Plot of the Elevation*
 
 <details>
     <summary>
@@ -1065,7 +1062,7 @@ p.elev
   <img src="img/5.2.elev.png"  width="60%" />
 </p>
 
-### I.5.2. Missing Data
+#### I.2.5.2. Missing Data
 
 <details>
     <summary>
@@ -1085,13 +1082,13 @@ elevation.freq.na
   <img src="img/5.3.elev.png"  width="60%" />
 </p>
 
-## I.6. Land Surface Temperature
+### I.2.6. Land Surface Temperature
 
-### I.6.1. Data Analysis
+#### I.2.6.1. Data Analysis
 
 _Land Surface Temperature_ is represented in Kelvin, with values adjusted by a scale factor of 0.02. Different months have varying missing data.
 
-#### *Import data*
+##### *Import data*
 
 <details>
     <summary>
@@ -1125,7 +1122,7 @@ landSurfaceTemp.rast
     max values  :       16387,       16415,       16356,       16434,       16432,       16455, ... 
 ```
 
-#### *Rename and order layers*
+##### *Rename and order layers*
 
 <details>
     <summary>
@@ -1155,7 +1152,7 @@ landSurfaceTemp.rast
     min values  :   13255,   12869,   13508,   13464,   13727,   13364, ... 
     max values  :   16387,   16432,   16455,   16223,   15990,   15897, ... 
 ```
-#### *Verification of the values*
+##### *Verification of the values*
 
 <details>
     <summary>
@@ -1173,7 +1170,7 @@ landSurfaceTemp.minmax
   <img src="img/6.1.lst.png"  width="60%" />
 </p>
 
-#### *Plot of the month of October 2020*
+##### *Plot of the month of October 2020*
 
 <details>
     <summary>
@@ -1199,7 +1196,7 @@ p.lst
   <img src="img/6.2.lst.png"  width="60%" />
 </p>
 
-### I.6.2. Missing Data
+#### I.2.6.2. Missing Data
 
 <details>
     <summary>
@@ -1242,7 +1239,7 @@ landsurftemp.freq.na
   <img src="img/6.3.lst.png"  width="60%" />
 </p>
 
-#### *Plot of Missing Data*
+##### *Plot of Missing Data*
 
 <details>
     <summary>
@@ -1278,13 +1275,13 @@ p.lst.4na
   <img src="img/6.4-1.lst.png"  width="70%" />
 </p>
 
-## I.7. Specific Humidity
+### I.2.7. Specific Humidity
 
-### I.7.1. Data Analysis
+#### I.2.7.1. Data Analysis
 
 _Specific Humidity_ is represented as kg/kg, indicating the ratio of kilograms of water (moisture) per kilogram of air. It ranges from 9.59e-04 to 2.15e-02.
 
-#### *Import data*
+##### *Import data*
 
 <details>
     <summary>
@@ -1318,7 +1315,7 @@ humidity.rast
     max values  : 0.018998224, 0.019306520, 0.019978305,  0.02033914, 0.018878255, 0.019174447, ...
 ```
 
-#### *Rename and order layers*
+##### *Rename and order layers*
 
 <details>
     <summary>
@@ -1349,7 +1346,7 @@ humidity.rast
     max values  : 0.018998224, 0.018878255, 0.019174447, 0.020020029, 0.019958658, 0.019542987, ...
 ```
 
-#### *Verification of the values*
+##### *Verification of the values*
 
 <details>
     <summary>
@@ -1367,7 +1364,7 @@ humidity.minmax
   <img src="img/7.1.hum.png"  width="70%" />
 </p>
 
-#### *Plot of the month of October 2020*
+##### *Plot of the month of October 2020*
 
 <details>
     <summary>
@@ -1393,7 +1390,7 @@ p.hum
   <img src="img/7.2.hum.png"  width="70%" />
 </p>
 
-### I.7.2. Missing Data
+#### I.2.7.2. Missing Data
 
 <details>
     <summary>
@@ -1433,7 +1430,7 @@ humidity.freq.na
   <img src="img/7.3.hum.png"  width="70%" />
 </p>
 
-#### *Plot of Missing Data*
+##### *Plot of Missing Data*
 
 <details>
     <summary>
@@ -1466,13 +1463,13 @@ p.hum.na
   <img src="img/7.4.hum.png"  width="70%" />
 </p>
 
-## I.8. Evapotranspiration
+### I.2.8. Evapotranspiration
 
-### I.8.1. Data Analysis
+#### I.2.8.1. Data Analysis
 
 _Evapotranspiration_ is measured in kg/m2s, with values ranging between -2.02e-07 and 9.69e-05.
 
-#### *Import data*
+##### *Import data*
 
 <details>
     <summary>
@@ -1506,7 +1503,7 @@ evapotranspiration.rast
   max values  : 8.157189e-05,  8.477412e-05,  9.205872e-05,  7.918844e-05,  9.691325e-05,  8.340040e-05, ... 
 ```
 
-#### *Rename and order layers*
+##### *Rename and order layers*
 
 <details>
     <summary>
@@ -1538,7 +1535,7 @@ evapotranspiration.rast
   max values  : 8.157189e-05,  9.691325e-05,  8.340040e-05,  7.563404e-05,  7.022559e-05,  8.013412e-05, ... 
 ```
 
-#### *Verification of the values*
+##### *Verification of the values*
 
 <details>
     <summary>
@@ -1558,7 +1555,7 @@ evapotranspiration.minmax
   <img src="img/8.1.evapot.png"  width="70%" />
 </p>
 
-#### *Plot of the month of October 2020*
+##### *Plot of the month of October 2020*
 
 <details>
     <summary>
@@ -1584,7 +1581,7 @@ p.evapot
   <img src="img/8.2.evapot.png"  width="70%" />
 </p>
 
-### I.8.2. Missing Data
+#### I.2.8.2. Missing Data
 
 <details>
     <summary>
@@ -1625,7 +1622,7 @@ evapotranspiration.freq.na
   <img src="img/8.3.evapot.png"  width="70%" />
 </p>
 
-#### *Plot of Missing Data*
+##### *Plot of Missing Data*
 
 <details>
     <summary>
@@ -1658,13 +1655,13 @@ p.evapot.na
   <img src="img/8.4.evapot.png"  width="70%" />
 </p>
 
-## I.9. Wind Speed
+### I.2.9. Wind Speed
 
-### I.9.1. Data Analysis
+#### I.2.9.1. Data Analysis
 
 _Wind Speed_ is measured in m/s, with values between 0.86 and 9.85.
 
-#### *Import data*
+##### *Import data*
 
 <details>
     <summary>
@@ -1698,7 +1695,7 @@ wind.rast
   max values  :    8.202874,    7.747525,    7.947669,    8.901711,    9.390056,    8.901502, ... 
 ```
 
-#### *Rename and order layers*
+##### *Rename and order layers*
 
 <details>
     <summary>
@@ -1730,7 +1727,7 @@ wind.rast
   max values  : 8.202874, 9.390056, 8.901502, 8.614891, 7.900918, 7.8636937, ... 
 ```
 
-#### *Verification of the values*
+##### *Verification of the values*
 
 <details>
     <summary>
@@ -1749,7 +1746,7 @@ wind.minmax
 </p>
 
 
-#### *Plot of the month of October 2020*
+##### *Plot of the month of October 2020*
 
 <details>
     <summary>
@@ -1777,7 +1774,7 @@ p.wind
   <img src="img/9.2.wind.png"  width="70%" />
 </p>
 
-### I.9.2. Missing Data
+#### I.2.9.2. Missing Data
 
 <details>
     <summary>
@@ -1817,7 +1814,7 @@ wind.freq.na
   <img src="img/9.3.wind.png"  width="70%" />
 </p>
 
-#### *Plot of Missing Data*
+##### *Plot of Missing Data*
 
 <details>
     <summary>
@@ -1852,13 +1849,13 @@ p.wind.na
   <img src="img/9.4.wind.png"  width="70%" />
 </p>
 
-## I.10. Air Temperature
+### I.2.10. Air Temperature
 
-### I.10.1. Data Analysis
+#### I.2.10.1. Data Analysis
 
 _Air Temperature_ is represented in Kelvin, with values ranging from 268 to 307.
 
-#### *Import data*
+##### *Import data*
 
 <details>
     <summary>
@@ -1892,7 +1889,7 @@ airtemp.rast
   max values  :    303.1154,    304.1908,    304.2381,    303.4955,    304.7826,    304.7043, ... 
 ```
 
-#### *Rename and order layers*
+##### *Rename and order layers*
 
 <details>
     <summary>
@@ -1923,7 +1920,7 @@ airtemp.rast
   max values  : 303.1154, 304.7826, 304.7043, 304.4511, 303.5922, 304.0975, ... 
 ```
 
-#### *Verification of the values*
+##### *Verification of the values*
 
 <details>
     <summary>
@@ -1941,7 +1938,7 @@ airtemp.minmax
   <img src="img/10.1.airtemp.png"  width="70%" />
 </p>
 
-#### *Plot of the month of October 2020*
+##### *Plot of the month of October 2020*
 
 <details>
     <summary>
@@ -1967,7 +1964,7 @@ p.airtemp
   <img src="img/10.2.airtemp.png"  width="70%" />
 </p>
 
-### I.10.2. Missing Data
+#### I.2.10.2. Missing Data
 
 <details>
     <summary>
@@ -2007,7 +2004,7 @@ airtemp.freq.na
   <img src="img/10.3.airtemp.png"  width="70%" />
 </p>
 
-#### *Plot of Missing Data*
+##### *Plot of Missing Data*
 
 <details>
     <summary>
@@ -2040,7 +2037,7 @@ p.airtemp.na
   <img src="img/10.4.airtemp.png"  width="70%" />
 </p>
 
-## I.11. Merge all dataframes of missing values.
+### I.2.11. Merge all dataframes of missing values.
 
 <details>
     <summary>
