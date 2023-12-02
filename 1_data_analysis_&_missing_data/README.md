@@ -148,7 +148,7 @@ amaz.basin.shp <- st_read(
 
 #### I.2.1.1. Data Analysis
 
-_Burnt Area_ Represents the extent of burned areas in the Amazon rainforest, categorized as burnt (1), unburnt (0), missing (-1), or water (-2).
+>_Burnt Area_ Represents the extent of burned areas in the Amazon rainforest, categorized as burnt (1), unburnt (0), missing (-1), or water (-2).
 
 ##### *Import data*
 
@@ -287,7 +287,6 @@ p.ba
 ```
 </details>
 
-
 <p align="center">
   <img src="img/1.2.ba.png"  width="60%" />
 </p>
@@ -349,7 +348,6 @@ percentage.fires
   [1] 0.00089637
 ```
 
-
 #### I.2.1.2. Missing Data
 
 <details>
@@ -397,7 +395,7 @@ burntArea.freq.na
 
 #### I.2.2.1. Data Analysis
 
-_Land Cover_ is a categorical variable with 11 classes, providing information on different land cover types such as water, urban, forest, grassland, and more.
+>_Land Cover_ is a categorical variable with 11 classes, providing information on different land cover types such as water, urban, forest, grassland, and more.
 
 ##### *Import data*
 
@@ -555,7 +553,7 @@ landCover.freq.na
 
 #### I.2.3.1. Data Analysis
 
-_Precipitation_ is measured in millimeters per hour, with a range between 0 and 3300.
+>_Precipitation_ is measured in millimeters per hour, with a range between 0 and 3300.
 
 ##### *Import data*
 
@@ -749,7 +747,7 @@ p.prec.na
 
 #### I.2.4.1. Data Analysis
 
-_Soil Moisture_ is measured in millimeters, with missing values marked as -9.99e+08, and a range between 0 and 4291.
+>_Soil Moisture_ is measured in millimeters, with missing values marked as -9.99e+08, and a range between 0 and 4291.
 
 ##### *Import data*
 
@@ -983,7 +981,7 @@ p.soilm.na
 
 #### I.2.5.1. Data Analysis
 
-_Elevation_ is measured in meters, with a range between -85 and 6471.
+>_Elevation_ is measured in meters, with a range between -85 and 6471.
 
 ##### *Import data*
 
@@ -1086,7 +1084,7 @@ elevation.freq.na
 
 #### I.2.6.1. Data Analysis
 
-_Land Surface Temperature_ is represented in Kelvin, with values adjusted by a scale factor of 0.02. Different months have varying missing data.
+>_Land Surface Temperature_ is represented in Kelvin, with values adjusted by a scale factor of 0.02. Different months have varying missing data.
 
 ##### *Import data*
 
@@ -1279,7 +1277,7 @@ p.lst.4na
 
 #### I.2.7.1. Data Analysis
 
-_Specific Humidity_ is represented as kg/kg, indicating the ratio of kilograms of water (moisture) per kilogram of air. It ranges from 9.59e-04 to 2.15e-02.
+>_Specific Humidity_ is represented as kg/kg, indicating the ratio of kilograms of water (moisture) per kilogram of air. It ranges from 9.59e-04 to 2.15e-02.
 
 ##### *Import data*
 
@@ -1467,7 +1465,7 @@ p.hum.na
 
 #### I.2.8.1. Data Analysis
 
-_Evapotranspiration_ is measured in kg/m2s, with values ranging between -2.02e-07 and 9.69e-05.
+>_Evapotranspiration_ is measured in kg/m2s, with values ranging between -2.02e-07 and 9.69e-05.
 
 ##### *Import data*
 
@@ -1659,7 +1657,7 @@ p.evapot.na
 
 #### I.2.9.1. Data Analysis
 
-_Wind Speed_ is measured in m/s, with values between 0.86 and 9.85.
+>_Wind Speed_ is measured in m/s, with values between 0.86 and 9.85.
 
 ##### *Import data*
 
@@ -1853,7 +1851,7 @@ p.wind.na
 
 #### I.2.10.1. Data Analysis
 
-_Air Temperature_ is represented in Kelvin, with values ranging from 268 to 307.
+>_Air Temperature_ is represented in Kelvin, with values ranging from 268 to 307.
 
 ##### *Import data*
 
