@@ -12,11 +12,12 @@ The dataset includes 10 variables that capture various factors related to fires,
 ## I.1. Missing Data
 Dealing with missing data is a crucial part of our project. In the context of the *Burnt Area* variable, cells with a value of (-2) represent water. However, the status of these cells can change over time to indicate "No fire" (0) or "Fire" (1) in different months. In our analysis, we treat cells with a value of (-2) as missing data.
 
-For the covariate *Land Surface Temperature*, missing data varies across months. We observed that 26 months had more than 1 million missing data points, with three months exceeding 2 million missing data points. February 2016 had the highest with 3.3 million missing data points. To visually understand these missing data patterns, you can refer to the plots for the months with the most significant gaps.
+For the covariate *Land Surface Temperature*, missing data varies across months. We observed that 26 months had more than 1 million missing data points, with three months exceeding 2 million missing data points. February 2016 had the highest with 3.3 million missing data points. To visually understand these missing data patterns, you can refer to the plots for the months with the most significant gaps.__
+The plot below represents the four months with the most missing data:
 
 In contrast, other covariates like *Precipitation*, *Soil Moisture*, *Specific Humidity*, *Evapotranspiration*, *Wind Speed*, and *Air Temperature* have consistent missing data patterns across all months. These covariates have missing data values mostly at the boundary of the map, and each month's missing data count is below 133,000. We decided to exclude cells with missing data in these covariates as they consistently lacked data throughout the entire study period.
 
-Those missing data will be study and shown with the next section [I.2. Data Analysis](../##Data-Analysis)
+The missing data for each variable will be investigated and presented in the upcoming section [I.2. Data Analysis](../##Data-Analysis).
 
 ## I.2. Data Analysis
 Before looking for each variable, we import the Amazon shape file and initialize variables and functions to use them after for each variable:
