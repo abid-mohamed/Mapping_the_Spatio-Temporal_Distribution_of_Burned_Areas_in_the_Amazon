@@ -24,8 +24,8 @@ In contrast, other covariates like *Precipitation*, *Soil Moisture*, *Specific H
 The following table represents the count of missing data for each variable across the initial 10 months:
 
 <p align="center">
-  <img src="img/MissingData_1.png"  width="49.5%" />
-  <img src="img/MissingData_2.png"  width="49.5%" />
+  <img src="img/MissingData_1.png"  width="49%" />
+  <img src="img/MissingData_2.png"  width="49%" />
 </p>
 
 The missing data for each variable will be investigated and presented in the upcoming section **I.2. Data Analysis**.
