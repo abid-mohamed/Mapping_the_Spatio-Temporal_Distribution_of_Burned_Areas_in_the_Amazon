@@ -2012,35 +2012,6 @@ p.airtemp.na
   <img src="img/10.4.airtemp.png"  width="70%" />
 </p>
 
-### I.2.11. Merge all dataframes of missing values.
-
-<details>
-    <summary>
-      <em><code>Show/Hide code</code></em>
-    </summary>
-
-```r
-# create the dataframe
-amaz.na.df <- as.data.frame(ordered.names)
-colnames(amaz.na.df) <- "layer"
-# Merge the dataframes
-amaz.na.df <- list(amaz.na.df, 
-                   burntArea.freq.na[,-2], 
-                   landCover.freq.na[,-2], 
-                   precipitation.freq.na[,-2],
-                   soilmoisture.freq.na[,-2],
-                   elevation.freq.na[,-2],
-                   landsurftemp.freq.na[,-2], 
-                   humidity.freq.na[,-2], 
-                   evapotranspiration.freq.na[,-2],
-                   wind.freq.na[,-2], 
-                   airtemp.freq.na[,-2]) %>% 
-  reduce(full_join, by="layer")
-
-amaz.na.df
-```
-</details>
-
 #
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
