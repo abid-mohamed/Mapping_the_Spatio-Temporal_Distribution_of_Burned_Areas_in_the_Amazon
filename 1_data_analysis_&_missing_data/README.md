@@ -28,7 +28,7 @@ The following table represents the count of missing data for each variable acros
   <img src="img/MissingData2.png"  width="49.5%" />
 </p>
 
-The missing data for each variable will be investigated and presented in the upcoming section $\text{I.2. Data Analysis}$.
+The missing data for each variable will be investigated and presented in the upcoming section **I.2. Data Analysis**.
 
 ## I.2. Data Analysis
 Before looking for each variable, we import the Amazon shape file and initialize variables and functions to use them after for each variable:
