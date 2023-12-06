@@ -53,13 +53,13 @@ In this step, we address the class imbalance issue identified in the Data Analys
 - For cells without any fire events during this period, we randomly select a single observation from across all the months. It's important to note that this selection ensures that there are no missing values in the _land surface temperature_ covariate or the response variable _burnt area_.
 
 <p align="center">
-  <img src="assets/Downsampling_approach.jpg" width="50%" />
+  <img src="./img/Downsampling_approach.jpg" width="50%" />
 </p>
 
 As the downsampling process still results in a substantial dataset of approximately 550 million observations, we have opted to partition our data into 11 zones, with each zone containing approximately 50 million observations. This division not only reduces the computational load but also enhances the usability and manageability of the dataset.
 
 <p align="center">
-  <img src="assets/zones.png"  width="70%" />
+  <img src="./img/zones.png"  width="70%" />
 </p>
 
 > [!NOTE]
@@ -83,7 +83,7 @@ In this section, we present the results of our ensemble model's predictions for 
 Explore the dynamic monthly fire probability maps through the animated GIF plot below. Each frame in the animation represents a different month across the 20-year study period. This visualization provides valuable insights into the seasonality and the spatial distribution of fire probability in the Amazon.
 
 <p align="center">
-  <img src="assets/pred_fire.gif"  width="70%" />
+  <img src="./img/pred_fire.gif"  width="70%" />
 </p>
 
 **Time Trend of Fire Probability**
@@ -91,7 +91,7 @@ Explore the dynamic monthly fire probability maps through the animated GIF plot 
 The boxplots presented below depict the time trend of fire probability during the 20-year study period. These visualizations illustrate how fire risk has evolved over time, offering a comprehensive view of long-term patterns and trends in fire probability.
 
 <p align="center">
-  <img src="assets/pred_boxplot.png"  width="70%" />
+  <img src="./img/pred_boxplot.png"  width="70%" />
 </p>
 
 These visualizations are powerful tools for understanding the dynamics and patterns of fires in the Amazon rainforest.
