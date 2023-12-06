@@ -42,7 +42,7 @@ We focus on addressing the significant challenge of identifying and managing mis
 For the remaining covariates, missing data is minimal, consistent across months, and typically located near the map's edges.
 
 > [!NOTE]
-> Additional information :point_right: [*1. Data Analysis & Missing Data*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/1_data_analysis_%26_missing_data/README.md)
+> Additional information :point_right: [*1. Data Analysis & Missing Data*](./1_data_analysis_%26_missing_data/README.md)
 
 ### II. Data Preparation (Downsampling strategy)
 
@@ -63,7 +63,7 @@ As the downsampling process still results in a substantial dataset of approximat
 </p>
 
 > [!NOTE]
-> Additional information :point_right: [*2. Data Preparation*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/2_data_preparation/README.md)
+> Additional information :point_right: [*2. Data Preparation*](./2_data_preparation/README.md)
 
 ### III. Model Assessment, Ensemble Model, and Results
 
@@ -72,7 +72,7 @@ In the Model Assessment, Ensemble Model, and Results step, we evaluate the perfo
 Additionally, we create ensemble models for each zone, combining the four methods using a linear combination technique. The weights for each method in the ensemble are determined based on the normalized AUCPR metric. This ensemble approach optimizes predictive accuracy for each zone.
 
 > [!NOTE]
-> Additional information :point_right: [*3. Model Assessment*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Fires_in_the_Amazon/blob/main/3_model_assessment_&_ensemble_model/README.md)
+> Additional information :point_right: [*3. Model Assessment*](./3_model_assessment_&_ensemble_model/README.md)
 
 ### IV. Maps and Time Trends of Fire Probability
 
@@ -95,6 +95,9 @@ The boxplots presented below depict the time trend of fire probability during th
 </p>
 
 These visualizations are powerful tools for understanding the dynamics and patterns of fires in the Amazon rainforest.
+
+> [!NOTE]
+> Access to the code :point_right: [*Code*](./code)
 
 #
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
