@@ -29,10 +29,6 @@ library(parallel)
 library(foreach)
 library(data.table)
 library(dplyr)
-# library(fastDummies)
-# library(randomForest)
-# library(caTools)
-# library(rpart)
 library(rsample)
 library(recipes)
 library(RColorBrewer)
@@ -143,9 +139,6 @@ airtemp.path <- paste0(path.data,"/10. Air Temperature/03. Working Data")
 seq.dates <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month")
 # Create name of layers
 ordered.names <- format(seq.dates, '%Y_%m') %>% setdiff(., c("2012_07", "2012_09"))
-seq.dates.238 <- paste0(ordered.names, '_01') %>% 
-  gsub("_", "-", .) %>%
-  as.Date()
 # Import shape file
 amaz.basin.shp <- st_read(
   paste0(path.data,"/0. Amazon_shapefile/projected/amazon_shp_projected.shp"), quiet = TRUE)

@@ -30,116 +30,10 @@ library(rsample)
 library(recipes)
 ```
 
-# Function
-
-```{r}
-#---- 'splitAmaZones' Function ----
-splitAmaZones <- function(Amazon.data.dt, amaz.basin.shp){
-  v <- ext(amaz.basin.shp)
-  x.min <- v$xmin[[1]] - 1; x.max <- v$xmax[[1]] + 1; 
-  y.min <- v$ymin[[1]] - 1; y.max <- v$ymax[[1]] + 1; 
-  
-  # Defining zones
-  XY <- list(
-    c(x.min, -0.84e+06, y.min, y.max),                       #  z1
-    c(-0.84e+06, +0.55e+06, 3.75e+06, y.max),                #  z2
-    c(-0.84e+06, +0.55e+06, 2.6e+06, 3.75e+06),              #  z3
-    c(-0.84e+06, -0.05e+06, 2.22e+06, 2.6e+06),              #  z4
-    c(-0.84e+06, -0.51e+06, y.min, 2.22e+06),                #  z5
-    c(-0.51e+06, -0.05e+06, y.min, 2.22e+06),                #  z6
-    c(-0.05e+06, 0.6e+06, y.min, 2.6e+06),                   #  z7
-    c(0.6e+06, 0.95e+06, y.min, 2.6e+06),                    #  z8
-    c(+0.55e+06, x.max, 3.24e+06, y.max),                    #  z9
-    c(+0.55e+06, x.max, 2.86e+06, 3.24e+06),                 # z10
-    c(+0.55e+06, 0.95e+06, x.max, y.min, 2.6e+06, 2.86e+06)  # z11
-  )
-  
-  # number of zones
-  nz <- length(XY)
-  # Create column 'Zones'
-  Amazon.data.dt[, Zones := 0.0]
-  Amazon.data.dt %>% setcolorder(., c('cell', 'x', 'y', 'Zones', 'Year', 'Month'))
-  
-  # Assigning zone numbers to cells 
-  for (i in 1:nz){
-    cat("Zone", i, "/", nz, " - ")
-    if (i == nz){
-      Amazon.data.dt[((x > XY[[i]][2] & x <= XY[[i]][3]) & (y > XY[[i]][4] & y <= XY[[i]][5])) | 
-                       ((x > XY[[i]][1] & x <= XY[[i]][3]) & (y > XY[[i]][5] & y <= XY[[i]][6])), Zones := i]
-    }else{
-      Amazon.data.dt[(x > XY[[i]][1] & x <= XY[[i]][2]) & (y > XY[[i]][3] & y <= XY[[i]][4]), Zones := i]
-    }
-  }
-  # Convert the column 'Zones' as factor
-  Amazon.data.dt$Zones <- as.factor(Amazon.data.dt$Zones)
-  return(Amazon.data.dt)
-}
-```
-
 # Initialization
 
 ```{r}
 my.path <- "~/Documents/"
-path.data <- paste0(my.path, "/Amazon_new_data")
-
-# path of variables
-burntArea.path <- paste0(path.data,"/1. Burnt Area/03. Working Data")
-landCover.path <- paste0(path.data,"/2. Land Cover/03. Working Data")
-precip.path <- paste0(path.data,"/3. Precipitation/03. Working Data")
-soilMoisture.path <- paste0(path.data,"/4. Soil Moisture/03. Working Data")
-elevation.path <- paste0(path.data,"/5. Elevation/03. Working Data")
-LandSurfaceTemp.path <- paste0(path.data,"/6. LandSurfaceTemp/03. Working Data")
-humidity.path <- paste0(path.data,"/7. Specific Humidity/03. Working Data")
-evapotranspiration.path <- paste0(path.data,"/8. Evapotranspiration/03. Working Data")
-wind.path <- paste0(path.data,"/9. Wind Speed/03. Working Data")
-airtemp.path <- paste0(path.data,"/10. Air Temperature/03. Working Data")
-
-# Create a sequence date
-seq.dates <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month")
-
-# Create name of layers
-ordered.names <- format(seq.dates, '%Y_%m') %>% setdiff(., c("2012_07", "2012_09"))
-seq.dates.238 <- paste0(ordered.names, '_01') %>% 
-  gsub("_", "-", .) %>%
-  as.Date()
-# Import shape file
-amaz.basin.shp <- st_read(
-  paste0(path.data,"/0. Amazon_shapefile/projected/amazon_shp_projected.shp"), quiet = TRUE)
-
-# Number of cores to use
-nbrCores <- detectCores() - 1
-# nbrCores <- 50
-
-# Color palette
-my.colors <- c("mediumblue", "mediumseagreen", "firebrick")
-```
-
-```{r}
-# Import shape file
-amaz.basin.shp <- st_read("~/Documents/Amazon_new_data/0. Amazon_shapefile/projected/amazon_shp_projected.shp", quiet = TRUE)
-
-# path of variables
-my.path <- "~/Documents"
-path0 <- "/home/abidm/Documents"
-burntArea.path <- "~/Documents/Amazon_new_data/1. Burnt Area/03. Working Data"
-landCover.path <- "~/Documents/Amazon_new_data/2. Land Cover/03. Working Data"
-precip.path <- "~/Documents/Amazon_new_data/3. Precipitation/03. Working Data"
-soilMoisture.path <- "~/Documents/Amazon_new_data/4. Soil Moisture/03. Working Data"
-elevation.path <- "~/Documents/Amazon_new_data/5. Elevation/03. Working Data"
-LandSurfaceTemp.path <- "~/Documents/Amazon_new_data/6. LandSurfaceTemp/03. Working Data"
-humidity.path <- "~/Documents/Amazon_new_data/7. Specific Humidity/03. Working Data"
-evapotranspiration.path <- "~/Documents/Amazon_new_data/8. Evapotranspiration/03. Working Data"
-wind.path <- "~/Documents/Amazon_new_data/9. Wind Speed/03. Working Data"
-airtemp.path <- "~/Documents/Amazon_new_data/10. Air Temperature/03. Working Data"
-
-# Color palette
-my.colors <- c("mediumblue", "mediumseagreen", "firebrick")
-pal <- colorRampPalette(c("mediumblue", "mediumseagreen", "firebrick"))
-
-# Create a sequence of dates
-sq.date <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month") %>% 
-  format(., '%Y_%m') %>% 
-  setdiff(., c("2012_07", "2012_09"))
 ```
 
 # Initialize and Connect to `h2o` 
@@ -508,8 +402,6 @@ aucpr.auc.vals
 
 ```{r}
 h2o.removeAll()
-h2o:::.h2o.garbageCollect(); Sys.sleep(10)
-h2o:::.h2o.garbageCollect(); Sys.sleep(10)
-h2o:::.h2o.garbageCollect(); Sys.sleep(10)
+h2o:::.h2o.garbageCollect()
 ```
 
