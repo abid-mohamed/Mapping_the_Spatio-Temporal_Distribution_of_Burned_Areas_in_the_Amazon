@@ -124,6 +124,8 @@ myPlot <- function(
 }
 
 #---- Initialization ----
+my.path <- "~/Documents/"
+path.data <- paste0(my.path, "/Amazon_new_data")
 # Create a sequence date
 seq.dates <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month")
 # Create name of layers
