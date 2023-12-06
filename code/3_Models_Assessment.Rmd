@@ -413,10 +413,6 @@ for (zone in 1:nz){
 }
 ```
 
-<center> 
-![beta.df](./img/3.beta.df.png){width=50%}
-</center>
-
 ## Ensemble Model
 
 ```{r}
@@ -507,19 +503,6 @@ for (zone in 1:nz){
 }
 aucpr.auc.vals
 ```
-
-            AUCPR       AUC
-Zone1  0.08882860 0.8755054
-Zone2  0.03869273 0.8393833
-Zone3  0.15804285 0.9457521
-Zone4  0.15676270 0.9226609
-Zone5  0.16304809 0.9072631
-Zone6  0.16885492 0.9251834
-Zone7  0.03562361 0.8065207
-Zone8  0.15706451 0.8850442
-Zone9  0.08186088 0.9049003
-Zone10 0.10826509 0.9274360
-Zone11 0.29922686 0.9595762
 
 # Clear `h2o`
 
