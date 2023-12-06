@@ -22,33 +22,13 @@ library(terra)
 library(sf)
 library(tidyverse)
 library(data.table)
-# library(dplyr)
-# library(gdata)
 library(pROC)
-# Parallel
 library(foreach)
 library(doSNOW)
 library(parallel)
 library(itertools)
-# Cross Validation
 library(rsample)
 library(recipes)
-# # Plot
-# library(RColorBrewer)
-# library(tidyterra)
-# library(scico)
-# library(wesanderson)
-# library(viridis)
-# library(scales)
-# library(ggforce)
-# library(lubridate)
-# library(timetk)
-# # library(latex2exp)
-# library(ggplot2)
-# library(plotly)
-# # Time
-# library(tictoc)
-# library(gdata)
 ```
 
 # Function
@@ -100,8 +80,7 @@ splitAmaZones <- function(Amazon.data.dt, amaz.basin.shp){
 # Initialization
 
 ```{r}
-# my.path <- "~/Documents/"
-my.path <- "/Users/abid.med/Documents/Data_ScienceTech_Institute/00.Intership/Project/Code_official_data"
+my.path <- "~/Documents/"
 path.data <- paste0(my.path, "/Amazon_new_data")
 
 # path of variables
@@ -181,6 +160,8 @@ library(h2o)
 h2o.init(ip = 'localhost', port = 50001, nthreads = 50, max_mem_size = '650g')
 h2o.no_progress()
 ```
+
+#-
 
 # Models
 
@@ -412,6 +393,8 @@ for (zone in c(1:nz)){
 save(perf.df, file = paste0(my.path, "/Models_ens/Ens2_new/Ens2_performance_vi.Rdata"))
 ```
 
+#-
+
 # Ensemble Model and Methods Assessment
 
 ## Compute beta
@@ -432,7 +415,7 @@ for (zone in 1:nz){
 ```
 
 <center> 
-![beta.df](./img/beta.df.png){width=50%}
+![beta.df](./img/3.beta.df.png){width=50%}
 </center>
 
 ## Ensemble Model

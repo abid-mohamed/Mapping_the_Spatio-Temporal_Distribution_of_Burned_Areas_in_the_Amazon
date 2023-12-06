@@ -18,7 +18,6 @@ output:
 # Load libraries
 
 ```{r}
-# load libraries
 library(tictoc)
 library(tidyverse)
 library(dplyr)
@@ -55,7 +54,7 @@ renameLayers <- function(dataRast, fileStart, prefix){
   return(dataRast)
 }
 
-#---- Function to plot ----
+#---- Plot Function ----
 myPlot <- function(
   rast, 
   title=NULL, 
@@ -67,7 +66,7 @@ myPlot <- function(
   x_angle=0,
   b_size=16,
   na.color=NA,
-  v_unit=c(2, 2, 2, 2) # c(t, r, b, l)
+  v_unit=c(2, 2, 2, 2) # c(top, right , below , left)
 ){
   p1 <- ggplot()
   p1 <- switch(
@@ -107,17 +106,11 @@ myPlot <- function(
 }
 ```
 
-# Path
-
-```{r}
-my.path <- "/Users/abid.med/Documents/Data_ScienceTech_Institute/00.Intership/Project/Code_official_data"
-path.data <- paste0(my.path, "/Amazon_new_data")
-# load("/Users/abid.med/Documents/Data_ScienceTech_Institute/00.Intership/email/Amazon_data_R/data-amaz_na3.RData")
-```
-
 # Initialization
 
 ```{r}
+my.path <- "~/Documents/"
+path.data <- paste0(my.path, "/Amazon_new_data")
 # Create a sequence date
 seq.dates <- seq(as.Date("2001-1-1"), as.Date("2020-12-1"), by = "month")
 # Create name of layers
@@ -127,7 +120,7 @@ amaz.basin.shp <- st_read(
   paste0(path.data,"/0. Amazon_shapefile/projected/amazon_shp_projected.shp"))
 ```
 
-#=====================
+#-
 
 # Burnt Area data
 
@@ -251,7 +244,7 @@ burntArea.freq.na <- burntArea.freq.na[order(burntArea.freq.na$layer)]
 burntArea.freq.na
 ```
 
-#=====================
+#-
 
 # Land Cover data
 
@@ -335,7 +328,7 @@ landCover.freq.na <- landCover.freq.na[order(landCover.freq.na$layer)]
 landCover.freq.na
 ```
 
-#=====================
+#-
 
 # Precipitation data
 
@@ -445,7 +438,7 @@ p.prec.na <- myPlot(
 p.prec.na
 ```
 
-#=====================
+#-
 
 # Soil Moisture data
 
@@ -579,7 +572,7 @@ soilmoisture.freq.na <- soilmoisture.freq.na[order(soilmoisture.freq.na$layer)]
 soilmoisture.freq.na
 ```
 
-#=====================
+#-
 
 # Elevation data
 
@@ -639,7 +632,7 @@ elevation.freq.na <- not.na(elevation.rast) %>%
 elevation.freq.na
 ```
 
-#=====================
+#-
 
 # LandSurfaceTemp data
 
@@ -747,7 +740,7 @@ p.lst.4na <- ggplot() +
 p.lst.4na
 ```
 
-#=====================
+#-
 
 # Specific Humidity data
 
@@ -851,7 +844,7 @@ p.hum.na <- myPlot(
 p.hum.na
 ```
 
-#=====================
+#-
 
 # Evapotranspiration data
 
@@ -959,7 +952,7 @@ p.evapot.na <- myPlot(
 p.evapot.na
 ```
 
-#=====================
+#-
 
 # Wind Speed data
 
@@ -1067,7 +1060,7 @@ p.wind.na <- myPlot(
 p.wind.na
 ```
 
-#=====================
+#-
 
 # Air Temperature data
 
@@ -1171,7 +1164,7 @@ p.airtemp.na <- myPlot(
 p.airtemp.na
 ```
 
-#=====================
+#-
 
 # Merge all dataframes of missing values.
 
@@ -1195,37 +1188,6 @@ amaz.na.df <- list(amaz.na.df,
 
 amaz.na.df
 ```
-
-#=====================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
