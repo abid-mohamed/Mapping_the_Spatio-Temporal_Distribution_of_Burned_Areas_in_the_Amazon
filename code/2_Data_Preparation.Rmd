@@ -1,6 +1,5 @@
 ---
 title: "Amazon_select_data"
-date: "2023-02-18"
 output:
   html_document: 
     number_sections: yes

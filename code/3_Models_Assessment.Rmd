@@ -1,6 +1,5 @@
 ---
 title: "Amazon_methods"
-date: "`r Sys.Date()`"
 output:
   html_document: 
     number_sections: yes
