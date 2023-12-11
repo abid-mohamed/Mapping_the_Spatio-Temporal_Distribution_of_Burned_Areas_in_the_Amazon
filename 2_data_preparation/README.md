@@ -76,7 +76,7 @@ By merging the data from "Cells with at Least One 'Fire' Event" and "Cells with 
 To enhance subsequent analysis and modeling, we normalized the data and partitioned it into 11 zones, each containing approximately 50 million observations. The allocation of zones and the distribution of data are visually represented in the following figure.
 
 <p align="center">
-  <img src="../assets/zones.png"  width="60%" />
+  <img src="../img/zones.png"  width="60%" />
 </p>
 
 This downsampling strategy not only addresses the class imbalance but also allows for efficient modeling and analysis, providing a balanced and representative dataset for our study.
