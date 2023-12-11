@@ -16,7 +16,7 @@ Our dataset features a spatial resolution of 500 meters, resulting in an extensi
 - For cells that did not experience any fire events during the study period, we randomly selected one observation from each of the 238 months. We ensured that the selected value was not missing data for the covariate "Land Surface Temperature" and was either 0 (unburnt) or 1 (burnt) for the response variable "Burnt Area."
 
 <p align="center">
-  <img src="../assets/Downsampling_approach.jpg" width="50%" />
+  <img src="../img/Downsampling_approach.jpg" width="50%" />
 </p>
 
 By identifying the maximum value of each cell across the 238-month dataset in the response variable *Burnt Area*, we can categorize cells into distinct groups.
