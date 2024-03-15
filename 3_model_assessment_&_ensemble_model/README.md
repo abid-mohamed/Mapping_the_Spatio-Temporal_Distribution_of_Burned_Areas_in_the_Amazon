@@ -2,7 +2,7 @@
 &emsp;&emsp;&emsp;&emsp;&emsp;
 [*:arrow_left: II. Data Preparation*](../2_data_preparation/README.md) 
 &emsp;&emsp; | &emsp;&emsp;
-[*IV. Maps and Time Trends of Fire Probability :arrow_right:*](../README.md#iv-maps-and-time-trends-of-fire-probability)
+[*IV. Maps and Time Trends of Fire Probability :arrow_right:*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Burned_Areas_in_the_Amazon/blob/main/README.md#iv-maps-and-time-trends-of-fire-probability)
 
 #
 
@@ -43,4 +43,4 @@ The table below presents the calculated performance metrics for various models a
 &emsp;&emsp;&emsp;&emsp;&emsp;
 [*:arrow_left: II. Data Preparation*](../2_data_preparation/README.md) 
 &emsp;&emsp; | &emsp;&emsp;
-[*IV. Maps and Time Trends of Fire Probability :arrow_right:*](../README.md#iv-maps-and-time-trends-of-fire-probability)
+[*IV. Maps and Time Trends of Fire Probability :arrow_right:*](https://github.com/abid-mohamed/Mapping_the_Spatio-Temporal_Distribution_of_Burned_Areas_in_the_Amazon/blob/main/README.md#iv-maps-and-time-trends-of-fire-probability)
